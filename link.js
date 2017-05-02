@@ -20,7 +20,7 @@ function link_init() {
                 //console.log(json.sensors.imu.p_rad_sec);
                 //console.log(tokens[1]);
                 var json_pretty = JSON.stringify(json, null, 3);
-                document.getElementById("aura_props").innerHTML =  json_pretty;
+                document.getElementById("aura_props").innerHTML = json_pretty;
                 //console.log(json_pretty);
                 //console.log(json.sensors.imu[0].p_rad_sec);
 	    } else {
