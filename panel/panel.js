@@ -1,8 +1,13 @@
 var panel = function() {
     var canvas;
+    var context;
     var asiLayer, atiLayer, altLayer, hdgLayer, vsiLayer, tcLayer, vccLayer, mvLayer;
+    var options;
     var opacity = 1;
 
+    var img_main_volts = new Image();
+    var img_asi3 = new Image();
+    
     var instrument_config = {
         asi : {build: build_asi},
         att : {build: build_ati},
@@ -12,48 +17,39 @@ var panel = function() {
         vsi : {build: build_vsi},
         avionics_vcc : {build: build_vcc},
         amp : {build: build_amp},
-        main_volts : {build: build_main_volts},
+        main_volts : {draw: draw_main_volts},
     };
 
     var layout_config = {
         horizontal : {
-            instruments : [['avionics_vcc', 'asi', 'att', 'alt'], ['amp', 'tc', 'dg', 'vsi']],
-            align : 'center',
-            valign : 'center',
-            size : 'auto',
-            offset : {x: 0, y : 50}
+            instruments : [['avionics_vcc', 'asi', 'att', 'alt'], ['amp', 'tc', 'dg', 'vsi']]
         },
         vertical : {
-            instruments : [['avionics_vcc', 'amp'], ['asi', 'att'], ['alt', 'tc'], ['dg', 'vsi']],
-            size : 'auto',
-            align : 'center',
-            valign : 'center',
-            offset : {x: 0, y : 50}
+            instruments : [['avionics_vcc', 'amp'], ['asi', 'att'], ['alt', 'tc'], ['dg', 'vsi']]
         },
         mini : {
             instruments : [['att', '', '', '', '', '', '', '', '', 'dg'],
                            ['asi', '', '', '', '', '', '', '', '', 'alt'],
-                           ['tc', '', '', '', '', '', '', '', '', 'vsi']],
-            size : 'auto',
-            align : 'center',
-            valign : 'center'
+                           ['tc', '', '', '', '', '', '', '', '', 'vsi']]
         }
     };
 
-    var options;
-
-    //OpenLayers.Renderer.symbol.pointer = [0,0, 0,-19, -1,-19, 0,-20, 1,-19, 0,-19, 0,0];
-
     function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth - 20;
+        canvas.height = window.innerHeight - 2;
         // redraw stuff
     }
     
     function init() {
         canvas = document.getElementById("panel");
-        var context = canvas.getContext('2d');
+        context = canvas.getContext('2d');
         window.addEventListener('resize', resizeCanvas, false);
+        resizeCanvas();
+
+        img_main_volts.src = 'textures/main-volts.png';
+        img_asi3.src = 'textures/asi3.png';
+        
+        console.log('finished scheduling texture loads');
         
         // asiLayer = new ol.layer.Vector( "Airspeed Indicator", {displayInLayerSwitcher: false});
         // map.addLayer(asiLayer);
@@ -83,86 +79,36 @@ var panel = function() {
         // map.addLayer(mvLayer);
     }
 
-    function build () {
-        // var layout;
-        // if (options.custom_layout) {
-        //     layout = layout_config[options.custom_layout];
-        //     if (!layout)
-        //         console.error("Could not find custom layout!", custom_layout);
-        // }
-        // else {
-        //     if ( map_size.w >= map_size.h ) {
-        //         layout = layout_config['horizontal'];
-        //     } else {
-        //         layout = layout_config['vertical'];
-        //     }
-        // }
+    function draw() {
+        var layout;
+        if ( canvas.width >= canvas.height ) {
+            layout = layout_config['horizontal'];
+        } else {
+            layout = layout_config['vertical'];
+        }
 
-        // var offset_y = (layout.offset) ? layout.offset.y : 0;
-        // var offset_x = (layout.offset) ? layout.offset.x : 0;
-        // var num_rows = layout.instruments.length;
-        // var map_size_h = map_size.h - offset_y;
-        // var map_size_w = map_size.w - offset_x;
-        // var max_dy = Math.floor(map_size_h / num_rows);
-
-        // for (var row = 0; row < num_rows; row++) {
-        //     offset_y = (layout.offset) ? layout.offset.y : 0;
-        //     offset_x = (layout.offset) ? layout.offset.x : 0;
-        //     var num_cols = layout.instruments[row].length;
-
-        //     var dx = layout.size;
-        //     var dy = layout.size;
-        //     var size = layout.size;
-
-        //     if (layout.size == 'auto') {
-        //         var max_dx = Math.floor(map_size_w / num_cols);
-        //         console.log("Max dx " , max_dx);
-        //         dx = (max_dx > max_dy) ? max_dy : max_dx;
-        //         dy = (max_dy > max_dx) ? max_dx : max_dy;
-        //         size = dx;
-        //     }
-
-        //     dx = (dx > dy) ? dy : dx;
-        //     dy = (dy > dx) ? dx : dy;
-
-        //     if (layout.align == 'center') {
-        //         offset_x += dx * .5 + (map_size_w - (num_cols * dx)) / 2;
-        //     }
-        //     else if (layout.align == 'left') {
-        //         offset_x += dx * .5;
-        //     }
-        //     else if (layout.align == 'right') {
-        //         offset_x += map_size_w - (num_cols * dx - (dx * .5));
-        //     }
-
-        //     if (layout.valign == 'center') {
-        //         offset_y = offset_y + dy *.5 + (map_size_h - (num_rows * dy)) / 2;
-        //     }
-        //     else if (layout.valign == 'top') {
-        //         offset_y = offset_y + dy *.5;
-        //     }
-        //     else if (layout.valign == 'bottom') {
-        //         offset_y = -offset_y + map_size_h - (num_rows * dy - (dy * .5));
-        //     }
-
-        //     for (var col = 0; col < num_cols; col++) {
-        //         var pos_x = offset_x + dx * col;
-        //         var pos_y = offset_y + dy * row;
-        //         var instrument = layout.instruments[row][col];
-
-        //         if (instrument_config[instrument]) {
-	// 	    instrument_config[instrument].active = 1;
-	// 	    if (instrument_config[instrument].build) {
-	// 		console.debug("Creating instrument with x,y, size", instrument, pos_x, pos_y, size);
-	// 		instrument_config[instrument].build(pos_x, pos_y, size);
-	// 	    }
-        //         }
-        //         else {
-        //             if (instrument != '')
-        //                 console.error("Instrument not defined ", instrument);
-        //         }
-        //     }
-        // }
+        var num_rows = layout.instruments.length;
+        var dy = Math.floor(canvas.height / num_rows);
+        for (var row = 0; row < num_rows; row++) {
+            var num_cols = layout.instruments[row].length;
+            var dx = Math.floor(canvas.width / num_cols);
+            var size = dx;
+            if ( dy < dx ) { size = dy; }
+            var offset_x = Math.floor((canvas.width - (num_cols * size)) / 2);
+            var offset_y = Math.floor((canvas.height - (num_rows * size)) / 2);
+            for (var col = 0; col < num_cols; col++) {
+                var pos_x = offset_x + size * col;
+                var pos_y = offset_y + size * row;
+                console.log(pos_y);
+                var instrument = layout.instruments[row][col];
+                if (instrument_config[instrument]) {
+                    draw_main_volts(pos_x, pos_y, size);
+	            if (instrument_config[instrument].draw) {
+	                instrument_config[instrument].draw(pos_x, pos_y, size);
+	 	    }
+                }
+            }
+        }
     }
 
     function build_asi( x, y, size ) {
@@ -603,31 +549,34 @@ var panel = function() {
         amp3.move(pos);
     }
 
-    function build_main_volts( x, y, size ) {
-        mvLayer.clear();
+    function draw_main_volts( x, y, size ) {
+        console.log('draw main volts');
+        context.drawImage(img_main_volts, x, y, width=size, height=size);
+        
+        // mvLayer.clear();
 
-        var pos = new ol.geom.Point(x, y);
+        // var pos = new ol.geom.Point(x, y);
 
-        var mv1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        mv1_style.externalGraphic = url_prefix + "textures/main-volts.png";
-        mv1_style.graphicWidth = size;
-        mv1_style.graphicHeight = size;
-        mv1_style.graphicOpacity = opacity;
-        var mv1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, mv1_style );
-        mvLayer.addFeatures(mv1);
-        mv1.move(pos);
+        // var mv1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+        // mv1_style.externalGraphic = url_prefix + "textures/main-volts.png";
+        // mv1_style.graphicWidth = size;
+        // mv1_style.graphicHeight = size;
+        // mv1_style.graphicOpacity = opacity;
+        // var mv1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, mv1_style );
+        // mvLayer.addFeatures(mv1);
+        // mv1.move(pos);
 
-        var mv3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        mv3_style.externalGraphic = url_prefix + "textures/asi3.png";
-        mv3_style.graphicWidth = size * 0.109375;
-        mv3_style.graphicHeight = size * 0.53125;
-        mv3_style.graphicYOffset = -mv3_style.graphicHeight * 0.5
-	    - size * 0.111328125;
-        mv3_style.graphicOpacity = opacity;
-        var mv3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, mv3_style );
-        mv3.fid = "needle";
-        mvLayer.addFeatures(mv3);
-        mv3.move(pos);
+        // var mv3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+        // mv3_style.externalGraphic = url_prefix + "textures/asi3.png";
+        // mv3_style.graphicWidth = size * 0.109375;
+        // mv3_style.graphicHeight = size * 0.53125;
+        // mv3_style.graphicYOffset = -mv3_style.graphicHeight * 0.5
+	//     - size * 0.111328125;
+        // mv3_style.graphicOpacity = opacity;
+        // var mv3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, mv3_style );
+        // mv3.fid = "needle";
+        // mvLayer.addFeatures(mv3);
+        // mv3.move(pos);
     }
 
     function update1( tokens ) {
@@ -661,31 +610,6 @@ var panel = function() {
         update_vcc( data.avionics_vcc, data.main_volts, data.cell_volts );
         update_amps( data.main_amps );
         update_main_volts( data.main_volts );
-    }
-
-    function update_hud_speed(airspeed, target_airspeed, true_scale_est) {
-	if (!instrument_config.hud_speed['active'])
-	    return;
-
-        //var true_est = airspeed * true_scale_est;
-        //var true_kt = Math.round(true_est);
-	var speed_px = -1638 + (airspeed * 25.6300) + "px";
-	$("#speed_tape").css("background-position", "10px " + speed_px);
-	$("#speed_text").text(Math.round(airspeed));
-	$("#speed_target_real").text(Math.round(target_airspeed));
-    }
-
-    function update_hud_alt( alt_m, target_alt ) {
-	if (!instrument_config.hud_alt['active'])
-	    return;
-
-        var alt_ft = alt_m / 0.3048;
-
-	var alt_px = -3686 + (alt_ft * 2.560) + "px";
-	$("#alt_tape").css("background-position", "-30px " + alt_px);
-	$("#alt_text").text(Math.round(alt_ft));
-	$("#alt_target_real").text(Math.round(target_alt));
-
     }
 
     var asi_interpx = [ 0, 80,  160 ];
@@ -897,7 +821,7 @@ var panel = function() {
 
     return {
         init : init,
-        build : build,
+        draw : draw,
         update1 : update1,
         update_json : update_json
     }
