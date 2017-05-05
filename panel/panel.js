@@ -1,3 +1,5 @@
+var d2r = Math.PI / 180;
+
 var panel = function() {
     var canvas;
     var context;
@@ -35,8 +37,8 @@ var panel = function() {
     };
 
     function resizeCanvas() {
-        canvas.width = window.innerWidth - 20;
-        canvas.height = window.innerHeight - 2;
+        canvas.width = window.innerWidth - 30;
+        canvas.height = window.innerHeight - 30;
         // redraw stuff
     }
     
@@ -46,7 +48,7 @@ var panel = function() {
         window.addEventListener('resize', resizeCanvas, false);
         resizeCanvas();
 
-        img_main_volts.src = 'textures/main-volts.png';
+        img_main_volts.src = 'textures/volts.png';
         img_asi3.src = 'textures/asi3.png';
         
         console.log('finished scheduling texture loads');
@@ -86,7 +88,7 @@ var panel = function() {
         } else {
             layout = layout_config['vertical'];
         }
-
+        context.clearRect(0,0,canvas.width,canvas.height);
         var num_rows = layout.instruments.length;
         var dy = Math.floor(canvas.height / num_rows);
         for (var row = 0; row < num_rows; row++) {
@@ -99,7 +101,6 @@ var panel = function() {
             for (var col = 0; col < num_cols; col++) {
                 var pos_x = offset_x + size * col;
                 var pos_y = offset_y + size * row;
-                console.log(pos_y);
                 var instrument = layout.instruments[row][col];
                 if (instrument_config[instrument]) {
                     draw_main_volts(pos_x, pos_y, size);
@@ -550,33 +551,20 @@ var panel = function() {
     }
 
     function draw_main_volts( x, y, size ) {
-        console.log('draw main volts');
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
         context.drawImage(img_main_volts, x, y, width=size, height=size);
-        
-        // mvLayer.clear();
-
-        // var pos = new ol.geom.Point(x, y);
-
-        // var mv1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        // mv1_style.externalGraphic = url_prefix + "textures/main-volts.png";
-        // mv1_style.graphicWidth = size;
-        // mv1_style.graphicHeight = size;
-        // mv1_style.graphicOpacity = opacity;
-        // var mv1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, mv1_style );
-        // mvLayer.addFeatures(mv1);
-        // mv1.move(pos);
-
-        // var mv3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        // mv3_style.externalGraphic = url_prefix + "textures/asi3.png";
-        // mv3_style.graphicWidth = size * 0.109375;
-        // mv3_style.graphicHeight = size * 0.53125;
-        // mv3_style.graphicYOffset = -mv3_style.graphicHeight * 0.5
-	//     - size * 0.111328125;
-        // mv3_style.graphicOpacity = opacity;
-        // var mv3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, mv3_style );
-        // mv3.fid = "needle";
-        // mvLayer.addFeatures(mv3);
-        // mv3.move(pos);
+        console.log(scale, img_asi3.width, img_asi3.height,
+                    Math.floor(img_asi3.width*scale),
+                    Math.floor(img_asi3.height*scale));
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale*0.85)
+        var nh = Math.floor(img_asi3.height*scale*0.85)
+        context.translate(cx, cy);
+        context.rotate(8*json.status.frame_time*d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.restore();
     }
 
     function update1( tokens ) {
