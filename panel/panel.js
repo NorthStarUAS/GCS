@@ -3,7 +3,7 @@ var d2r = Math.PI / 180;
 var panel = function() {
     var canvas;
     var context;
-    var asiLayer, atiLayer, altLayer, hdgLayer, vsiLayer, tcLayer, vccLayer, mvLayer;
+    var hdgLayer, vsiLayer, tcLayer, vccLayer, mvLayer;
     var options;
     var opacity = 1;
 
@@ -14,6 +14,11 @@ var panel = function() {
     var img_ati3 = new Image();
     var img_ati4 = new Image();
     var img_ati5 = new Image();
+    var img_alt1 = new Image();
+    var img_alt2 = new Image();
+    var img_alt3 = new Image();
+    var img_alt4 = new Image();
+    var img_alt5 = new Image();
     var img_asi3 = new Image();
     var img_hdg2 = new Image();
     
@@ -21,7 +26,7 @@ var panel = function() {
         avionics_vcc : {draw: draw_vcc},
         asi : {draw: draw_asi},
         ati : {draw: draw_ati},
-        alt : {build: build_altimeter},
+        alt : {draw: draw_alt},
         tc : {build: build_tc},
         dg : {build: build_heading},
         vsi : {build: build_vsi},
@@ -62,6 +67,11 @@ var panel = function() {
         img_ati3.src = 'textures/ati3.png';
         img_ati4.src = 'textures/ati4.png';
         img_ati5.src = 'textures/ati5.png';
+        img_alt1.src = 'textures/alt1.png';
+        img_alt2.src = 'textures/alt2.png';
+        img_alt3.src = 'textures/alt3.png';
+        img_alt4.src = 'textures/alt4.png';
+        img_alt5.src = 'textures/alt5.png';
         img_asi3.src = 'textures/asi3.png';
         img_hdg2.src = 'textures/hdg2.png';
         
@@ -154,7 +164,7 @@ var panel = function() {
         var deg = my_interp( json.autopilot.targets.airspeed_kt,
                              asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
-        context.drawImage(img_hdg2, -nw*0.5, -size*0.5, width=nw, height=nh);
+        context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.95, width=nw, height=nh);
         context.restore();
 
         // true airspeed needle
@@ -241,79 +251,63 @@ var panel = function() {
         context.drawImage(img_ati4, -nw*0.5, -nh*0.5+(78*scale), width=nw, height=nh);
         context.restore();
 
-        // cover
+        // bezel
         context.drawImage(img_ati5, x, y, width=size, height=size);
     }
 
-    function build_altimeter( x, y, size ) {
-        altLayer.clear();
+    function draw_alt( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
 
-        var pos = new ol.geom.Point(x, y);
+        var alt_ft = json.position.combined.altitude_true_m / 0.3048;
+        
+        // kollsman
+        context.save();
+        var nw = Math.floor(img_alt1.width*scale)
+        var nh = Math.floor(img_alt1.height*scale)
+        context.translate(cx, cy);
+        context.drawImage(img_alt1, -nw*0.5, -nh*0.5, width=(size*0.75), height=(size*0.75));
+        context.restore();
 
-        var alt1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        alt1_style.externalGraphic = url_prefix + "textures/alt1.png";
-        alt1_style.graphicWidth = size * 0.75;
-        alt1_style.graphicHeight = size * 0.75;
-        alt1_style.graphicOpacity = opacity;
-        var alt1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, alt1_style );
-        altLayer.addFeatures(alt1);
-        alt1.move(pos);
+        // backplate
+        context.drawImage(img_alt2, x, y, width=size, height=size);
 
-        var alt2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        alt2_style.externalGraphic = url_prefix + "textures/alt2.png";
-        alt2_style.graphicWidth = size;
-        alt2_style.graphicHeight = size;
-        alt2_style.graphicOpacity = opacity;
-        var alt2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, alt2_style );
-        altLayer.addFeatures(alt2);
-        alt2.move(pos);
+        // bug
+        context.save();
+        var nw = Math.floor(img_hdg2.width*scale*0.85)
+        var nh = Math.floor(img_hdg2.height*scale*0.85)
+        context.translate(cx, cy);
+        context.rotate((alt_ft*0.36)*d2r);
+        context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.85, width=nw, height=nh);
+        context.restore();
 
-        var alt3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        alt3_style.externalGraphic = url_prefix + "textures/alt3.png";
-        alt3_style.graphicWidth = size * 0.4375;
-        alt3_style.graphicHeight = size * 0.5;
-        alt3_style.graphicOpacity = opacity;
-        var alt3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, alt3_style );
-        alt3.fid = "needle 10k";
-        altLayer.addFeatures(alt3);
-        alt3.move(pos);
+        // needle 10k ft
+        context.save();
+        var nw = Math.floor(img_alt3.width*scale*0.85)
+        var nh = Math.floor(img_alt3.height*scale*0.85)
+        context.translate(cx, cy);
+        context.rotate((alt_ft*0.0036)*d2r);
+        context.drawImage(img_alt3, -nw*0.5, -nh*0.5, width=nw, height=nh);
+        context.restore();
 
-        var alt4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        alt4_style.externalGraphic = url_prefix + "textures/alt4.png";
-        alt4_style.graphicWidth = size * 0.1171875;
-        alt4_style.graphicHeight = size * 0.4296875;
-        alt4_style.graphicYOffset = -alt4_style.graphicHeight * 0.5
-            - size * 0.0625;
-        alt4_style.graphicOpacity = opacity;
-        var alt4 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, alt4_style );
-        alt4.fid = "needle 1k";
-        altLayer.addFeatures(alt4);
-        alt4.move(pos);
+        // needle 1k ft
+        context.save();
+        var nw = Math.floor(img_alt4.width*scale*0.85)
+        var nh = Math.floor(img_alt4.height*scale*0.85)
+        context.translate(cx, cy);
+        context.rotate((alt_ft*0.036)*d2r);
+        context.drawImage(img_alt4, -nw*0.5, -nh, width=nw, height=nh);
+        context.restore();
 
-        var alt5_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        alt5_style.externalGraphic = url_prefix + "textures/alt5.png";
-        alt5_style.graphicWidth = size * 0.1171875;
-        alt5_style.graphicHeight = size * 0.4296875;
-        alt5_style.graphicYOffset = -alt5_style.graphicHeight * 0.5
-            - size * 0.1035;
-        alt5_style.graphicOpacity = opacity;
-        var alt5 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, alt5_style );
-        alt5.fid = "needle";
-        altLayer.addFeatures(alt5);
-        alt5.move(pos);
-
-        var alt6_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        alt6_style.externalGraphic = url_prefix + "textures/hdg2.png";
-        alt6_style.graphicWidth = size * 0.09375;
-        alt6_style.graphicHeight = size * 0.09375;
-        alt6_style.graphicYOffset = -alt6_style.graphicHeight * 0.5
-            - size * 0.37109375;
-        alt6_style.graphicOpacity = opacity;
-        var alt6 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, alt6_style );
-        alt6.fid = "bug";
-        altLayer.addFeatures(alt6);
-        var pos6 = new ol.geom.Point(x, y);
-        alt6.move(pos6);
+        // needle 100 ft
+        context.save();
+        var nw = Math.floor(img_alt5.width*scale*0.85)
+        var nh = Math.floor(img_alt5.height*scale*0.85)
+        context.translate(cx, cy);
+        context.rotate((alt_ft*0.36)*d2r);
+        context.drawImage(img_alt5, -nw*0.5, -nh, width=nw, height=nh);
+        context.restore();
     }
 
     function build_heading( x, y, size ) {
@@ -539,52 +533,6 @@ var panel = function() {
         update_tc( data.imu_ay, data.imu_az, data.imu_r );
         update_amps( data.main_amps );
         update_main_volts( data.main_volts );
-    }
-
-    function update_ati( roll_deg, pitch_deg ) {
-        var backplate = atiLayer.getFeatureByFid("backplate");
-        backplate.style.rotation = -roll_deg;
-
-        var pitch = atiLayer.getFeatureByFid("pitch");
-        pitch.style.rotation = -roll_deg;
-        var p = pitch_deg;
-        if ( p < -20 ) { p = -20; }
-        if ( p > 20 ) { p = 20; }
-        var ypx = p * 4.5;
-        var px = pitch.basex;
-        var py = pitch.basey + pitch.mysize * (ypx / 512);
-        var pos = new ol.geom.Point(px, py);
-        pitch.move(pos);
-
-        var roll = atiLayer.getFeatureByFid("roll");
-        roll.style.rotation = -roll_deg;
-
-        atiLayer.redraw();
-    }
-
-    function update_altimeter( alt_m, target_alt ) {
-	if (!instrument_config.alt['active'])
-	    return;
-
-        var alt_ft = alt_m / 0.3048;
-
-	var alt_px = -3683 + (alt_ft * 2.5606) + "px";
-	$("#alt_tape").css("background-position-y", alt_px);
-	$("#actual_alt").text(Math.round(alt_ft));
-
-        var needle = altLayer.getFeatureByFid("needle");
-        needle.style.rotation = alt_ft * 0.36;
-
-        var needle1k = altLayer.getFeatureByFid("needle 1k");
-        needle1k.style.rotation = alt_ft * 0.036;
-
-        var needle10k = altLayer.getFeatureByFid("needle 10k");
-        needle10k.style.rotation = alt_ft * 0.0036;
-
-        var bug = altLayer.getFeatureByFid("bug");
-        bug.style.rotation = target_alt * 0.36
-
-        altLayer.redraw();
     }
 
     function update_heading( hdg_deg, track_deg, bug_deg, wind_deg, wind_speed, track_speed ) {
