@@ -8,10 +8,12 @@ var panel = function() {
     var opacity = 1;
 
     var img_main_volts = new Image();
+    var img_res3_asi = new Image();
     var img_asi3 = new Image();
+    var img_hdg2 = new Image();
     
     var instrument_config = {
-        asi : {build: build_asi},
+        asi : {draw: draw_asi},
         att : {build: build_ati},
         alt : {build: build_altimeter},
         tc : {build: build_tc},
@@ -48,8 +50,10 @@ var panel = function() {
         window.addEventListener('resize', resizeCanvas, false);
         resizeCanvas();
 
+        img_res3_asi.src = 'textures/res3-asi.png';
         img_main_volts.src = 'textures/volts.png';
         img_asi3.src = 'textures/asi3.png';
+        img_hdg2.src = 'textures/hdg2.png';
         
         console.log('finished scheduling texture loads');
         
@@ -103,82 +107,76 @@ var panel = function() {
                 var pos_y = offset_y + size * row;
                 var instrument = layout.instruments[row][col];
                 if (instrument_config[instrument]) {
-                    draw_main_volts(pos_x, pos_y, size);
 	            if (instrument_config[instrument].draw) {
 	                instrument_config[instrument].draw(pos_x, pos_y, size);
-	 	    }
+	 	    } else {
+                        draw_main_volts(pos_x, pos_y, size);
+                    }
                 }
             }
         }
     }
 
-    function build_asi( x, y, size ) {
-        asiLayer.clear();
+    var asi_interpx = [ 0, 80,  160 ];
+    var asi_interpy = [ 0, 340, 680 ];
+    function draw_asi( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+        
+        // background
+        context.drawImage(img_res3_asi, x, y, width=size, height=size);
+        img = img_res3_asi;
+        console.log(scale, img.width, img.height,
+                    Math.floor(img.width*scale),
+                    Math.floor(img.height*scale));
+        
+        // bug
+        context.save();
+        var nw = Math.floor(img_hdg2.width*scale*0.85)
+        var nh = Math.floor(img_hdg2.height*scale*0.85)
+        context.translate(cx, cy);
+        var deg = my_interp( json.autopilot.targets.airspeed_kt,
+                             asi_interpx, asi_interpy);
+        context.rotate(deg*d2r);
+        context.drawImage(img_hdg2, -nw*0.5, -size*0.5, width=nw, height=nh);
+        context.restore();
 
-        var pos = new ol.geom.Point(x, y);
+        // true airspeed needle
+        context.save();
+        context.strokeStyle = 'orange';
+        context.lineWidth = 3;
+        var nw = Math.floor(img_asi3.width*scale*0.85)
+        var nh = Math.floor(img_asi3.height*scale*0.85)
+        context.translate(cx, cy);
+        var ps = json.filters.wind.pitot_scale_factor;
+        var true_kt = json.velocity.airspeed_smoothed_kt * ps;
+        var deg = my_interp( true_kt, asi_interpx, asi_interpy);
+        context.rotate(deg*d2r);
+        context.beginPath();
+        context.moveTo(0, -size*0.1*0.85);
+        context.lineTo(0, -size*0.5*0.85);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.5*0.85);
+        context.lineTo(-size*0.03*0.85, -size*0.42*0.85);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.5*0.85);
+        context.lineTo(size*0.03*0.85, -size*0.42*0.85);
+        context.stroke();
+        context.restore();
 
-        var asi1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        asi1_style.externalGraphic = url_prefix + "textures/res3-asi.png";
-        asi1_style.graphicWidth = size;
-        asi1_style.graphicHeight = size;
-        asi1_style.graphicOpacity = opacity;
-        var asi1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, asi1_style );
-        asiLayer.addFeatures(asi1);
-        asi1.move(pos);
-
-        //var asi2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        //asi2_style.externalGraphic = url_prefix + "textures/asi2.png";
-        //asi2_style.graphicWidth = size;
-        //asi2_style.graphicHeight = size;
-        //asi2_style.graphicOpacity = opacity;
-        //var asi2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, asi2_style );
-        //asiLayer.addFeatures(asi2);
-        //asi2.move(pos);
-
-        var asitr_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        asitr_style.graphicName = "pointer";
-        asitr_style.pointRadius = size * 0.27;
-        asitr_style.strokeColor = "orange";
-        asitr_style.strokeWidth = 4;
-        asitr_style.strokeOpacity = 0.9;
-        asitr_style.fillColor = "orange";
-        asitr_style.fillOpacity = 0.6;
-        asitr_style.label = "TRUE";
-        asitr_style.fontFamily = "Courier New, monospace";
-        asitr_style.fontColor = "orange";
-        asitr_style.fontWeight = "bold";
-        asitr_style.labelAlign = "rm";
-        asitr_style.labelXOffset = -20;
-        asitr_style.labelYOffset = -20;
-        var asitr = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, asitr_style );
-        asitr.fid = "true kt";
-        asiLayer.addFeatures(asitr);
-        asitr.move(pos);
-
-        var asi3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        asi3_style.externalGraphic = url_prefix + "textures/asi3.png";
-        asi3_style.graphicWidth = size * 0.109375;
-        asi3_style.graphicHeight = size * 0.53125;
-        asi3_style.graphicYOffset = -asi3_style.graphicHeight * 0.5
-            - size * 0.111328125;
-        asi3_style.graphicOpacity = opacity;
-        var asi3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, asi3_style );
-        asi3.fid = "needle";
-        asiLayer.addFeatures(asi3);
-        asi3.move(pos);
-
-        var asi4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        asi4_style.externalGraphic = url_prefix + "textures/hdg2.png";
-        asi4_style.graphicWidth = size * 0.09375;
-        asi4_style.graphicHeight = size * 0.09375;
-        asi4_style.graphicYOffset = -asi4_style.graphicHeight * 0.5
-            - size * 0.37109375;
-        asi4_style.graphicOpacity = opacity;
-        var asi4 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, asi4_style );
-        asi4.fid = "bug";
-        asiLayer.addFeatures(asi4);
-        var pos4 = new ol.geom.Point(x, y);
-        asi4.move(pos);
+        // airspeed needle
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale*0.85)
+        var nh = Math.floor(img_asi3.height*scale*0.85)
+        context.translate(cx, cy);
+        var deg = my_interp( json.velocity.airspeed_smoothed_kt,
+                             asi_interpx, asi_interpy);
+        context.rotate(deg*d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.restore();
     }
 
     function build_ati( x, y, size ) {
@@ -555,9 +553,6 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
         context.drawImage(img_main_volts, x, y, width=size, height=size);
-        console.log(scale, img_asi3.width, img_asi3.height,
-                    Math.floor(img_asi3.width*scale),
-                    Math.floor(img_asi3.height*scale));
         context.save();
         var nw = Math.floor(img_asi3.width*scale*0.85)
         var nh = Math.floor(img_asi3.height*scale*0.85)
