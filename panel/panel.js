@@ -4,7 +4,7 @@ var r2d = 180 / Math.PI;
 var panel = function() {
     var canvas;
     var context;
-    var hdgLayer, vsiLayer, tcLayer, vccLayer, mvLayer;
+    var hdgLayer, vsiLayer;
     var options;
     var opacity = 1;
 
@@ -26,7 +26,9 @@ var panel = function() {
     var img_tc2 = new Image();
     var img_tc3 = new Image();
     var img_tc4 = new Image();
+    var img_hdg1 = new Image();
     var img_hdg2 = new Image();
+    var img_hdg3 = new Image();
     
     var instrument_config = {
         avionics_vcc : {draw: draw_vcc},
@@ -35,9 +37,8 @@ var panel = function() {
         alt : {draw: draw_alt},
         amp : {draw: draw_amp},
         tc : {draw: draw_tc},
-        dg : {build: build_heading},
+        dg : {draw: draw_dg},
         vsi : {build: build_vsi},
-        main_volts : {draw: draw_main_volts},
     };
 
     var layout_config = {
@@ -84,7 +85,9 @@ var panel = function() {
         img_tc2.src = 'textures/tc2.png';
         img_tc3.src = 'textures/tc3.png';
         img_tc4.src = 'textures/tc4.png';
+        img_hdg1.src = 'textures/hdg1.png';
         img_hdg2.src = 'textures/hdg2.png';
+        img_hdg3.src = 'textures/hdg3.png';
         
         console.log('finished scheduling texture loads');
     }
@@ -114,7 +117,7 @@ var panel = function() {
 	            if (instrument_config[instrument].draw) {
 	                instrument_config[instrument].draw(pos_x, pos_y, size);
 	 	    } else {
-                        draw_main_volts(pos_x, pos_y, size);
+                        draw_vcc(pos_x, pos_y, size);
                     }
                 }
             }
@@ -181,9 +184,7 @@ var panel = function() {
         // true airspeed needle
         context.save();
         context.strokeStyle = 'orange';
-        context.lineWidth = 3;
-        var nw = Math.floor(img_asi3.width*scale*0.85)
-        var nh = Math.floor(img_asi3.height*scale*0.85)
+        context.lineWidth = 5;
         context.translate(cx, cy);
         var ps = json.filters.wind.pitot_scale_factor;
         var true_kt = json.velocity.airspeed_smoothed_kt * ps;
@@ -366,7 +367,7 @@ var panel = function() {
         context.drawImage(img_tc2, -nw*0.5 + xpos, -nh*0.5+(84*scale), width=nw, height=nh);
         context.restore();
 
-        // bezel
+        // face plate
         context.drawImage(img_tc3, x, y, width=size, height=size);
         
         // plane (turn rate)
@@ -380,93 +381,83 @@ var panel = function() {
         context.rotate(r*10 * d2r);
         context.drawImage(img_tc4, -nw*0.5, -nh*0.5, width=nw, height=nh);
         context.restore();
- 
-        // var tc4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        // tc4_style.externalGraphic = url_prefix + "textures/tc4.png";
-        // tc4_style.graphicWidth = size * 0.625;
-        // tc4_style.graphicHeight = size * 0.171875;
-        // tc4_style.graphicOpacity = opacity;
-        // var tc4 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc4_style );
-        // tc4.fid = "plane";
-        // tcLayer.addFeatures(tc4);
-        // tc4.move(pos);
     }
 
-    function build_heading( x, y, size ) {
-        hdgLayer.clear();
+    function draw_dg( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
 
-        var pos = new ol.geom.Point(x, y);
+        var heading = json.filters.filter[0].heading_deg;
+        var groundtrack = json.filters.filter[0].groundtrack_deg;
+        var ap_hdg = json.autopilot.targets.groundtrack_deg
+        var wind_deg = json.filters.wind.wind_dir_deg;
+        
+        // rose
+        context.save();
+        var nw = Math.floor(img_hdg1.width*scale)
+        var nh = Math.floor(img_hdg1.height*scale)
+        context.translate(cx, cy);
+        context.rotate(-heading*d2r);
+        context.drawImage(img_hdg1, -nw*0.5, -nh*0.5, width=nw, height=nh);
+        context.restore();
 
-        var hdg1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        hdg1_style.externalGraphic = url_prefix + "textures/hdg1.png";
-        hdg1_style.graphicWidth = size;
-        hdg1_style.graphicHeight = size;
-        hdg1_style.graphicOpacity = opacity;
-        var hdg1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, hdg1_style );
-        hdg1.fid = "rose";
-        hdgLayer.addFeatures(hdg1);
-        hdg1.move(pos);
+        // FIXME: display wind speed and ground speed
 
-        var hdgwv_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        hdgwv_style.graphicName = "pointer";
-        hdgwv_style.pointRadius = size * 0.22;
-        hdgwv_style.strokeColor = "lightblue";
-        hdgwv_style.strokeWidth = 4;
-        hdgwv_style.strokeOpacity = 0.9;
-        hdgwv_style.fillColor = "lightblue";
-        hdgwv_style.fillOpacity = 0.6;
-        hdgwv_style.label = "WND";
-        hdgwv_style.fontFamily = "Courier New, monospace";
-        hdgwv_style.fontColor = "lightblue";
-        hdgwv_style.fontWeight = "bold";
-        hdgwv_style.labelAlign = "lm";
-        hdgwv_style.labelXOffset = 20;
-        hdgwv_style.labelYOffset = 20;
-        var hdgwv = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, hdgwv_style );
-        hdgwv.fid = "windvane";
-        hdgLayer.addFeatures(hdgwv);
-        hdgwv.move(pos);
+        // wind vane
+        context.save();
+        context.strokeStyle = 'lightblue';
+        context.lineWidth = 5;
+        context.translate(cx, cy);
+        var vane_rot = -parseFloat(heading) + parseFloat(wind_deg) + 180;
+        context.rotate(vane_rot*d2r);
+        context.beginPath();
+        context.moveTo(0, size*0.5*0.65);
+        context.lineTo(0, -size*0.5*0.65);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.5*0.65);
+        context.lineTo(-size*0.03*0.65, -size*0.42*0.65);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.5*0.65);
+        context.lineTo(size*0.03*0.65, -size*0.42*0.65);
+        context.stroke();
+        context.restore();
+        
+        // ground track
+        context.save();
+        context.strokeStyle = 'orange';
+        context.lineWidth = 5;
+        context.translate(cx, cy);
+        var track_rot = -parseFloat(heading) + parseFloat(groundtrack);
+        context.rotate(track_rot*d2r);
+        context.beginPath();
+        context.moveTo(0, size*0.5*0.65);
+        context.lineTo(0, -size*0.5*0.65);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.5*0.65);
+        context.lineTo(-size*0.03*0.65, -size*0.42*0.65);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.5*0.65);
+        context.lineTo(size*0.03*0.65, -size*0.42*0.65);
+        context.stroke();
+        context.restore();
 
-        var hdggt_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        hdggt_style.graphicName = "pointer";
-        hdggt_style.pointRadius = size * 0.32;
-        hdggt_style.strokeColor = "orange";
-        hdggt_style.strokeWidth = 4;
-        hdggt_style.strokeOpacity = 0.9;
-        hdggt_style.fillColor = "orange";
-        hdggt_style.fillOpacity = 0.6;
-        hdggt_style.label = "GND";
-        hdggt_style.fontFamily = "Courier New, monospace";
-        hdggt_style.fontColor = "orange";
-        hdggt_style.fontWeight = "bold";
-        hdggt_style.labelAlign = "rm";
-        hdggt_style.labelXOffset = -20;
-        hdggt_style.labelYOffset = 20;
-        var hdggt = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, hdggt_style );
-        hdggt.fid = "track";
-        hdgLayer.addFeatures(hdggt);
-        hdggt.move(pos);
+        // bug
+        context.save();
+        var nw = Math.floor(img_hdg2.width*scale*0.85)
+        var nh = Math.floor(img_hdg2.height*scale*0.85)
+        context.translate(cx, cy);
+        var bug_deg = -parseFloat(heading) + parseFloat(ap_hdg);
+        context.rotate(bug_deg*d2r);
+        context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.82, width=nw, height=nh);
+        context.restore();
 
-        var hdg2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        hdg2_style.externalGraphic = url_prefix + "textures/hdg2.png";
-        hdg2_style.graphicWidth = size * 0.09375;
-        hdg2_style.graphicHeight = size * 0.09375;
-        hdg2_style.graphicYOffset = -hdg2_style.graphicHeight * 0.5
-            - size * 0.37109375;
-        hdg2_style.graphicOpacity = opacity;
-        var hdg2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, hdg2_style );
-        hdg2.fid = "bug";
-        hdgLayer.addFeatures(hdg2);
-        hdg2.move(pos);
-
-        var hdg3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        hdg3_style.externalGraphic = url_prefix + "textures/hdg3.png";
-        hdg3_style.graphicWidth = size;
-        hdg3_style.graphicHeight = size;
-        hdg3_style.graphicOpacity = opacity;
-        var hdg3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, hdg3_style );
-        hdgLayer.addFeatures(hdg3);
-        hdg3.move(pos);
+        // face plate
+        context.drawImage(img_hdg3, x, y, width=size, height=size);
     }
 
     function build_vsi( x, y, size ) {
@@ -534,7 +525,6 @@ var panel = function() {
         update_altimeter( data.alt_true, data.ap_altitude );
         update_heading( data.filter_psi, data.filter_track, data.ap_hdg, data.wind_deg, data.wind_kts, data.filter_speed );
         update_vsi( data.airdata_climb, data.ap_climb );
-        update_tc( data.imu_ay, data.imu_az, data.imu_r );
         update_main_volts( data.main_volts );
     }
 
@@ -595,45 +585,6 @@ var panel = function() {
             = my_interp(target_fps*60, vsi_interpx, vsi_interpy) - 90;
 
         vsiLayer.redraw();
-    }
-
-    var filt_rot = 0;
-    function update_tc( ay, az, r ) {
-	if (!instrument_config.tc['active'])
-	    return;
-
-        var tc = ay / az;
-        var ball = tcLayer.getFeatureByFid("ball");
-        var ypx = Math.abs(tc) * 13 * 0;
-        var xpx = tc * -108;
-
-        var bx = ball.basex + ball.mysize * (xpx / 512);
-        var by = ball.basey + ball.mysize * (ypx / 512);
-
-        var pos = new ol.geom.Point(bx, by);
-        ball.move(pos);
-
-        var plane = tcLayer.getFeatureByFid("plane");
-        var rot = r;
-        if ( rot < -2.5 ) { rot = -2.5; }
-        if ( rot > 2.5 ) { rot = 2.5; }
-        filt_rot = 0.9 * filt_rot + 0.1 * rot;
-        plane.style.rotation = filt_rot * 10;
-
-        tcLayer.redraw();
-    }
-
-    var min_volts = 9.0;
-    var filt_volts = min_volts;
-    function update_main_volts( volts ) {
-        if (!instrument_config.main_volts['active'])
-	    return;
-
-        filt_volts = 0.9 * filt_volts + 0.1 * volts;
-
-        var needle = mvLayer.getFeatureByFid("needle");
-        needle.style.rotation = (filt_volts-min_volts) * 340.0 / (25.2-min_volts)
-        mvLayer.redraw();
     }
 
     return {
