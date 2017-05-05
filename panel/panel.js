@@ -4,7 +4,6 @@ var r2d = 180 / Math.PI;
 var panel = function() {
     var canvas;
     var context;
-    var hdgLayer, vsiLayer;
     var options;
     var opacity = 1;
 
@@ -29,6 +28,7 @@ var panel = function() {
     var img_hdg1 = new Image();
     var img_hdg2 = new Image();
     var img_hdg3 = new Image();
+    var img_vsi1 = new Image();
     
     var instrument_config = {
         avionics_vcc : {draw: draw_vcc},
@@ -38,7 +38,7 @@ var panel = function() {
         amp : {draw: draw_amp},
         tc : {draw: draw_tc},
         dg : {draw: draw_dg},
-        vsi : {build: build_vsi},
+        vsi : {draw: draw_vsi},
     };
 
     var layout_config = {
@@ -88,6 +88,7 @@ var panel = function() {
         img_hdg1.src = 'textures/hdg1.png';
         img_hdg2.src = 'textures/hdg2.png';
         img_hdg3.src = 'textures/hdg3.png';
+        img_vsi1.src = 'textures/vsi1.png';
         
         console.log('finished scheduling texture loads');
     }
@@ -460,57 +461,24 @@ var panel = function() {
         context.drawImage(img_hdg3, x, y, width=size, height=size);
     }
 
-    function build_vsi( x, y, size ) {
-        vsiLayer.clear();
-
-        var pos = new ol.geom.Point(x, y);
-
-        var vsi1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        vsi1_style.externalGraphic = url_prefix + "textures/vsi1.png";
-        vsi1_style.graphicWidth = size;
-        vsi1_style.graphicHeight = size;
-        vsi1_style.graphicOpacity = opacity;
-        var vsi1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, vsi1_style );
-        vsiLayer.addFeatures(vsi1);
-        vsi1.move(pos);
-
-        var vsi2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        vsi2_style.externalGraphic = url_prefix + "textures/alt5.png";
-        vsi2_style.graphicWidth = size * 0.1171875;
-        vsi2_style.graphicHeight = size * 0.4296875;
-        vsi2_style.graphicYOffset = -vsi2_style.graphicHeight * 0.5
-            - size * 0.1035;
-        vsi2_style.graphicOpacity = opacity;
-        var vsi2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, vsi2_style );
-        vsi2.fid = "needle";
-        vsiLayer.addFeatures(vsi2);
-        vsi2.move(pos);
-
-        var vsi3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        vsi3_style.externalGraphic = url_prefix + "textures/hdg2.png";
-        vsi3_style.graphicWidth = size * 0.09375;
-        vsi3_style.graphicHeight = size * 0.09375;
-        vsi3_style.graphicYOffset = -vsi3_style.graphicHeight * 0.5
-            - size * 0.37109375;
-        vsi3_style.graphicOpacity = opacity;
-        var pos3 = new ol.geom.Point(x, y);
-        var vsi3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, vsi3_style );
-        vsi3.fid = "bug";
-        vsiLayer.addFeatures(vsi3);
-        vsi3.move(pos);
-    }
-
-    function draw_main_volts( x, y, size ) {
+    var vsi_interpx = [ -2000, -1500, -1000, -500, 0, 500, 1000, 1500, 2000 ];
+    var vsi_interpy = [ -173.5, -131.5, -82, -36, 0, 35, 81, 131, 173 ];
+    function draw_vsi( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
-        context.drawImage(img_volts, x, y, width=size, height=size);
+        
+        // face plate
+        context.drawImage(img_vsi1, x, y, width=size, height=size);
+
+        var climb_fpm = json.velocity.pressure_vertical_speed_fps * 60;
+        var needle_rot = my_interp(climb_fpm, vsi_interpx, vsi_interpy) - 90;
         context.save();
-        var nw = Math.floor(img_asi3.width*scale*0.85)
-        var nh = Math.floor(img_asi3.height*scale*0.85)
+        var nw = Math.floor(img_alt5.width*scale*0.85)
+        var nh = Math.floor(img_alt5.height*scale*0.85)
         context.translate(cx, cy);
-        context.rotate(8*json.status.frame_time*d2r);
-        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.rotate(needle_rot*d2r);
+        context.drawImage(img_alt5, -nw*0.5, -nh, width=nw, height=nh);
         context.restore();
     }
 
@@ -526,32 +494,6 @@ var panel = function() {
         update_heading( data.filter_psi, data.filter_track, data.ap_hdg, data.wind_deg, data.wind_kts, data.filter_speed );
         update_vsi( data.airdata_climb, data.ap_climb );
         update_main_volts( data.main_volts );
-    }
-
-    function update_heading( hdg_deg, track_deg, bug_deg, wind_deg, wind_speed, track_speed ) {
-	if (!instrument_config.dg['active'])
-	    return;
-
-        var rose = hdgLayer.getFeatureByFid("rose");
-        rose.style.rotation = -hdg_deg;
-
-        var offset = (hdg_deg - track_deg)*0;
-        var bug = hdgLayer.getFeatureByFid("bug");
-        bug.style.rotation = -parseFloat(hdg_deg) + parseFloat(bug_deg) + offset;
-
-        var windvane = hdgLayer.getFeatureByFid("windvane");
-        var vane_rot = -parseFloat(hdg_deg) + parseFloat(wind_deg) + 180;
-        var vane_kt = parseFloat(wind_speed).toFixed(0);
-        windvane.style.rotation = vane_rot;
-        windvane.style.label = 'WS: ' + vane_kt + 'kt';
-
-        var track = hdgLayer.getFeatureByFid("track");
-        var track_rot = -parseFloat(hdg_deg) + parseFloat(track_deg);
-        var track_kt = parseFloat(track_speed).toFixed(0);
-        track.style.rotation = track_rot;
-        track.style.label = 'GS: ' + track_kt + 'kt';
-
-        hdgLayer.redraw();
     }
 
     function my_interp( input, interpx, interpy ) {
