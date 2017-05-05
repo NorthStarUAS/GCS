@@ -56,33 +56,6 @@ var panel = function() {
         img_hdg2.src = 'textures/hdg2.png';
         
         console.log('finished scheduling texture loads');
-        
-        // asiLayer = new ol.layer.Vector( "Airspeed Indicator", {displayInLayerSwitcher: false});
-        // map.addLayer(asiLayer);
-
-        // atiLayer = new ol.layer.Vector( "Attitude Indicator", {displayInLayerSwitcher: false});
-        // map.addLayer(atiLayer);
-
-        // altLayer = new ol.layer.Vector( "Altimeter", {displayInLayerSwitcher: false});
-        // map.addLayer(altLayer);
-
-        // hdgLayer = new ol.layer.Vector( "Directional Gyro", {displayInLayerSwitcher: false});
-        // map.addLayer(hdgLayer);
-
-        // vsiLayer = new ol.layer.Vector( "Vertical Speed Indicator", {displayInLayerSwitcher: false});
-        // map.addLayer(vsiLayer);
-
-        // tcLayer = new ol.layer.Vector( "Turn Coordinator", {displayInLayerSwitcher: false});
-        // map.addLayer(tcLayer);
-
-        // vccLayer = new ol.source.Vector( "Avionics VCC", {displayInLayerSwitcher: false});
-        // map.addLayer(vccLayer);
-
-        // ampLayer = new ol.layer.Vector( "Amperes", {displayInLayerSwitcher: false});
-        // map.addLayer(ampLayer);
-
-        // mvLayer = new ol.layer.Vector( "Main Volts", {displayInLayerSwitcher: false});
-        // map.addLayer(mvLayer);
     }
 
     function draw() {
@@ -562,21 +535,6 @@ var panel = function() {
         context.restore();
     }
 
-    function update1( tokens ) {
-        var size = map.getSize();
-        map.setCenter( new OpenLayers.LonLat( size.x * 0.5, size.y * 0.5 ) );
-
-        update_hud_speed( tokens[4], tokens[22], tokens[23] );
-        update_hud_alt( tokens[3], tokens[21] );
-
-        update_asi( tokens[4], tokens[22], tokens[23] );
-        update_ati( tokens[19], tokens[20] );
-        update_altimeter( tokens[3], tokens[21] );
-        update_heading( tokens[5], tokens[6], tokens[13], tokens[8], tokens[9], tokens[7] );
-        update_vsi( tokens[14], tokens[15] );
-        update_tc( tokens[16], tokens[17], tokens[18] );
-    }
-
     function update_json( data ) {
         var size = map.getSize();
         map.setCenter( new OpenLayers.LonLat( size.x * 0.5, size.y * 0.5 ) );
@@ -584,7 +542,6 @@ var panel = function() {
         update_hud_speed( data.airspeed, data.ap_speed, data.pitot_scale );
         update_hud_alt( data.alt_true, data.ap_altitude );
 
-        update_asi( data.airspeed, data.ap_speed, data.pitot_scale );
         update_ati( data.filter_phi, data.filter_theta );
         update_altimeter( data.alt_true, data.ap_altitude );
         update_heading( data.filter_psi, data.filter_track, data.ap_hdg, data.wind_deg, data.wind_kts, data.filter_speed );
@@ -593,32 +550,6 @@ var panel = function() {
         update_vcc( data.avionics_vcc, data.main_volts, data.cell_volts );
         update_amps( data.main_amps );
         update_main_volts( data.main_volts );
-    }
-
-    var asi_interpx = [ 0, 80,  160 ];
-    var asi_interpy = [ 0, 340, 680 ];
-    var filt_airspeed = 0.0;
-    function update_asi( airspeed, target_airspeed, true_scale_est ) {
-        if (!instrument_config.asi['active'])
-	    return;
-
-        filt_airspeed = 0.8 * filt_airspeed + 0.2 * airspeed;
-        var needle = asiLayer.getFeatureByFid("needle");
-        needle.style.rotation = my_interp( filt_airspeed, asi_interpx, asi_interpy);
-
-        var true_speed = asiLayer.getFeatureByFid("true kt");
-        var true_est = filt_airspeed * true_scale_est;
-        var true_rot = my_interp( true_est, asi_interpx, asi_interpy );
-        var true_kt = parseFloat(true_est).toFixed(0);
-        true_speed.style.rotation = true_rot;
-        //true_speed.style.label = 'TR: ' + true_kt + 'kt';
-        //true_speed.style.label = 'TR: ' + true_kt + 'kt';
-
-        var bug = asiLayer.getFeatureByFid("bug");
-        bug.style.rotation = my_interp( target_airspeed,
-				        asi_interpx, asi_interpy );
-
-        asiLayer.redraw();
     }
 
     function update_ati( roll_deg, pitch_deg ) {
@@ -805,7 +736,6 @@ var panel = function() {
     return {
         init : init,
         draw : draw,
-        update1 : update1,
         update_json : update_json
     }
 }();
