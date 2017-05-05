@@ -7,19 +7,19 @@ var panel = function() {
     var options;
     var opacity = 1;
 
-    var img_main_volts = new Image();
+    var img_volts = new Image();
     var img_res3_asi = new Image();
     var img_asi3 = new Image();
     var img_hdg2 = new Image();
     
     var instrument_config = {
+        avionics_vcc : {draw: draw_vcc},
         asi : {draw: draw_asi},
         att : {build: build_ati},
         alt : {build: build_altimeter},
         tc : {build: build_tc},
         dg : {build: build_heading},
         vsi : {build: build_vsi},
-        avionics_vcc : {build: build_vcc},
         amp : {build: build_amp},
         main_volts : {draw: draw_main_volts},
     };
@@ -51,7 +51,7 @@ var panel = function() {
         resizeCanvas();
 
         img_res3_asi.src = 'textures/res3-asi.png';
-        img_main_volts.src = 'textures/volts.png';
+        img_volts.src = 'textures/volts.png';
         img_asi3.src = 'textures/asi3.png';
         img_hdg2.src = 'textures/hdg2.png';
         
@@ -90,6 +90,42 @@ var panel = function() {
         }
     }
 
+    function draw_vcc( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+        
+        // background
+        context.drawImage(img_volts, x, y, width=size, height=size);
+
+        // vcc needle
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale*0.85)
+        var nh = Math.floor(img_asi3.height*scale*0.85)
+        context.translate(cx, cy);
+        var vcc = json.sensors.APM2.board_vcc;
+        if (vcc < 4.45) { vcc = 4.45; }
+        if (vcc > 5.55) { vcc = 5.55; }
+        var deg = (vcc - 5.0) * 150.0;
+        context.rotate(deg*d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.restore();
+        
+        // volts needle
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale*0.85)
+        var nh = Math.floor(img_asi3.height*scale*0.85)
+        context.translate(cx, cy);
+        var cell_volts = json.sensors.APM2.extern_cell_volt;
+        if (cell_volts < 2.95) { cell_volts = 2.95; }
+        if (cell_volts > 4.25) { cell_volts = 4.25; }
+        var deg = ((3.6 - cell_volts) * 75.0 / 0.6) + 180.0;
+        context.rotate(deg*d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.restore();
+        
+    }
+
     var asi_interpx = [ 0, 80,  160 ];
     var asi_interpy = [ 0, 340, 680 ];
     function draw_asi( x, y, size ) {
@@ -99,10 +135,6 @@ var panel = function() {
         
         // background
         context.drawImage(img_res3_asi, x, y, width=size, height=size);
-        img = img_res3_asi;
-        console.log(scale, img.width, img.height,
-                    Math.floor(img.width*scale),
-                    Math.floor(img.height*scale));
         
         // bug
         context.save();
@@ -453,47 +485,6 @@ var panel = function() {
         tc4.move(pos);
     }
 
-    function build_vcc( x, y, size ) {
-        vccLayer.clear();
-
-        var pos = new ol.geom.Point(x, y);
-
-        //var vcc1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        var vcc1_style = ol.style.Style({
-        });
-        vcc1_style.externalGraphic = url_prefix + "textures/volts.png";
-        vcc1_style.graphicWidth = size;
-        vcc1_style.graphicHeight = size;
-        vcc1_style.graphicOpacity = opacity;
-        var vcc1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, vcc1_style );
-        vccLayer.addFeatures(vcc1);
-        vcc1.move(pos);
-
-        var vcc3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        vcc3_style.externalGraphic = url_prefix + "textures/asi3.png";
-        vcc3_style.graphicWidth = size * 0.109375;
-        vcc3_style.graphicHeight = size * 0.53125;
-        vcc3_style.graphicYOffset = -vcc3_style.graphicHeight * 0.5
-	    - size * 0.111328125;
-        vcc3_style.graphicOpacity = opacity;
-        var vcc3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, vcc3_style );
-        vcc3.fid = "needle1";
-        vccLayer.addFeatures(vcc3);
-        vcc3.move(pos);
-
-        var vcc4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        vcc4_style.externalGraphic = url_prefix + "textures/asi3.png";
-        vcc4_style.graphicWidth = size * 0.109375;
-        vcc4_style.graphicHeight = size * 0.53125;
-        vcc4_style.graphicYOffset = -vcc4_style.graphicHeight * 0.5
-	    - size * 0.111328125;
-        vcc4_style.graphicOpacity = opacity;
-        var vcc4 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, vcc4_style );
-        vcc4.fid = "needle2";
-        vccLayer.addFeatures(vcc4);
-        vcc4.move(pos);
-    }
-
     function build_amp( x, y, size ) {
         ampLayer.clear();
 
@@ -525,7 +516,7 @@ var panel = function() {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
-        context.drawImage(img_main_volts, x, y, width=size, height=size);
+        context.drawImage(img_volts, x, y, width=size, height=size);
         context.save();
         var nw = Math.floor(img_asi3.width*scale*0.85)
         var nh = Math.floor(img_asi3.height*scale*0.85)
@@ -547,7 +538,6 @@ var panel = function() {
         update_heading( data.filter_psi, data.filter_track, data.ap_hdg, data.wind_deg, data.wind_kts, data.filter_speed );
         update_vsi( data.airdata_climb, data.ap_climb );
         update_tc( data.imu_ay, data.imu_az, data.imu_r );
-        update_vcc( data.avionics_vcc, data.main_volts, data.cell_volts );
         update_amps( data.main_amps );
         update_main_volts( data.main_volts );
     }
@@ -684,28 +674,6 @@ var panel = function() {
         plane.style.rotation = filt_rot * 10;
 
         tcLayer.redraw();
-    }
-
-    var battery_cells = 1;
-    function update_vcc( vcc, main_volts, cell_volts ) {
-        if (!instrument_config.avionics_vcc['active'])
-	    return;
-
-        var needle1 = vccLayer.getFeatureByFid("needle1");
-        needle1.style.rotation = (vcc - 5.0) * 150.0;
-
-        var battery_cells = main_volts / cell_volts;
-        var volts_per_cell = cell_volts
-        if ( volts_per_cell < 2.9 ) {
-	    volts_per_cell = 2.9;
-        }
-        if ( volts_per_cell > 4.3 ) {
-	    volts_per_cell = 4.3;
-        }
-        var needle2 = vccLayer.getFeatureByFid("needle2");
-        needle2.style.rotation = ((3.6-volts_per_cell) * 75.0 / 0.6) + 180.0;
-
-        vccLayer.redraw();
     }
 
     //var filt_amps = 0.0;
