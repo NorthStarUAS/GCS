@@ -9,13 +9,18 @@ var panel = function() {
 
     var img_volts = new Image();
     var img_res3_asi = new Image();
+    var img_ati1 = new Image();
+    var img_ati2 = new Image();
+    var img_ati3 = new Image();
+    var img_ati4 = new Image();
+    var img_ati5 = new Image();
     var img_asi3 = new Image();
     var img_hdg2 = new Image();
     
     var instrument_config = {
         avionics_vcc : {draw: draw_vcc},
         asi : {draw: draw_asi},
-        att : {build: build_ati},
+        ati : {draw: draw_ati},
         alt : {build: build_altimeter},
         tc : {build: build_tc},
         dg : {build: build_heading},
@@ -26,13 +31,13 @@ var panel = function() {
 
     var layout_config = {
         horizontal : {
-            instruments : [['avionics_vcc', 'asi', 'att', 'alt'], ['amp', 'tc', 'dg', 'vsi']]
+            instruments : [['avionics_vcc', 'asi', 'ati', 'alt'], ['amp', 'tc', 'dg', 'vsi']]
         },
         vertical : {
-            instruments : [['avionics_vcc', 'amp'], ['asi', 'att'], ['alt', 'tc'], ['dg', 'vsi']]
+            instruments : [['avionics_vcc', 'amp'], ['asi', 'ati'], ['alt', 'tc'], ['dg', 'vsi']]
         },
         mini : {
-            instruments : [['att', '', '', '', '', '', '', '', '', 'dg'],
+            instruments : [['ati', '', '', '', '', '', '', '', '', 'dg'],
                            ['asi', '', '', '', '', '', '', '', '', 'alt'],
                            ['tc', '', '', '', '', '', '', '', '', 'vsi']]
         }
@@ -52,6 +57,11 @@ var panel = function() {
 
         img_res3_asi.src = 'textures/res3-asi.png';
         img_volts.src = 'textures/volts.png';
+        img_ati1.src = 'textures/ati1.png';
+        img_ati2.src = 'textures/ati2.png';
+        img_ati3.src = 'textures/ati3.png';
+        img_ati4.src = 'textures/ati4.png';
+        img_ati5.src = 'textures/ati5.png';
         img_asi3.src = 'textures/asi3.png';
         img_hdg2.src = 'textures/hdg2.png';
         
@@ -183,67 +193,56 @@ var panel = function() {
         context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
         context.restore();
     }
+    
+    function draw_ati( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
 
-    function build_ati( x, y, size ) {
-        atiLayer.clear();
+        var roll = json.filters.filter[0].roll_deg;
+        var pitch = json.filters.filter[0].pitch_deg;
+        
+        // backplate
+        context.save();
+        var nw = Math.floor(img_ati1.width*scale)
+        var nh = Math.floor(img_ati1.height*scale)
+        context.translate(cx, cy);
+        context.rotate(-roll*d2r);
+        context.drawImage(img_ati1, -nw*0.5, -nh*0.5, width=nw, height=nh);
+        context.restore();
 
-        var pos = new ol.geom.Point(x, y);
+        // pitch overlay
+        context.save();
+        var nw = Math.floor(img_ati2.width*scale)
+        var nh = Math.floor(img_ati2.height*scale)
+        context.translate(cx, cy);
+        context.rotate(-roll*d2r);
+        var p = pitch;
+        if ( p < -20 ) { p = -20; }
+        if ( p > 20 ) { p = 20; }
+        var y_offset = (p * 4.5) * scale;
+        context.drawImage(img_ati2, -nw*0.5, -nh*0.5+y_offset, width=nw, height=nh);
+        context.restore();
+        
+        // roll
+        context.save();
+        var nw = Math.floor(img_ati3.width*scale)
+        var nh = Math.floor(img_ati3.height*scale)
+        context.translate(cx, cy);
+        context.rotate(-roll*d2r);
+        context.drawImage(img_ati3, -nw*0.5, -nh*0.5, width=nw, height=nh);
+        context.restore();
+        
+        // bird
+        context.save();
+        var nw = Math.floor(img_ati4.width*scale)
+        var nh = Math.floor(img_ati4.height*scale)
+        context.translate(cx, cy);
+        context.drawImage(img_ati4, -nw*0.5, -nh*0.5+(78*scale), width=nw, height=nh);
+        context.restore();
 
-        var ati1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        ati1_style.externalGraphic = url_prefix + "textures/ati1.png";
-        ati1_style.graphicWidth = size * 0.75;
-        ati1_style.graphicHeight = size * 0.75;
-        ati1_style.graphicOpacity = opacity;
-        var ati1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, ati1_style );
-        ati1.fid = "backplate";
-        atiLayer.addFeatures(ati1);
-        ati1.move(pos);
-
-        var ati2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        ati2_style.externalGraphic = url_prefix + "textures/ati2.png";
-        ati2_style.graphicWidth = size * 0.765625;
-        ati2_style.graphicHeight = size * 0.5;
-        ati2_style.graphicOpacity = opacity;
-        var ati2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, ati2_style );
-        ati2.fid = "pitch";
-        ati2.mysize = size;
-        ati2.basex = x;
-        ati2.basey = y;
-        atiLayer.addFeatures(ati2);
-        ati2.move(pos);
-
-        var ati3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        ati3_style.externalGraphic = url_prefix + "textures/ati3.png";
-        ati3_style.graphicWidth = size * 0.90625;
-        ati3_style.graphicHeight = size * 0.90625;
-        ati3_style.graphicOpacity = opacity;
-        var ati3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, ati3_style );
-        ati3.fid = "roll";
-        atiLayer.addFeatures(ati3);
-        ati3.move(pos);
-
-        var ati4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        ati4_style.externalGraphic = url_prefix + "textures/ati4.png";
-        ati4_style.graphicWidth = size * 0.515625;
-        ati4_style.graphicHeight = size * 0.33984375;
-        ati4_style.graphicOpacity = opacity;
-        ati4_style.graphicYOffset = -ati4_style.graphicHeight * 0.5
-            + size * 0.15234375;
-        var ati4 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, ati4_style );
-        ati4.fid = "bird";
-        atiLayer.addFeatures(ati4);
-        var pos4 = new ol.geom.Point(x, y);
-        ati4.move(pos);
-
-        var ati5_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        ati5_style.externalGraphic = url_prefix + "textures/ati5.png";
-        ati5_style.graphicWidth = size;
-        ati5_style.graphicHeight = size;
-        ati5_style.graphicOpacity = opacity;
-        var ati5 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, ati5_style );
-        atiLayer.addFeatures(ati5);
-        var pos5 = new ol.geom.Point(x, y);
-        ati5.move(pos);
+        // cover
+        context.drawImage(img_ati5, x, y, width=size, height=size);
     }
 
     function build_altimeter( x, y, size ) {
@@ -543,9 +542,6 @@ var panel = function() {
     }
 
     function update_ati( roll_deg, pitch_deg ) {
-	if (!instrument_config.att['active'])
-	    return;
-
         var backplate = atiLayer.getFeatureByFid("backplate");
         backplate.style.rotation = -roll_deg;
 
