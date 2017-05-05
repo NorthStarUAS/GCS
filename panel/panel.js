@@ -1,4 +1,5 @@
 var d2r = Math.PI / 180;
+var r2d = 180 / Math.PI;
 
 var panel = function() {
     var canvas;
@@ -21,6 +22,10 @@ var panel = function() {
     var img_alt4 = new Image();
     var img_alt5 = new Image();
     var img_amp = new Image();
+    var img_tc1 = new Image();
+    var img_tc2 = new Image();
+    var img_tc3 = new Image();
+    var img_tc4 = new Image();
     var img_hdg2 = new Image();
     
     var instrument_config = {
@@ -75,6 +80,10 @@ var panel = function() {
         img_alt4.src = 'textures/alt4.png';
         img_alt5.src = 'textures/alt5.png';
         img_amp.src = 'textures/amps.png';
+        img_tc1.src = 'textures/tc1.png';
+        img_tc2.src = 'textures/tc2.png';
+        img_tc3.src = 'textures/tc3.png';
+        img_tc4.src = 'textures/tc4.png';
         img_hdg2.src = 'textures/hdg2.png';
         
         console.log('finished scheduling texture loads');
@@ -333,41 +342,45 @@ var panel = function() {
     }
 
     function draw_tc( x, y, size ) {
-        // var tc1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        // tc1_style.externalGraphic = url_prefix + "textures/tc1.png";
-        // tc1_style.graphicWidth = size * 0.59375;
-        // tc1_style.graphicHeight = size * 0.15625;
-        // tc1_style.graphicYOffset = -tc1_style.graphicHeight * 0.5
-        //     + size * 0.15234375;
-        // tc1_style.graphicOpacity = opacity;
-        // var tc1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc1_style );
-        // tcLayer.addFeatures(tc1);
-        // tc1.move(pos);
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
         
-        // var tc2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        // tc2_style.externalGraphic = url_prefix + "textures/tc2.png";
-        // tc2_style.graphicWidth = size * 0.125;
-        // tc2_style.graphicHeight = size * 0.15625;
-        // tc2_style.graphicYOffset = -tc2_style.graphicHeight * 0.5
-        //     + size * 0.1640625;
-        // tc2_style.graphicOpacity = opacity;
-        // var tc2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc2_style );
-        // tc2.fid = "ball";
-        // tc2.mysize = size;
-        // tc2.basex = x;
-        // tc2.basey = y;
-        // tcLayer.addFeatures(tc2);
-        // tc2.move(pos);
+        // channel
+        context.save();
+        var nw = Math.floor(img_tc1.width*scale)
+        var nh = Math.floor(img_tc1.height*scale)
+        context.translate(cx, cy);
+        context.drawImage(img_tc1, -nw*0.5, -nh*0.5+(80*scale), width=nw, height=nh);
+        context.restore();
 
-        // var tc3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        // tc3_style.externalGraphic = url_prefix + "textures/tc3.png";
-        // tc3_style.graphicWidth = size;
-        // tc3_style.graphicHeight = size;
-        // tc3_style.graphicOpacity = opacity;
-        // var tc3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc3_style );
-        // tcLayer.addFeatures(tc3);
-        // tc3.move(pos);
+        // ball
+        var ay = json.sensors.imu[0].ay_mps_sec;
+        var az = json.sensors.imu[0].az_mps_sec;
+        var tc = ay / az;
+        var xpos = tc * -500 * scale;
+        context.save();
+        var nw = Math.floor(img_tc2.width*scale)
+        var nh = Math.floor(img_tc2.height*scale)
+        context.translate(cx, cy);
+        context.drawImage(img_tc2, -nw*0.5 + xpos, -nh*0.5+(84*scale), width=nw, height=nh);
+        context.restore();
 
+        // bezel
+        context.drawImage(img_tc3, x, y, width=size, height=size);
+        
+        // plane (turn rate)
+        r = json.sensors.imu[0].r_rad_sec * r2d;
+        if ( r < -4 ) { r = -4; }
+        if ( r > 4 ) { r = 4; }
+        context.save();
+        var nw = Math.floor(img_tc4.width*scale*0.85)
+        var nh = Math.floor(img_tc4.height*scale*0.85)
+        context.translate(cx, cy);
+        context.rotate(r*10 * d2r);
+        context.drawImage(img_tc4, -nw*0.5, -nh*0.5, width=nw, height=nh);
+        context.restore();
+ 
         // var tc4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
         // tc4_style.externalGraphic = url_prefix + "textures/tc4.png";
         // tc4_style.graphicWidth = size * 0.625;
