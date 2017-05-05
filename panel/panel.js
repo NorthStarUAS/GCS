@@ -1,5 +1,6 @@
 var d2r = Math.PI / 180;
 var r2d = 180 / Math.PI;
+var mps2kt = 1.9438444924406046432;
 
 var panel = function() {
     var canvas;
@@ -31,7 +32,7 @@ var panel = function() {
     var img_vsi1 = new Image();
     
     var instrument_config = {
-        avionics_vcc : {draw: draw_vcc},
+        vcc : {draw: draw_vcc},
         asi : {draw: draw_asi},
         ati : {draw: draw_ati},
         alt : {draw: draw_alt},
@@ -43,15 +44,14 @@ var panel = function() {
 
     var layout_config = {
         horizontal : {
-            instruments : [['avionics_vcc', 'asi', 'ati', 'alt'], ['amp', 'tc', 'dg', 'vsi']]
+            instruments : [['vcc', 'asi', 'ati', 'alt'],
+                           ['amp', 'tc', 'dg', 'vsi']]
         },
         vertical : {
-            instruments : [['avionics_vcc', 'amp'], ['asi', 'ati'], ['alt', 'tc'], ['dg', 'vsi']]
-        },
-        mini : {
-            instruments : [['ati', '', '', '', '', '', '', '', '', 'dg'],
-                           ['asi', '', '', '', '', '', '', '', '', 'alt'],
-                           ['tc', '', '', '', '', '', '', '', '', 'vsi']]
+            instruments : [['vcc', 'amp'],
+                           ['asi', 'ati'],
+                           ['alt', 'tc'],
+                           ['dg', 'vsi']]
         }
     };
 
@@ -170,6 +170,15 @@ var panel = function() {
         
         // background
         context.drawImage(img_res3_asi, x, y, width=size, height=size);
+
+        // 'true' label
+        context.save()
+        var px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "orange";
+        context.textAlign = "center";
+        context.fillText("(TRUE)", cx, cy + size*0.25);
+        context.restore();
         
         // bug
         context.save();
@@ -192,16 +201,16 @@ var panel = function() {
         var deg = my_interp( true_kt, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.beginPath();
-        context.moveTo(0, -size*0.1*0.85);
-        context.lineTo(0, -size*0.5*0.85);
+        context.moveTo(0, size*0.1*0.85);
+        context.lineTo(0, -size*0.45*0.85);
         context.stroke();
         context.beginPath();
-        context.moveTo(0, -size*0.5*0.85);
-        context.lineTo(-size*0.03*0.85, -size*0.42*0.85);
+        context.moveTo(0, -size*0.45*0.85);
+        context.lineTo(-size*0.03*0.85, -size*0.37*0.85);
         context.stroke();
         context.beginPath();
-        context.moveTo(0, -size*0.5*0.85);
-        context.lineTo(size*0.03*0.85, -size*0.42*0.85);
+        context.moveTo(0, -size*0.45*0.85);
+        context.lineTo(size*0.03*0.85, -size*0.37*0.85);
         context.stroke();
         context.restore();
 
@@ -274,6 +283,7 @@ var panel = function() {
         var scale = size/512;
 
         var alt_ft = json.position.combined.altitude_true_m / 0.3048;
+        var target_ft = json.autopilot.targets.altitude_msl_ft;
         
         // kollsman
         context.save();
@@ -291,7 +301,7 @@ var panel = function() {
         var nw = Math.floor(img_hdg2.width*scale*0.85)
         var nh = Math.floor(img_hdg2.height*scale*0.85)
         context.translate(cx, cy);
-        context.rotate((alt_ft*0.36)*d2r);
+        context.rotate((target_ft*0.36)*d2r);
         context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.85, width=nw, height=nh);
         context.restore();
 
@@ -426,6 +436,16 @@ var panel = function() {
         context.stroke();
         context.restore();
         
+        // wind label
+        context.save()
+        var wind_kt = parseFloat(json.filters.wind.wind_speed_kt).toFixed(0);
+        var px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "lightblue";
+        context.textAlign = "center";
+        context.fillText("WND:" + wind_kt, cx + size*0.14, cy - size*0.06);
+        context.restore();
+ 
         // ground track
         context.save();
         context.strokeStyle = 'orange';
@@ -446,7 +466,18 @@ var panel = function() {
         context.lineTo(size*0.03*0.65, -size*0.42*0.65);
         context.stroke();
         context.restore();
-
+        
+        // groundspeed label
+        context.save()
+        var track_mps = parseFloat(json.filters.filter[0].speed_ms);
+        var track_kt = (track_mps * mps2kt).toFixed(0);
+        var px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "orange";
+        context.textAlign = "center";
+        context.fillText("GS:" + track_kt, cx - size*0.14, cy - size*0.06);
+        context.restore();
+        
         // bug
         context.save();
         var nw = Math.floor(img_hdg2.width*scale*0.85)
