@@ -9,6 +9,7 @@ var panel = function() {
 
     var img_volts = new Image();
     var img_res3_asi = new Image();
+    var img_asi3 = new Image();
     var img_ati1 = new Image();
     var img_ati2 = new Image();
     var img_ati3 = new Image();
@@ -19,7 +20,7 @@ var panel = function() {
     var img_alt3 = new Image();
     var img_alt4 = new Image();
     var img_alt5 = new Image();
-    var img_asi3 = new Image();
+    var img_amp = new Image();
     var img_hdg2 = new Image();
     
     var instrument_config = {
@@ -27,10 +28,10 @@ var panel = function() {
         asi : {draw: draw_asi},
         ati : {draw: draw_ati},
         alt : {draw: draw_alt},
-        tc : {build: build_tc},
+        amp : {draw: draw_amp},
+        tc : {draw: draw_tc},
         dg : {build: build_heading},
         vsi : {build: build_vsi},
-        amp : {build: build_amp},
         main_volts : {draw: draw_main_volts},
     };
 
@@ -60,8 +61,9 @@ var panel = function() {
         window.addEventListener('resize', resizeCanvas, false);
         resizeCanvas();
 
-        img_res3_asi.src = 'textures/res3-asi.png';
         img_volts.src = 'textures/volts.png';
+        img_res3_asi.src = 'textures/res3-asi.png';
+        img_asi3.src = 'textures/asi3.png';
         img_ati1.src = 'textures/ati1.png';
         img_ati2.src = 'textures/ati2.png';
         img_ati3.src = 'textures/ati3.png';
@@ -72,7 +74,7 @@ var panel = function() {
         img_alt3.src = 'textures/alt3.png';
         img_alt4.src = 'textures/alt4.png';
         img_alt5.src = 'textures/alt5.png';
-        img_asi3.src = 'textures/asi3.png';
+        img_amp.src = 'textures/amps.png';
         img_hdg2.src = 'textures/hdg2.png';
         
         console.log('finished scheduling texture loads');
@@ -310,6 +312,73 @@ var panel = function() {
         context.restore();
     }
 
+    function draw_amp( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+
+        var amps = json.sensors.extern_amps;
+        
+        // backplate
+        context.drawImage(img_amp, x, y, width=size, height=size);
+
+        // needle
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale*0.85)
+        var nh = Math.floor(img_asi3.height*scale*0.85)
+        context.translate(cx, cy);
+        context.rotate((amps * 340 / 50.0) * d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.restore();
+    }
+
+    function draw_tc( x, y, size ) {
+        // var tc1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+        // tc1_style.externalGraphic = url_prefix + "textures/tc1.png";
+        // tc1_style.graphicWidth = size * 0.59375;
+        // tc1_style.graphicHeight = size * 0.15625;
+        // tc1_style.graphicYOffset = -tc1_style.graphicHeight * 0.5
+        //     + size * 0.15234375;
+        // tc1_style.graphicOpacity = opacity;
+        // var tc1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc1_style );
+        // tcLayer.addFeatures(tc1);
+        // tc1.move(pos);
+        
+        // var tc2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+        // tc2_style.externalGraphic = url_prefix + "textures/tc2.png";
+        // tc2_style.graphicWidth = size * 0.125;
+        // tc2_style.graphicHeight = size * 0.15625;
+        // tc2_style.graphicYOffset = -tc2_style.graphicHeight * 0.5
+        //     + size * 0.1640625;
+        // tc2_style.graphicOpacity = opacity;
+        // var tc2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc2_style );
+        // tc2.fid = "ball";
+        // tc2.mysize = size;
+        // tc2.basex = x;
+        // tc2.basey = y;
+        // tcLayer.addFeatures(tc2);
+        // tc2.move(pos);
+
+        // var tc3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+        // tc3_style.externalGraphic = url_prefix + "textures/tc3.png";
+        // tc3_style.graphicWidth = size;
+        // tc3_style.graphicHeight = size;
+        // tc3_style.graphicOpacity = opacity;
+        // var tc3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc3_style );
+        // tcLayer.addFeatures(tc3);
+        // tc3.move(pos);
+
+        // var tc4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+        // tc4_style.externalGraphic = url_prefix + "textures/tc4.png";
+        // tc4_style.graphicWidth = size * 0.625;
+        // tc4_style.graphicHeight = size * 0.171875;
+        // tc4_style.graphicOpacity = opacity;
+        // var tc4 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc4_style );
+        // tc4.fid = "plane";
+        // tcLayer.addFeatures(tc4);
+        // tc4.move(pos);
+    }
+
     function build_heading( x, y, size ) {
         hdgLayer.clear();
 
@@ -427,84 +496,6 @@ var panel = function() {
         vsi3.move(pos);
     }
 
-    function build_tc( x, y, size ) {
-        tcLayer.clear();
-
-        var pos = new ol.geom.Point(x, y);
-
-        var tc1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        tc1_style.externalGraphic = url_prefix + "textures/tc1.png";
-        tc1_style.graphicWidth = size * 0.59375;
-        tc1_style.graphicHeight = size * 0.15625;
-        tc1_style.graphicYOffset = -tc1_style.graphicHeight * 0.5
-            + size * 0.15234375;
-        tc1_style.graphicOpacity = opacity;
-        var tc1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc1_style );
-        tcLayer.addFeatures(tc1);
-        tc1.move(pos);
-        
-        var tc2_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        tc2_style.externalGraphic = url_prefix + "textures/tc2.png";
-        tc2_style.graphicWidth = size * 0.125;
-        tc2_style.graphicHeight = size * 0.15625;
-        tc2_style.graphicYOffset = -tc2_style.graphicHeight * 0.5
-            + size * 0.1640625;
-        tc2_style.graphicOpacity = opacity;
-        var tc2 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc2_style );
-        tc2.fid = "ball";
-        tc2.mysize = size;
-        tc2.basex = x;
-        tc2.basey = y;
-        tcLayer.addFeatures(tc2);
-        tc2.move(pos);
-
-        var tc3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        tc3_style.externalGraphic = url_prefix + "textures/tc3.png";
-        tc3_style.graphicWidth = size;
-        tc3_style.graphicHeight = size;
-        tc3_style.graphicOpacity = opacity;
-        var tc3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc3_style );
-        tcLayer.addFeatures(tc3);
-        tc3.move(pos);
-
-        var tc4_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        tc4_style.externalGraphic = url_prefix + "textures/tc4.png";
-        tc4_style.graphicWidth = size * 0.625;
-        tc4_style.graphicHeight = size * 0.171875;
-        tc4_style.graphicOpacity = opacity;
-        var tc4 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, tc4_style );
-        tc4.fid = "plane";
-        tcLayer.addFeatures(tc4);
-        tc4.move(pos);
-    }
-
-    function build_amp( x, y, size ) {
-        ampLayer.clear();
-
-        var pos = new ol.geom.Point(x, y);
-
-        var amp1_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        amp1_style.externalGraphic = url_prefix + "textures/amps.png";
-        amp1_style.graphicWidth = size;
-        amp1_style.graphicHeight = size;
-        amp1_style.graphicOpacity = opacity;
-        var amp1 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, amp1_style );
-        ampLayer.addFeatures(amp1);
-        amp1.move(pos);
-
-        var amp3_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-        amp3_style.externalGraphic = url_prefix + "textures/asi3.png";
-        amp3_style.graphicWidth = size * 0.109375;
-        amp3_style.graphicHeight = size * 0.53125;
-        amp3_style.graphicYOffset = -amp3_style.graphicHeight * 0.5
-	    - size * 0.111328125;
-        amp3_style.graphicOpacity = opacity;
-        var amp3 = new OpenLayers.Feature.Vector( new ol.geom.Point(0,0), null, amp3_style );
-        amp3.fid = "needle";
-        ampLayer.addFeatures(amp3);
-        amp3.move(pos);
-    }
-
     function draw_main_volts( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -531,7 +522,6 @@ var panel = function() {
         update_heading( data.filter_psi, data.filter_track, data.ap_hdg, data.wind_deg, data.wind_kts, data.filter_speed );
         update_vsi( data.airdata_climb, data.ap_climb );
         update_tc( data.imu_ay, data.imu_az, data.imu_r );
-        update_amps( data.main_amps );
         update_main_volts( data.main_volts );
     }
 
@@ -618,18 +608,6 @@ var panel = function() {
         plane.style.rotation = filt_rot * 10;
 
         tcLayer.redraw();
-    }
-
-    //var filt_amps = 0.0;
-    function update_amps( amps ) {
-        if (!instrument_config.amp['active'])
-	    return;
-
-        //filt_amps = 0.8 * filt_amps + 0.2 * amps;
-
-        var needle = ampLayer.getFeatureByFid("needle");
-        needle.style.rotation = amps * 340.0 / 50.0;
-        ampLayer.redraw();
     }
 
     var min_volts = 9.0;
