@@ -1,6 +1,7 @@
 var ws;
 var link_connected = 0;
 var update_rate = 250;
+var json;
 
 function link_init() {
     try {
@@ -16,11 +17,15 @@ function link_init() {
 	    var tokens = msg.data.split(' ');
 	    //alert('tokens[0] = ' + tokens[0]);
 	    if ( tokens[0] == "full_json" ) {
-                var json = JSON.parse( tokens[1] );
+                json = JSON.parse( tokens[1] );
                 //console.log(json.sensors.imu.p_rad_sec);
                 //console.log(tokens[1]);
                 var json_pretty = JSON.stringify(json, null, 3);
-                document.getElementById("aura_props").innerHTML = json_pretty;
+                var html = document.getElementById("aura_props");
+                if ( html != null ) {
+                    html.innerHTML = json_pretty;
+                }
+                panel.draw();
                 //console.log(json_pretty);
                 //console.log(json.sensors.imu[0].p_rad_sec);
 	    } else {
