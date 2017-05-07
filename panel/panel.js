@@ -117,8 +117,6 @@ var panel = function() {
                 if (instrument_config[instrument]) {
 	            if (instrument_config[instrument].draw) {
 	                instrument_config[instrument].draw(pos_x, pos_y, size);
-	 	    } else {
-                        draw_vcc(pos_x, pos_y, size);
                     }
                 }
             }
@@ -135,28 +133,28 @@ var panel = function() {
 
         // vcc needle
         context.save();
-        var nw = Math.floor(img_asi3.width*scale*0.85)
-        var nh = Math.floor(img_asi3.height*scale*0.85)
+        var nw = Math.floor(img_asi3.width*scale)
+        var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
         var vcc = json.sensors.APM2.board_vcc;
         if (vcc < 4.45) { vcc = 4.45; }
         if (vcc > 5.55) { vcc = 5.55; }
         var deg = (vcc - 5.0) * 150.0;
         context.rotate(deg*d2r);
-        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
         
         // volts needle
         context.save();
-        var nw = Math.floor(img_asi3.width*scale*0.85)
-        var nh = Math.floor(img_asi3.height*scale*0.85)
+        var nw = Math.floor(img_asi3.width*scale)
+        var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
         var cell_volts = json.sensors.APM2.extern_cell_volt;
         if (cell_volts < 2.95) { cell_volts = 2.95; }
         if (cell_volts > 4.25) { cell_volts = 4.25; }
         var deg = ((3.6 - cell_volts) * 75.0 / 0.6) + 180.0;
         context.rotate(deg*d2r);
-        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
         
     }
@@ -182,8 +180,8 @@ var panel = function() {
         
         // bug
         context.save();
-        var nw = Math.floor(img_hdg2.width*scale*0.85)
-        var nh = Math.floor(img_hdg2.height*scale*0.85)
+        var nw = Math.floor(img_hdg2.width*scale)
+        var nh = Math.floor(img_hdg2.height*scale)
         context.translate(cx, cy);
         var deg = my_interp( json.autopilot.targets.airspeed_kt,
                              asi_interpx, asi_interpy);
@@ -201,7 +199,7 @@ var panel = function() {
         var deg = my_interp( true_kt, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.beginPath();
-        context.moveTo(0, size*0.1*0.85);
+        context.moveTo(0, 0);
         context.lineTo(0, -size*0.45*0.85);
         context.stroke();
         context.beginPath();
@@ -216,13 +214,13 @@ var panel = function() {
 
         // airspeed needle
         context.save();
-        var nw = Math.floor(img_asi3.width*scale*0.85)
-        var nh = Math.floor(img_asi3.height*scale*0.85)
+        var nw = Math.floor(img_asi3.width*scale)
+        var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
         var deg = my_interp( json.velocity.airspeed_smoothed_kt,
                              asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
-        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
     
@@ -284,7 +282,7 @@ var panel = function() {
 
         var alt_ft = json.position.combined.altitude_true_m / 0.3048;
         var target_ft = json.autopilot.targets.altitude_msl_ft;
-        
+
         // kollsman
         context.save();
         var nw = Math.floor(img_alt1.width*scale)
@@ -298,8 +296,8 @@ var panel = function() {
 
         // bug
         context.save();
-        var nw = Math.floor(img_hdg2.width*scale*0.85)
-        var nh = Math.floor(img_hdg2.height*scale*0.85)
+        var nw = Math.floor(img_hdg2.width*scale)
+        var nh = Math.floor(img_hdg2.height*scale)
         context.translate(cx, cy);
         context.rotate((target_ft*0.36)*d2r);
         context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.85, width=nw, height=nh);
@@ -307,8 +305,8 @@ var panel = function() {
 
         // needle 10k ft
         context.save();
-        var nw = Math.floor(img_alt3.width*scale*0.85)
-        var nh = Math.floor(img_alt3.height*scale*0.85)
+        var nw = Math.floor(img_alt3.width*scale)
+        var nh = Math.floor(img_alt3.height*scale)
         context.translate(cx, cy);
         context.rotate((alt_ft*0.0036)*d2r);
         context.drawImage(img_alt3, -nw*0.5, -nh*0.5, width=nw, height=nh);
@@ -316,20 +314,20 @@ var panel = function() {
 
         // needle 1k ft
         context.save();
-        var nw = Math.floor(img_alt4.width*scale*0.85)
-        var nh = Math.floor(img_alt4.height*scale*0.85)
+        var nw = Math.floor(img_alt4.width*scale)
+        var nh = Math.floor(img_alt4.height*scale)
         context.translate(cx, cy);
         context.rotate((alt_ft*0.036)*d2r);
-        context.drawImage(img_alt4, -nw*0.5, -nh, width=nw, height=nh);
+        context.drawImage(img_alt4, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
 
         // needle 100 ft
         context.save();
-        var nw = Math.floor(img_alt5.width*scale*0.85)
-        var nh = Math.floor(img_alt5.height*scale*0.85)
+        var nw = Math.floor(img_alt5.width*scale)
+        var nh = Math.floor(img_alt5.height*scale)
         context.translate(cx, cy);
         context.rotate((alt_ft*0.36)*d2r);
-        context.drawImage(img_alt5, -nw*0.5, -nh, width=nw, height=nh);
+        context.drawImage(img_alt5, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
 
@@ -345,11 +343,11 @@ var panel = function() {
 
         // needle
         context.save();
-        var nw = Math.floor(img_asi3.width*scale*0.85)
-        var nh = Math.floor(img_asi3.height*scale*0.85)
+        var nw = Math.floor(img_asi3.width*scale)
+        var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
         context.rotate((amps * 340 / 50.0) * d2r);
-        context.drawImage(img_asi3, -nw*0.5, -nh, width=nw, height=nh);
+        context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
 
@@ -504,12 +502,13 @@ var panel = function() {
 
         var climb_fpm = json.velocity.pressure_vertical_speed_fps * 60;
         var needle_rot = my_interp(climb_fpm, vsi_interpx, vsi_interpy) - 90;
+        // needle
         context.save();
-        var nw = Math.floor(img_alt5.width*scale*0.85)
-        var nh = Math.floor(img_alt5.height*scale*0.85)
+        var nw = Math.floor(img_alt5.width*scale)
+        var nh = Math.floor(img_alt5.height*scale)
         context.translate(cx, cy);
         context.rotate(needle_rot*d2r);
-        context.drawImage(img_alt5, -nw*0.5, -nh, width=nw, height=nh);
+        context.drawImage(img_alt5, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
 
