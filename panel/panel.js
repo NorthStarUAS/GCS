@@ -491,8 +491,8 @@ var panel = function() {
         
         // bug
         context.save();
-        var nw = Math.floor(img_hdg2.width*scale*0.85)
-        var nh = Math.floor(img_hdg2.height*scale*0.85)
+        var nw = Math.floor(img_hdg2.width*scale)
+        var nh = Math.floor(img_hdg2.height*scale)
         context.translate(cx, cy);
         var bug_deg = -parseFloat(heading) + parseFloat(ap_hdg);
         context.rotate(bug_deg*d2r);
