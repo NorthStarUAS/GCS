@@ -26,6 +26,7 @@ function link_init() {
                     html.innerHTML = json_pretty;
                 }
                 panel.draw();
+                annunciator.draw();
                 //console.log(json_pretty);
                 //console.log(json.sensors.imu[0].p_rad_sec);
 	    } else {
