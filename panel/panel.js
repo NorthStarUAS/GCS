@@ -1,3 +1,8 @@
+// Analog instrument panel.
+//
+// Uses the html5 canvas and a websockets/json interface to the data
+// sever for telemetry.
+
 var d2r = Math.PI / 180;
 var r2d = 180 / Math.PI;
 var mps2kt = 1.9438444924406046432;

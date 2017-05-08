@@ -1,13 +1,25 @@
 <html>
   <head>
     <title>Aura Panel</title>
+    <link rel="stylesheet" href="panel.css" type="text/css">
     <script src="../js/jquery-3.2.1.js"></script>
     <script src="../link.js"></script>
     <script src="panel.js"></script>
+    <script src="../annunciator.js"></script>
   </head>
   <body>
+    <div id="annunciator_container">
+      <div id="annunciator" class="control_box">
+        <div id="sats" class="off">0 sats</div>
+        <div id="power" class="off">0mah</div>
+        <div id="timer" class="off">0:00:00</div>
+        <div id="link" class="error">Lost Link</div>
+        <div id="auto" class="off">Manual</div>
+        <div id="wx" class="off">000@0 kt</div>
+      </div>
+    </div>
     <canvas id="panel" width="800" height="500">
-      Your browser does not support the HTML5 canvas tag.
+      Your browser does not support the html5 canvas tag.
     </canvas>
     <!-- <pre><div id="aura_props"></div></pre> -->
   </body>
@@ -15,4 +27,5 @@
 
 <script>
   panel.init();
+  annunciator.init();
 </script>
