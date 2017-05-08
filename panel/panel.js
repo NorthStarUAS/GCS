@@ -281,6 +281,7 @@ var panel = function() {
         var scale = size/512;
 
         var alt_ft = json.position.combined.altitude_true_m / 0.3048;
+        var ground_ft = json.position.altitude_ground_m / 0.3048;
         var target_ft = json.autopilot.targets.altitude_msl_ft;
 
         // kollsman
@@ -293,6 +294,18 @@ var panel = function() {
 
         // backplate
         context.drawImage(img_alt2, x, y, width=size, height=size);
+
+        // ground elevation
+        context.save();
+        context.strokeStyle = 'red';
+        context.lineWidth = 7;
+        context.translate(cx, cy);
+        context.rotate((ground_ft*0.36)*d2r);
+        context.beginPath();
+        context.moveTo(0, -size*0.35*0.85);
+        context.lineTo(0, -size*0.48*0.85);
+        context.stroke();
+        context.restore();
 
         // bug
         context.save();
