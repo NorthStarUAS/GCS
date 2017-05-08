@@ -55,10 +55,25 @@ var panel = function() {
         }
     };
 
+    function my_interp( input, interpx, interpy ) {
+        var len = interpx.length;
+        if ( input < interpx[0] ) { input = interpx[0]; }
+        if ( input > interpx[len-1] ) { input = interpx[len-1]; }
+        for ( var i = 0; i < len - 1; i++ ) {
+            if ( input >= interpx[i] && input <= interpx[i+1] ) {
+                var rangex = interpx[i+1] - interpx[i];
+                var portion = input - interpx[i];
+                var percent = portion / rangex;
+                var rangey = interpy[i+1] - interpy[i];
+                return interpy[i] + rangey * percent;
+            }
+        }
+        return 0;
+    }
+
     function resizeCanvas() {
         canvas.width = window.innerWidth - 30;
         canvas.height = window.innerHeight - 30;
-        // redraw stuff
     }
     
     function init() {
@@ -424,8 +439,6 @@ var panel = function() {
         context.drawImage(img_hdg1, -nw*0.5, -nh*0.5, width=nw, height=nh);
         context.restore();
 
-        // FIXME: display wind speed and ground speed
-
         // wind vane
         context.save();
         context.strokeStyle = 'lightblue';
@@ -525,56 +538,8 @@ var panel = function() {
         context.restore();
     }
 
-    function update_json( data ) {
-        var size = map.getSize();
-        map.setCenter( new OpenLayers.LonLat( size.x * 0.5, size.y * 0.5 ) );
-
-        update_hud_speed( data.airspeed, data.ap_speed, data.pitot_scale );
-        update_hud_alt( data.alt_true, data.ap_altitude );
-
-        update_ati( data.filter_phi, data.filter_theta );
-        update_altimeter( data.alt_true, data.ap_altitude );
-        update_heading( data.filter_psi, data.filter_track, data.ap_hdg, data.wind_deg, data.wind_kts, data.filter_speed );
-        update_vsi( data.airdata_climb, data.ap_climb );
-        update_main_volts( data.main_volts );
-    }
-
-    function my_interp( input, interpx, interpy ) {
-        var len = interpx.length;
-        if ( input < interpx[0] ) { input = interpx[0]; }
-        if ( input > interpx[len-1] ) { input = interpx[len-1]; }
-        for ( var i = 0; i < len - 1; i++ ) {
-            if ( input >= interpx[i] && input <= interpx[i+1] ) {
-                var rangex = interpx[i+1] - interpx[i];
-                var portion = input - interpx[i];
-                var percent = portion / rangex;
-                var rangey = interpy[i+1] - interpy[i];
-                return interpy[i] + rangey * percent;
-            }
-        }
-        return 0;
-    }
-
-    var vsi_interpx = [ -2000,  -1500,  -1000, -500,  0, 500,  1000, 1500,  2000 ];
-    var vsi_interpy = [ -173.5, -131.5, -82, -36, 0, 35, 81, 131, 173 ];
-    function update_vsi( climb_fpm, target_fps ) {
-	if (!instrument_config.vsi['active'])
-	    return;
-
-        var needle = vsiLayer.getFeatureByFid("needle");
-        needle.style.rotation
-            = my_interp(climb_fpm, vsi_interpx, vsi_interpy) - 90;
-
-        var bug = vsiLayer.getFeatureByFid("bug");
-        bug.style.rotation
-            = my_interp(target_fps*60, vsi_interpx, vsi_interpy) - 90;
-
-        vsiLayer.redraw();
-    }
-
     return {
         init : init,
         draw : draw,
-        update_json : update_json
     }
 }();
