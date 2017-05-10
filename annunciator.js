@@ -33,6 +33,9 @@ var annunciator = function() {
         draw_mah();
         draw_timer();
         draw_link_state();
+        draw_auto();
+        draw_wind();
+        draw_temp();
     }
     
     function draw_sats() {
@@ -109,36 +112,86 @@ var annunciator = function() {
     };
     
     function draw_timer() {
-        var secs = parseFloat(json.status.flight_timer).toFixed(0);
         var timer_div = $("#timer");
-        timer_div.attr("class", "ok");
-        var hours = Math.floor(secs / 3600);
-        var rem = secs - (hours * 3600);
-        var mins = Math.floor(rem / 60);
-        var rem = rem - (mins * 60);
-        var timer_str = "";
-        if ( secs < 3600 ) {
-            timer_str = mins + ":" + pad2(rem);
-        } else {
-            timer_str = hours + ":" + pad2(mins) + ":" + pad2(rem);
+        if ( timer_div != null ) {
+            var secs = parseFloat(json.status.flight_timer).toFixed(0);
+            timer_div.attr("class", "ok");
+            var hours = Math.floor(secs / 3600);
+            var rem = secs - (hours * 3600);
+            var mins = Math.floor(rem / 60);
+            var rem = rem - (mins * 60);
+            var timer_str = "";
+            if ( secs < 3600 ) {
+                timer_str = mins + ":" + pad2(rem);
+            } else {
+                timer_str = hours + ":" + pad2(mins) + ":" + pad2(rem);
+            }
+            timer_div.html(timer_str);
         }
-        timer_div.html(timer_str);
     };
     
     function draw_link_state() {
-        var state = json.comms.remote_link.link_state;
         var link_div = $("#link");
-        if ( state == "ok" ) {
-            link_div.attr("class", "ok");
-            link_div.html("Link");
-            ann_lost_link = 0;
-        } else {
-            link_div.attr("class", "error");
-            link_div.html("Lost Link");
-            ann_lost_link = 1;
+        if ( link_div != null ) {
+            var state = json.comms.remote_link.link_state;
+            if ( state == "ok" ) {
+                link_div.attr("class", "ok");
+                link_div.html("Link");
+                ann_lost_link = 0;
+            } else {
+                link_div.attr("class", "error");
+                link_div.html("Lost Link");
+                ann_lost_link = 1;
+            }
+        }
+    }
+    
+    function draw_auto() {
+        var auto_div = $("#auto");
+        if ( auto_div != null ) {
+            var auto_switch = parseFloat(json.sensors.pilot_input[0].channel[7]);
+            if ( auto_switch > 0.0 ) {
+                auto_div.attr("class", "ok");
+                auto_div.html("Auto");
+            } else {
+                auto_div.attr("class", "warn");
+                auto_div.html("Manual");
+            }
         }
     }
 
+    function draw_wind() {
+        var wind_div = $("#wind");
+        if ( wind_div != null ) {
+            var wind_deg = parseFloat(json.filters.wind.wind_dir_deg);
+            var dir = Math.round(parseFloat(wind_deg * 0.1).toFixed(0) * 10.0);
+            var speed = parseFloat(json.filters.wind.wind_speed_kt).toFixed(0);
+            if ( speed <= 10 ) {
+                wind_div.attr("class", "ok");
+            } else if ( speed <= 15 ) {
+                wind_div.attr("class", "warn");
+            } else {
+                wind_div.attr("class", "error");
+            }
+            wind_div.html(pad3(dir) + '@' + speed + 'kt');
+        }
+    }
+
+    function draw_temp() {
+        var temp_div = $("#temp");
+        if ( temp_div != null ) {
+            var temp = parseFloat(json.sensors.airdata[0].temp_degC).toFixed(0);
+            if ( temp < -30 || temp > 50 ) {
+                temp_div.attr("class", "error");
+            } else if ( temp < -10 || temp > 35 ) {
+                temp_div.attr("class", "warn");
+            } else {
+                temp_div.attr("class", "ok");
+            }
+            temp_div.html( temp + 'C');
+        }
+    }
+    
     return {
         init: init,
         draw: draw,
