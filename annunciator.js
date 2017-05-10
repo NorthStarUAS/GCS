@@ -16,6 +16,10 @@ var annunciator = function() {
         }
     }
 
+    function init() {
+        // pass for now
+    }
+    
     function draw() {
         draw_sats();
         draw_ekf();
