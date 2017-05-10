@@ -1,8 +1,6 @@
 // requires jquery
 
 var annunciator = function() {
-    var ann_power_disp = 0;
-    var ann_wx_disp = 0;
 
     function pad2(number) {
         return (number < 10 ? '0' : '') + number;
@@ -18,14 +16,6 @@ var annunciator = function() {
         }
     }
 
-    function cycleData() {
-        ann_wx_disp = !ann_wx_disp;
-    }
-
-    function init() {
-        setInterval(cycleData, 3000);
-    }
-    
     function draw() {
         draw_sats();
         draw_ekf();
