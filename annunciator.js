@@ -19,7 +19,6 @@ var annunciator = function() {
     }
 
     function cycleData() {
-        ann_power_disp = (ann_power_disp + 1) % 4;
         ann_wx_disp = !ann_wx_disp;
     }
 
@@ -30,7 +29,8 @@ var annunciator = function() {
     function draw() {
         draw_sats();
         draw_ekf();
-        draw_power();
+        draw_volts();
+        draw_mah();
         draw_timer();
         draw_link_state();
     }
@@ -65,17 +65,14 @@ var annunciator = function() {
             var az_bias = parseFloat(json.filters.filter[0].az_bias);
             var imu_time = parseFloat(json.sensors.imu[0].timestamp);
             var filter_time = parseFloat(json.filters.filter[0].timestamp);
-            var age = imu_time - filter_time;
-            if ( Math.abs(age) > 1.0 ||
-                 Math.abs(p_bias) >= gyro_error ||
+            if ( Math.abs(p_bias) >= gyro_error ||
                  Math.abs(q_bias) >= gyro_error ||
                  Math.abs(r_bias) >= gyro_error ||
                  Math.abs(ax_bias) >= accel_error ||
                  Math.abs(ay_bias) >= accel_error ||
                  Math.abs(az_bias) >= accel_error ) {
                 ekf_div.attr("class", "error");
-            } else if ( Math.abs(age) > 0.5 ||
-                        Math.abs(p_bias) >= gyro_warn ||
+            } else if ( Math.abs(p_bias) >= gyro_warn ||
                         Math.abs(q_bias) >= gyro_warn ||
                         Math.abs(r_bias) >= gyro_warn ||
                         Math.abs(ax_bias) >= accel_warn ||
@@ -88,38 +85,26 @@ var annunciator = function() {
         }
     };
 
-    function draw_power() {
-        var power_div = $("#power");
-        if ( power_div != null ) {
-            var vcc = parseFloat(json.sensors.APM2.board_vcc).toFixed(2);
+    function draw_volts() {
+        var volts_div = $("#volts");
+        if ( volts_div != null ) {
             var volts_per_cell = parseFloat(json.sensors.APM2.extern_cell_volt).toFixed(2);
-            var amps = parseFloat(json.sensors.APM2.extern_amps).toFixed(2);
-            var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
-            if ( ann_power_disp == 0 ) {
-                if ( vcc < 4.3 || vcc > 5.7 ) {
-                    power_div.attr("class", "error");
-                } else if ( vcc < 4.5 || vcc > 5.5  ) {
-                    power_div.attr("class", "warn");
-                } else {
-                    power_div.attr("class", "ok");
-                }
-                power_div.html(vcc + "v av");
-            } else if ( ann_power_disp == 1 ) {
-                power_div.attr("class", "ok");
-                power_div.html(mah + "mah");
-            } else if ( ann_power_disp == 2 ) {
-                power_div.attr("class", "ok");
-                power_div.html(amps + "a");
-            } else if ( ann_power_disp == 3 ) {
-                if ( volts_per_cell < 3.20 ) {
-                    power_div.attr("class", "error");
-                } else if ( volts_per_cell < 3.30 ) {
-                    power_div.attr("class", "warn");
-                } else {
-                    power_div.attr("class", "ok");
-                }
-                power_div.html( volts_per_cell + "v ex" );
+            if ( volts_per_cell < 3.20 ) {
+                volts_div.attr("class", "error");
+            } else if ( volts_per_cell < 3.30 ) {
+                volts_div.attr("class", "warn");
+            } else {
+                volts_div.attr("class", "ok");
             }
+            volts_div.html( volts_per_cell + "v" );
+        }
+    };
+    function draw_mah() {
+        var mah_div = $("#mah");
+        if ( mah_div != null ) {
+            var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
+            mah_div.attr("class", "ok");
+            mah_div.html(mah + "mah");
         }
     };
     

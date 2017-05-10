@@ -1,6 +1,6 @@
 var ws;
 var link_connected = 0;
-var update_rate = 250;
+var update_rate = 200;
 var json;
 
 function link_init() {
