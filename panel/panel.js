@@ -300,7 +300,8 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var alt_ft = json.position.combined.altitude_true_m / 0.3048;
+        //var alt_ft = json.position.altitude_true_m / 0.3048;
+        var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
         var ground_ft = json.position.altitude_ground_m / 0.3048;
         var target_ft = json.autopilot.targets.altitude_msl_ft;
 
@@ -498,7 +499,7 @@ var panel = function() {
         
         // groundspeed label
         context.save()
-        var track_mps = parseFloat(json.filters.filter[0].speed_ms);
+        var track_mps = parseFloat(json.filters.filter[0].groundspeed_ms);
         var track_kt = (track_mps * mps2kt).toFixed(0);
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
