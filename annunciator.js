@@ -85,7 +85,7 @@ var annunciator = function() {
     function draw_volts() {
         var volts_div = $("#volts");
         if ( volts_div != null ) {
-            var volts_per_cell = parseFloat(json.sensors.APM2.extern_cell_volt).toFixed(2);
+            var volts_per_cell = parseFloat(json.sensors.APM2.extern_volt).toFixed(2);
             if ( volts_per_cell < 3.20 ) {
                 volts_div.attr("class", "error");
             } else if ( volts_per_cell < 3.30 ) {
