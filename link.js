@@ -14,24 +14,18 @@ function link_init() {
         ws.onmessage = function(msg) {
             //write('Server says: '+msg.data);
             //alert('Server says: '+msg.data);
-	    var tokens = msg.data.split(' ');
-	    //alert('tokens[0] = ' + tokens[0]);
-	    if ( tokens[0] == "full_json" ) {
-                json = JSON.parse( tokens[1] );
-                //console.log(json.sensors.imu.p_rad_sec);
-                //console.log(tokens[1]);
-                var json_pretty = JSON.stringify(json, null, 3);
-                var html = document.getElementById("aura_props");
-                if ( html != null ) {
-                    html.innerHTML = json_pretty;
-                }
-                panel.draw();
-                annunciator.draw();
-                //console.log(json_pretty);
-                //console.log(json.sensors.imu[0].p_rad_sec);
-	    } else {
-		// alert("not understood = " + tokens);
-	    }
+            //console.log(msg.data);
+            json = JSON.parse( msg.data );
+            //console.log(json.sensors.imu.p_rad_sec);
+            var json_pretty = JSON.stringify(json, null, 3);
+            var html = document.getElementById("aura_props");
+            if ( html != null ) {
+                html.innerHTML = json_pretty;
+            }
+            panel.draw();
+            annunciator.draw();
+            //console.log(json_pretty);
+            //console.log(json.sensors.imu[0].p_rad_sec);
         };
         ws.onclose = function(msg) {
             //alert('Closing... The connection is going throught the closing handshake (readyState '+this.readyState+')');
