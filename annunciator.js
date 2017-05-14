@@ -30,6 +30,7 @@ var annunciator = function() {
         draw_auto();
         draw_wind();
         draw_temp();
+        draw_callsign();
     }
     
     function draw_sats() {
@@ -159,15 +160,20 @@ var annunciator = function() {
         if ( wind_div != null ) {
             var wind_deg = parseFloat(json.filters.wind.wind_dir_deg);
             var dir = Math.round(parseFloat(wind_deg * 0.1).toFixed(0) * 10.0);
-            var speed = parseFloat(json.filters.wind.wind_speed_kt).toFixed(0);
-            if ( speed <= 10 ) {
+            var speed = parseFloat(json.filters.wind.wind_speed_kt);
+            var target_airspeed_kt = parseFloat(json.autopilot.targets.airspeed_kt);
+            var ratio = 0.0;
+            if ( target_airspeed_kt > 0.1 ) {
+                ratio = speed / target_airspeed_kt;
+            }
+            if ( ratio < 0.5 ) {
                 wind_div.attr("class", "ok");
-            } else if ( speed <= 15 ) {
+            } else if ( ratio < 0.7 ) {
                 wind_div.attr("class", "warn");
             } else {
                 wind_div.attr("class", "error");
             }
-            wind_div.html(pad3(dir) + '@' + speed + 'kt');
+            wind_div.html(pad3(dir) + '@' + speed.toFixed(0) + 'kt');
         }
     }
 
@@ -183,6 +189,16 @@ var annunciator = function() {
                 temp_div.attr("class", "ok");
             }
             temp_div.html( temp + 'C');
+        }
+    }
+    
+    function draw_callsign() {
+        var callsign_div = $("#callsign");
+        if ( callsign_div != null ) {
+            var callsign = json.config.identity.call_sign;
+            if ( callsign != null && callsign != "" ) {
+                callsign_div.html(callsign);
+            }
         }
     }
     
