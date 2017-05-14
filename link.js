@@ -22,8 +22,12 @@ function link_init() {
             if ( html != null ) {
                 html.innerHTML = json_pretty;
             }
-            panel.draw();
-            annunciator.draw();
+            if ( typeof panel != 'undefined' ) {
+                panel.draw();
+            }
+            if ( typeof annunciator != 'undefined' ) {
+                annunciator.draw();
+            }
             //console.log(json_pretty);
             //console.log(json.sensors.imu[0].p_rad_sec);
         };
