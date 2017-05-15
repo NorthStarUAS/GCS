@@ -43,7 +43,7 @@ function link_init() {
         };
         ws.onerror = function(event) {
             //terminal.innerHTML = '<li style="color: red;">'+event.data+'</li>'+terminal.innerHTML;
-	    alert( event );
+	    //alert( event );
         };
     }
     catch(exception) {
