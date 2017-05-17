@@ -97,12 +97,25 @@ var annunciator = function() {
             volts_div.html( volts_per_cell + "v" );
         }
     };
+    
     function draw_mah() {
         var mah_div = $("#mah");
         if ( mah_div != null ) {
             var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
-            mah_div.attr("class", "ok");
-            mah_div.html(mah + "mah");
+            var battery_total = parseFloat(json.config.power.battery_mah)
+            var remaining = battery_total - mah
+            var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
+            if ( battery_percent < 0 ) {
+                battery_percent = 0;
+            }
+            if ( battery_percent < 15 ) {
+                mah_div.attr("class", "error");
+            } else if ( battery_percent < 25 ) {
+                mah_div.attr("class", "warn");
+            } else {
+                mah_div.attr("class", "ok");
+            }
+            mah_div.html(mah + " " + battery_percent + "%");
         }
     };
     
