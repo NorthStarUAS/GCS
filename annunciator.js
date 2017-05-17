@@ -34,7 +34,9 @@ var annunciator = function() {
     }
     
     function draw_sats() {
+        //var sats_div = $("#sats");
         var sats_div = $("#sats");
+        var sats_inner = $("#sats #inner");
         if ( sats_div != null ) {
             sats = parseInt(json.sensors.gps[0].satellites);
             if ( sats <= 4 ) {
@@ -44,12 +46,13 @@ var annunciator = function() {
             } else {
                 sats_div.attr("class", "ok");
             }
-            sats_div.html(sats + " sats");
+            sats_inner.html(sats + " sats");
         }
     };
 
     function draw_ekf() {
         var ekf_div = $("#ekf");
+        var ekf_inner = $("#ekf #inner");
         if ( ekf_div != null ) {
             var gyro_warn = 0.5 * Math.PI / 180.0;
             var gyro_error = 1.0 * Math.PI / 180.0;
@@ -85,6 +88,7 @@ var annunciator = function() {
 
     function draw_volts() {
         var volts_div = $("#volts");
+        var volts_inner = $("#volts #inner");
         if ( volts_div != null ) {
             var volts_per_cell = parseFloat(json.sensors.APM2.extern_volt).toFixed(2);
             if ( volts_per_cell < 3.20 ) {
@@ -94,12 +98,13 @@ var annunciator = function() {
             } else {
                 volts_div.attr("class", "ok");
             }
-            volts_div.html( volts_per_cell + "v" );
+            volts_inner.html( volts_per_cell + "v" );
         }
     };
     
     function draw_mah() {
         var mah_div = $("#mah");
+        var mah_inner = $("#mah #inner");
         if ( mah_div != null ) {
             var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
             var battery_total = parseFloat(json.config.power.battery_mah)
@@ -115,12 +120,13 @@ var annunciator = function() {
             } else {
                 mah_div.attr("class", "ok");
             }
-            mah_div.html(mah + " " + battery_percent + "%");
+            mah_inner.html(mah + "mah " + battery_percent + "%");
         }
     };
     
     function draw_timer() {
         var timer_div = $("#timer");
+        var timer_inner = $("#timer #inner");
         if ( timer_div != null ) {
             var secs = parseFloat(json.status.flight_timer).toFixed(0);
             timer_div.attr("class", "ok");
@@ -134,21 +140,22 @@ var annunciator = function() {
             } else {
                 timer_str = hours + ":" + pad2(mins) + ":" + pad2(rem);
             }
-            timer_div.html(timer_str);
+            timer_inner.html(timer_str);
         }
     };
     
     function draw_link_state() {
         var link_div = $("#link");
+        var link_inner = $("#link #inner");
         if ( link_div != null ) {
             var state = json.comms.remote_link.link_state;
             if ( state == "ok" ) {
                 link_div.attr("class", "ok");
-                link_div.html("Link");
+                link_inner.html("Link");
                 ann_lost_link = 0;
             } else {
                 link_div.attr("class", "error");
-                link_div.html("Lost Link");
+                link_inner.html("Lost Link");
                 ann_lost_link = 1;
             }
         }
@@ -156,20 +163,22 @@ var annunciator = function() {
     
     function draw_auto() {
         var auto_div = $("#auto");
+        var auto_inner = $("#auto #inner");
         if ( auto_div != null ) {
             var auto_switch = parseFloat(json.sensors.pilot_input[0].channel[7]);
             if ( auto_switch > 0.0 ) {
                 auto_div.attr("class", "ok");
-                auto_div.html("Auto");
+                auto_inner.html("Auto");
             } else {
                 auto_div.attr("class", "warn");
-                auto_div.html("Manual");
+                auto_inner.html("Manual");
             }
         }
     }
 
     function draw_wind() {
         var wind_div = $("#wind");
+        var wind_inner = $("#wind #inner");
         if ( wind_div != null ) {
             var wind_deg = parseFloat(json.filters.wind.wind_dir_deg);
             var dir = Math.round(parseFloat(wind_deg * 0.1).toFixed(0) * 10.0);
@@ -186,12 +195,13 @@ var annunciator = function() {
             } else {
                 wind_div.attr("class", "error");
             }
-            wind_div.html(pad3(dir) + '@' + speed.toFixed(0) + 'kt');
+            wind_inner.html(pad3(dir) + '@' + speed.toFixed(0) + 'kt');
         }
     }
 
     function draw_temp() {
         var temp_div = $("#temp");
+        var temp_inner = $("#temp #inner");
         if ( temp_div != null ) {
             var temp = parseFloat(json.sensors.airdata[0].temp_degC).toFixed(0);
             if ( temp < -30 || temp > 50 ) {
@@ -201,16 +211,17 @@ var annunciator = function() {
             } else {
                 temp_div.attr("class", "ok");
             }
-            temp_div.html( temp + 'C');
+            temp_inner.html( temp + 'C');
         }
     }
     
     function draw_callsign() {
         var callsign_div = $("#callsign");
+        var callsign_inner = $("#callsign #inner");
         if ( callsign_div != null ) {
             var callsign = json.config.identity.call_sign;
             if ( callsign != null && callsign != "" ) {
-                callsign_div.html(callsign);
+                callsign_inner.html(callsign);
             }
         }
     }
