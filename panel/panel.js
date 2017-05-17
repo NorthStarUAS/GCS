@@ -169,7 +169,7 @@ var panel = function() {
         var nw = Math.floor(img_asi3.width*scale)
         var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
-        var cell_volts = json.sensors.APM2.extern_cell_volt;
+        var cell_volts = json.sensors.APM2.extern_cell_volts;
         if (cell_volts < 2.95) { cell_volts = 2.95; }
         if (cell_volts > 4.25) { cell_volts = 4.25; }
         var deg = ((3.6 - cell_volts) * 75.0 / 0.6) + 180.0;
