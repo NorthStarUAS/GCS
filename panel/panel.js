@@ -14,7 +14,8 @@ var panel = function() {
     var opacity = 1;
 
     var img_volts = new Image();
-    var img_res3_asi = new Image();
+    var img_aura_asi1 = new Image();
+    var img_aura_asi2 = new Image();
     var img_asi3 = new Image();
     var img_ati1 = new Image();
     var img_ati2 = new Image();
@@ -88,7 +89,8 @@ var panel = function() {
         resizeCanvas();
 
         img_volts.src = 'textures/volts.png';
-        img_res3_asi.src = 'textures/res3-asi.png';
+        img_aura_asi1.src = 'textures/aura-asi1.png';
+        img_aura_asi2.src = 'textures/aura-asi2.png';
         img_asi3.src = 'textures/asi3.png';
         img_ati1.src = 'textures/ati1.png';
         img_ati2.src = 'textures/ati2.png';
@@ -185,9 +187,54 @@ var panel = function() {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
+
+        var min_kt = parseFloat(json.config.speed.min_kt);
+        var max_kt = parseFloat(json.config.speed.max_kt);
+        var cruise_kt = parseFloat(json.config.speed.cruise_kt);
+        var range_kt = max_kt - min_kt;
+        var caution_kt = min_kt + 0.8 * range_kt;
+        var die_kt = 80.0;
+        
+        var min_deg = my_interp(min_kt, asi_interpx, asi_interpy);
+        var max_deg = my_interp(max_kt, asi_interpx, asi_interpy);
+        var cruise_deg = my_interp(cruise_kt, asi_interpx, asi_interpy);
+        var caution_deg = my_interp(caution_kt, asi_interpx, asi_interpy);
+        var die_deg = my_interp(die_kt, asi_interpx, asi_interpy);
+
+        var min_rad = (min_deg - 90) * d2r;
+        var max_rad = (max_deg - 90) * d2r;
+        var caution_rad = (caution_deg - 90) * d2r;
+        var die_rad = (die_deg - 90) * d2r;
         
         // background
-        context.drawImage(img_res3_asi, x, y, width=size, height=size);
+        context.drawImage(img_aura_asi1, x, y, width=size, height=size);
+
+        // green arc
+        context.beginPath();
+        context.arc(cx, cy, size*0.414, min_rad, caution_rad)
+        context.strokeStyle = '#0C0';
+        context.lineWidth = 20;
+        context.stroke();
+        context.restore(); 
+
+        // yellow arc
+        context.beginPath();
+        context.arc(cx, cy, size*0.422, caution_rad, max_rad)
+        context.strokeStyle = 'yellow';
+        context.lineWidth = 15;
+        context.stroke();
+        context.restore();
+        
+        // red arc
+        context.beginPath();
+        context.arc(cx, cy, size*0.430, max_rad, die_rad)
+        context.strokeStyle = 'red';
+        context.lineWidth = 10;
+        context.stroke();
+        context.restore();
+        
+        // tics
+        context.drawImage(img_aura_asi2, x, y, width=size, height=size);
 
         // 'true' label
         context.save()
