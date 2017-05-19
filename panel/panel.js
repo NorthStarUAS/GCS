@@ -27,7 +27,7 @@ var panel = function() {
     var img_alt3 = new Image();
     var img_alt4 = new Image();
     var img_alt5 = new Image();
-    var img_amp = new Image();
+    var img_power = new Image();
     var img_tc1 = new Image();
     var img_tc2 = new Image();
     var img_tc3 = new Image();
@@ -43,6 +43,7 @@ var panel = function() {
         ati : {draw: draw_ati},
         alt : {draw: draw_alt},
         amp : {draw: draw_amp},
+        power : {draw: draw_power},
         tc : {draw: draw_tc},
         dg : {draw: draw_dg},
         vsi : {draw: draw_vsi},
@@ -51,10 +52,10 @@ var panel = function() {
     var layout_config = {
         horizontal : {
             instruments : [['vcc', 'asi', 'ati', 'alt'],
-                           ['amp', 'tc', 'dg', 'vsi']]
+                           ['power', 'tc', 'dg', 'vsi']]
         },
         vertical : {
-            instruments : [['vcc', 'amp'],
+            instruments : [['vcc', 'power'],
                            ['asi', 'ati'],
                            ['alt', 'tc'],
                            ['dg', 'vsi']]
@@ -102,7 +103,7 @@ var panel = function() {
         img_alt3.src = 'textures/alt3.png';
         img_alt4.src = 'textures/alt4.png';
         img_alt5.src = 'textures/alt5.png';
-        img_amp.src = 'textures/amps.png';
+        img_power.src = 'textures/power.png';
         img_tc1.src = 'textures/tc1.png';
         img_tc2.src = 'textures/tc2.png';
         img_tc3.src = 'textures/tc3.png';
@@ -428,6 +429,44 @@ var panel = function() {
         var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
         context.rotate((amps * 340 / 50.0) * d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
+        context.restore();
+    }
+
+    function draw_power( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+
+        var watts = json.sensors.APM2.extern_watts;
+        var max_watts = 500;
+        
+        // backplate
+        context.drawImage(img_power, x, y, width=size, height=size);
+
+        // watt needle
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale)
+        var nh = Math.floor(img_asi3.height*scale)
+        context.translate(cx, cy);
+        context.rotate((watts*150/max_watts + 195) * d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
+        context.restore();
+
+        var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
+        var battery_total = parseFloat(json.config.power.battery_mah)
+        var remaining = battery_total - mah
+        var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
+        if ( battery_percent < 0 ) {
+            battery_percent = 0;
+        }
+
+        // battery needle
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale)
+        var nh = Math.floor(img_asi3.height*scale)
+        context.translate(cx, cy);
+        context.rotate((165 - battery_percent*1.5) * d2r);
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
