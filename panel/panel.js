@@ -418,7 +418,7 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var amps = json.sensors.extern_amps;
+        var amps = json.sensors.APM2.extern_amps;
         
         // backplate
         context.drawImage(img_amp, x, y, width=size, height=size);
