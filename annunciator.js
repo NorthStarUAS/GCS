@@ -24,7 +24,7 @@ var annunciator = function() {
         draw_sats();
         draw_ekf();
         draw_volts();
-        draw_mah();
+        draw_battery();
         draw_timer();
         draw_link_state();
         draw_auto();
@@ -102,10 +102,10 @@ var annunciator = function() {
         }
     };
     
-    function draw_mah() {
-        var mah_div = $("#mah");
-        var mah_inner = $("#mah #inner");
-        if ( mah_div != null ) {
+    function draw_battery() {
+        var batt_div = $("#battery");
+        var batt_inner = $("#battery #inner");
+        if ( batt_div != null ) {
             var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
             var battery_total = parseFloat(json.config.power.battery_mah)
             var remaining = battery_total - mah
@@ -114,13 +114,13 @@ var annunciator = function() {
                 battery_percent = 0;
             }
             if ( battery_percent < 15 ) {
-                mah_div.attr("class", "error");
+                batt_div.attr("class", "error");
             } else if ( battery_percent < 25 ) {
-                mah_div.attr("class", "warn");
+                batt_div.attr("class", "warn");
             } else {
-                mah_div.attr("class", "ok");
+                batt_div.attr("class", "ok");
             }
-            mah_inner.html(mah + "mah " + battery_percent + "%");
+            batt_inner.html(battery_percent + "% batt");
         }
     };
     
