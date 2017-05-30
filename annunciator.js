@@ -39,6 +39,9 @@ var annunciator = function() {
         var sats_inner = $("#sats #inner");
         if ( sats_div != null ) {
             sats = parseInt(json.sensors.gps[0].satellites);
+            if ( isNaN(sats) ) {
+                sats = 0;
+            }
             if ( sats <= 4 ) {
                 sats_div.attr("class", "error");
             } else if ( sats <= 6 ) {
