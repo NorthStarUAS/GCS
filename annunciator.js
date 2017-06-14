@@ -168,8 +168,8 @@ var annunciator = function() {
         var auto_div = $("#auto");
         var auto_inner = $("#auto #inner");
         if ( auto_div != null ) {
-            var auto_switch = parseFloat(json.sensors.pilot_input[0].channel[7]);
-            if ( auto_switch > 0.0 ) {
+            var auto_switch = json.autopilot.master_switch;
+            if ( auto_switch == "True" ) {
                 auto_div.attr("class", "ok");
                 auto_inner.html("Auto");
             } else {
