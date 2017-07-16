@@ -189,9 +189,9 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var min_kt = parseFloat(json.config.speed.min_kt);
-        var max_kt = parseFloat(json.config.speed.max_kt);
-        var cruise_kt = parseFloat(json.config.speed.cruise_kt);
+        var min_kt = parseFloat(json.config.specs.min_kt);
+        var max_kt = parseFloat(json.config.specs.max_kt);
+        var cruise_kt = parseFloat(json.config.specs.cruise_kt);
         var range_kt = max_kt - min_kt;
         var caution_kt = min_kt + 0.8 * range_kt;
         var die_kt = 80.0;
@@ -454,7 +454,7 @@ var panel = function() {
         context.restore();
 
         var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
-        var battery_total = parseFloat(json.config.power.battery_mah)
+        var battery_total = parseFloat(json.config.specs.battery_mah)
         var remaining = battery_total - mah
         var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
         if ( battery_percent < 0 ) {

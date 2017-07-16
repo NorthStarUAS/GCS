@@ -110,7 +110,7 @@ var annunciator = function() {
         var batt_inner = $("#battery #inner");
         if ( batt_div != null ) {
             var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
-            var battery_total = parseFloat(json.config.power.battery_mah)
+            var battery_total = parseFloat(json.config.specs.battery_mah)
             var remaining = battery_total - mah
             var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
             if ( battery_percent < 0 ) {
