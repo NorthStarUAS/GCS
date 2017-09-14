@@ -28,6 +28,9 @@ function link_init() {
             if ( typeof annunciator != 'undefined' ) {
                 annunciator.draw();
             }
+            if ( typeof mymap != 'undefined' ) {
+                map_update();
+            }
             //console.log(json_pretty);
             //console.log(json.sensors.imu[0].p_rad_sec);
         };

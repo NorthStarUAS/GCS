@@ -1,6 +1,8 @@
+var mymap;
+var ownship;
+
 function map_init() {
-    var mymap = L.map('mapid').setView([51.505, -0.09], 13);
-      
+    mymap = L.map('mapid').setView([51.505, -0.09], 13);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -88,4 +90,36 @@ function map_init() {
     //     [51.503, -0.06],
     //     [51.51, -0.047]
     // ]).addTo(mymap).bindPopup("I am a polygon.");
-}
+
+    ownship = L.marker([51.5, -0.09], {icon: aircraftIcon});
+    ownship.addTo(mymap);
+
+    ownship_label = L.marker([51.5, -0.09], {icon: aircraftLabel});
+    ownship_label.addTo(mymap)
+};
+
+
+map_update = function() {
+    // mymap.setView([51.505, -0.09], 13);
+    var newLatLng = new L.LatLng(json.filters.filter[0].latitude_deg,
+                                 json.filters.filter[0].longitude_deg);
+    ownship.setLatLng(newLatLng);
+    if (L.DomUtil.TRANSFORM) {
+        ownship._icon.style[L.DomUtil.TRANSFORM] += ' rotate('
+            + json.filters.filter[0].heading_deg + 'deg)';
+      ownship._icon.style["transform-origin"] = "50% 50%";
+    }
+    ownship_label.setLatLng(newLatLng);
+
+    var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
+    var alt_disp = Math.round(alt_ft/10) * 10;
+    var vel_disp = Math.round(json.velocity.airspeed_smoothed_kt);
+    var html = '<div>' + json.config.identity.call_sign + '</div>'
+        + '<div>' + alt_disp + ' ft</div>'
+        + '<div>' + vel_disp + ' kt</div>';
+    ownship_label._icon.innerHTML = html;
+    var visible = mymap.getBounds().contains(ownship.getLatLng());
+    if ( !visible ) {
+        mymap.panTo(ownship.getLatLng());
+    }
+};
