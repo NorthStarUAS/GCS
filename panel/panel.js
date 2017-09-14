@@ -189,8 +189,8 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var min_kt = parseFloat(json.config.specs.min_kt);
-        var max_kt = parseFloat(json.config.specs.max_kt);
+        var min_kt = parseFloat(json.config.autopilot.TECS.min_kt);
+        var max_kt = parseFloat(json.config.autopilot.TECS.max_kt);
         var cruise_kt = parseFloat(json.config.specs.cruise_kt);
         var range_kt = max_kt - min_kt;
         var caution_kt = min_kt + 0.8 * range_kt;
