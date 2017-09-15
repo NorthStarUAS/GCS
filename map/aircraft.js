@@ -23,7 +23,7 @@ var aircraftIcon = L.icon({
 });
 
 var aircraftLabel = L.divIcon({
-    className: 'fg-aircraft-label',
+    className: 'aircraft-label',
     iconSize:   null, // size of the icon
     iconAnchor: [-10, -10], // point of the icon which will correspond to marker's location
     html: 'callsign',

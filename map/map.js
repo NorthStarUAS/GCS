@@ -1,8 +1,10 @@
 var mymap;
 var ownship;
+var track;
+var track_sec = 600;
 
 function map_init() {
-    mymap = L.map('mapid').setView([51.505, -0.09], 13);
+    mymap = L.map('mapid').setView([51.505, -0.09], 15);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -95,7 +97,13 @@ function map_init() {
     ownship.addTo(mymap);
 
     ownship_label = L.marker([51.5, -0.09], {icon: aircraftLabel});
-    ownship_label.addTo(mymap)
+    ownship_label.addTo(mymap);
+
+    track = L.polyline([], {
+        color: 'red',
+        opacity: 0.5
+    });
+    track.addTo(mymap);
 };
 
 
@@ -116,10 +124,17 @@ map_update = function() {
     var vel_disp = Math.round(json.velocity.airspeed_smoothed_kt);
     var html = '<div>' + json.config.identity.call_sign + '</div>'
         + '<div>' + alt_disp + ' ft</div>'
-        + '<div>' + vel_disp + ' kt</div>';
+        + '<div>' + vel_disp + ' kts</div>';
     ownship_label._icon.innerHTML = html;
     var visible = mymap.getBounds().contains(ownship.getLatLng());
     if ( !visible ) {
         mymap.panTo(ownship.getLatLng());
+    }
+    
+    track.addLatLng(newLatLng);
+    var points = track.getLatLngs();
+    var track_history = (1000/update_rate) * track_sec;
+    if ( points.length > track_history ) {
+        points.splice(0, points.length - track_history);
     }
 };
