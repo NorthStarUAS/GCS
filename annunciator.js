@@ -37,7 +37,7 @@ var annunciator = function() {
         //var sats_div = $("#sats");
         var sats_div = $("#sats");
         var sats_inner = $("#sats #inner");
-        if ( sats_div != null ) {
+        if ( sats_div != null && json.sensors.gps[0].satellites != null ) {
             sats = parseInt(json.sensors.gps[0].satellites);
             if ( isNaN(sats) ) {
                 sats = 0;
@@ -56,7 +56,7 @@ var annunciator = function() {
     function draw_ekf() {
         var ekf_div = $("#ekf");
         var ekf_inner = $("#ekf #inner");
-        if ( ekf_div != null ) {
+        if ( ekf_div != null && json.filters.filter[0].timestamp != null ) {
             var gyro_warn = 0.5 * Math.PI / 180.0;
             var gyro_error = 1.0 * Math.PI / 180.0;
             var accel_warn = 0.5;
@@ -92,7 +92,7 @@ var annunciator = function() {
     function draw_volts() {
         var volts_div = $("#volts");
         var volts_inner = $("#volts #inner");
-        if ( volts_div != null ) {
+        if ( volts_div != null && json.sensors.APM2.extern_volts != null ) {
             var volts_per_cell = parseFloat(json.sensors.APM2.extern_volts).toFixed(2);
             if ( volts_per_cell < 3.20 ) {
                 volts_div.attr("class", "error");
@@ -108,7 +108,7 @@ var annunciator = function() {
     function draw_battery() {
         var batt_div = $("#battery");
         var batt_inner = $("#battery #inner");
-        if ( batt_div != null ) {
+        if ( batt_div != null && json.sensors.APM2.extern_current_mah != null ) {
             var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
             var battery_total = parseFloat(json.config.specs.battery_mah)
             var remaining = battery_total - mah
@@ -130,7 +130,7 @@ var annunciator = function() {
     function draw_timer() {
         var timer_div = $("#timer");
         var timer_inner = $("#timer #inner");
-        if ( timer_div != null ) {
+        if ( timer_div != null && json.status.flight_timer != null ) {
             var secs = parseFloat(json.status.flight_timer).toFixed(0);
             timer_div.attr("class", "ok");
             var hours = Math.floor(secs / 3600);
@@ -167,7 +167,7 @@ var annunciator = function() {
     function draw_auto() {
         var auto_div = $("#auto");
         var auto_inner = $("#auto #inner");
-        if ( auto_div != null ) {
+        if ( auto_div != null && json.autopilot.master_switch != null ) {
             var auto_switch = json.autopilot.master_switch;
             if ( auto_switch == "True" ) {
                 auto_div.attr("class", "ok");
@@ -182,7 +182,7 @@ var annunciator = function() {
     function draw_wind() {
         var wind_div = $("#wind");
         var wind_inner = $("#wind #inner");
-        if ( wind_div != null ) {
+        if ( wind_div != null && json.filters.wind.wind_dir_deg != null ) {
             var wind_deg = parseFloat(json.filters.wind.wind_dir_deg);
             var dir = Math.round(parseFloat(wind_deg * 0.1).toFixed(0) * 10.0);
             var speed = parseFloat(json.filters.wind.wind_speed_kt);
@@ -205,7 +205,7 @@ var annunciator = function() {
     function draw_temp() {
         var temp_div = $("#temp");
         var temp_inner = $("#temp #inner");
-        if ( temp_div != null ) {
+        if ( temp_div != null && json.sensors.airdata[0] != null ) {
             var temp = parseFloat(json.sensors.airdata[0].temp_degC).toFixed(0);
             if ( temp < -30 || temp > 50 ) {
                 temp_div.attr("class", "error");
@@ -225,6 +225,8 @@ var annunciator = function() {
             var callsign = json.config.identity.call_sign;
             if ( callsign != null && callsign != "" ) {
                 callsign_inner.html(callsign);
+            } else {
+                callsign_inner.html('callsign');
             }
         }
     }
