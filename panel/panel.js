@@ -485,9 +485,12 @@ var panel = function() {
         context.restore();
 
         // ball
-        var ay = json.sensors.imu[0].ay_mps_sec;
-        var az = json.sensors.imu[0].az_mps_sec;
-        var tc = ay / az;
+        var tc = 0.0;
+        if ( json.sensors.imu[0] != null ) {
+            var ay = json.sensors.imu[0].ay_mps_sec;
+            var az = json.sensors.imu[0].az_mps_sec;
+            var tc = ay / az;
+        }
         var xpos = tc * -500 * scale;
         context.save();
         var nw = Math.floor(img_tc2.width*scale)
@@ -500,7 +503,10 @@ var panel = function() {
         context.drawImage(img_tc3, x, y, width=size, height=size);
         
         // plane (turn rate)
-        r = json.sensors.imu[0].r_rad_sec * r2d;
+        r = 0.0;
+        if ( json.sensors.imu[0] != null ) {
+            r = json.sensors.imu[0].r_rad_sec * r2d;
+        }
         if ( r < -4 ) { r = -4; }
         if ( r > 4 ) { r = 4; }
         context.save();
