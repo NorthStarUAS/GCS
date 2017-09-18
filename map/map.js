@@ -3,8 +3,25 @@ var ownship;
 var track;
 var track_sec = 600;
 
+function circleHere(e) {
+}
+
+function moveHomeHere(e) {
+}
+
+menuitems = [
+    { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
+    { text: 'Move Home Here', icon: 'icons/home.png', callback: moveHomeHere }
+];
+
 function map_init() {
-    mymap = L.map('mapid').setView([51.505, -0.09], 15);
+    mymap = L.map('mapid',
+                  {
+                      contextmenu: true,
+                      contextmenuItems: menuitems
+                  }
+                 );
+    mymap.setView([51.505, -0.09], 15);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
