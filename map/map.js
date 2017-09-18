@@ -92,7 +92,7 @@ function map_init() {
     //     [51.503, -0.06],
     //     [51.51, -0.047]
     // ]).addTo(mymap).bindPopup("I am a polygon.");
-
+    
     ownship = L.marker([51.5, -0.09], {icon: aircraftIcon});
     ownship.addTo(mymap);
 
@@ -108,14 +108,17 @@ function map_init() {
 
 
 map_update = function() {
-    // mymap.setView([51.505, -0.09], 13);
+    if ( json.filters.filter[0].latitude_deg == null ) {
+        return;
+    }
+    
     var newLatLng = new L.LatLng(json.filters.filter[0].latitude_deg,
                                  json.filters.filter[0].longitude_deg);
     ownship.setLatLng(newLatLng);
     if (L.DomUtil.TRANSFORM) {
         ownship._icon.style[L.DomUtil.TRANSFORM] += ' rotate('
             + json.filters.filter[0].heading_deg + 'deg)';
-      ownship._icon.style["transform-origin"] = "50% 50%";
+        ownship._icon.style["transform-origin"] = "50% 50%";
     }
     ownship_label.setLatLng(newLatLng);
 
