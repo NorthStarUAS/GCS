@@ -470,8 +470,9 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 	_getTooltipText: function () {
 		var showLength = this.options.showLength,
 			labelText, distanceStr;
-		if (L.Browser.touch) {
-			showLength = false; // if there's a better place to put this, feel free to move it
+	    if (L.Browser.touch) {
+                    // FIXME: I want length in tooltip, but my browser is detected as touch screen even though it isn't, so commenting out the next line...
+		    // showLength = false; // if there's a better place to put this, feel free to move it
 		}
 		if (this._markers.length === 0) {
 			labelText = {
