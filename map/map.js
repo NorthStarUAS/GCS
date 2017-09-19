@@ -3,6 +3,8 @@ var ownship;
 var track;
 var track_sec = 600;
 
+var startLatLng = [44.9757, -93.2323];
+
 function circleHere(e) {
 }
 
@@ -16,12 +18,11 @@ menuitems = [
 
 function map_init() {
     mymap = L.map('mapid',
-                  {
-                      contextmenu: true,
-                      contextmenuItems: menuitems
-                  }
+                   { contextmenu: true,
+                     contextmenuItems: menuitems
+                   }
                  );
-    mymap.setView([51.505, -0.09], 15);
+    mymap.setView(startLatLng, 16);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -82,74 +83,51 @@ function map_init() {
             opacity : 0.5,
             bounds : L.latLngBounds(L.latLng(16.0, -179.0), L.latLng(72.0, -60.0)),
         }),
-        
-        // "Grid" : L.grid({
-	//     redraw: 'moveend',
-        //     coordStyle: 'DMS',
-        // }),
     }
 
-    mymap
-        //.setView(new L.LatLng(lat,lng),zoom)
-        .addLayer(baselayer["OpenStreetMap"]);
+    mymap.addLayer(baselayer["OpenStreetMap"]);
 
     L.control.layers(baselayer, overlays).addTo(mymap);
 
-    // L.marker([51.5, -0.09]).addTo(mymap)
-    //     .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
-    
-    // L.circle([51.508, -0.11], 500, {
-    //     color: 'red',
-    //     fillColor: '#f03',
-    //     fillOpacity: 0.5
-    // }).addTo(mymap).bindPopup("I am a circle.");
-    
-    // L.polygon([
-    //     [51.509, -0.08],
-    //     [51.503, -0.06],
-    //     [51.51, -0.047]
-    // ]).addTo(mymap).bindPopup("I am a polygon.");
-    
     // Initialise the FeatureGroup to store editable layers
-    var editableLayers = new L.FeatureGroup();
-    mymap.addLayer(editableLayers);
+    var drawnItems = new L.FeatureGroup();
+    mymap.addLayer(drawnItems);
     
     var drawPluginOptions = {
-        position: 'topright',
+        position: 'topleft',
         draw: {
-            polyline: {
+            /*polyline: {
+                showLength: true,
                 shapeOptions: {
                     color: '#f357a1',
                     weight: 10
                 }
-            },
+            },*/
             polygon: {
                 allowIntersection: false, // Restricts shapes to simple polygons
+                showArea: true,
                 drawError: {
                     color: '#e1e100', // Color the shape will turn when intersects
                     message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
                 },
                 shapeOptions: {
-                    color: '#bada55'
+                    color: '#f357a1'
                 }
             },
             circle: false, // Turns off this drawing tool
-            rectangle: {
-                shapeOptions: {
-                    clickable: false
-                }
-            },
+            rectangle: false,
             marker: {
                 // icon: new MyCustomMarker()
-            }
+            },
+            circlemarker: false,
         },
         edit: {
-            featureGroup: editableLayers, //REQUIRED!!
-            remove: false
+            featureGroup: drawnItems, //REQUIRED!!
+            //remove: false
         }
     };
     
-   // Initialise the draw control and pass it the FeatureGroup of
+    // Initialise the draw control and pass it the FeatureGroup of
     // editable layers
     var drawControl = new L.Control.Draw(drawPluginOptions);
     mymap.addControl(drawControl);
@@ -158,17 +136,59 @@ function map_init() {
         var type = e.layerType,
             layer = e.layer;
     
-        if (type === 'marker') {
-            layer.bindPopup('A popup!');
+        if ( type == 'marker' ) {
+            var msg = prompt('Enter a brief note:');
+            layer.bindPopup(msg);
+        } else if ( type == 'polyline' ) {
+            // console.log(layer.editing);
+            // console.log(layer.editing.latlngs[0]);
+            // console.log(layer._getMeasurementString()); // doesn't work
+            var result = confirm("Send this line route to aircraft?");
+            if ( result == true ) {
+                // send route
+            }
+        } else if ( type == 'polygon' ) {
+            // console.log(layer.editing);
+            // console.log(layer.editing.latlngs[0]);
+            // console.log(layer._getMeasurementString()); // doesn't work
+            var result = confirm("Send survey area to aircraft?");
+            if ( result == true ) {
+                // send survey area
+            }
         }
     
-        editableLayers.addLayer(layer);
+        drawnItems.addLayer(layer);
+    });
+    mymap.on(L.Draw.Event.EDITED, function (e) {
+        console.log('edited callback called');
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+            if ( layer instanceof L.Marker ) {
+                // Do marker specific actions here
+            } else if ( layer instanceof L.Polyline ) {
+                if ( layer.options.fill ) {
+                    // filled polygon == survey area
+                    var result = confirm("Send amended survey area to aircraft?");
+                    if ( result == true ) {
+                        // send survey area
+                        console.log(layer);
+                    }
+                } else {
+                    // non-filled polygon == linear route
+                    var result = confirm("Send amended route to aircraft?");
+                    if ( result == true ) {
+                        // send route
+                        console.log(layer);
+                    }
+                }
+            }
+        });
     });
     
-    ownship = L.marker([51.5, -0.09], {icon: aircraftIcon});
+    ownship = L.marker(startLatLng, {icon: aircraftIcon});
     ownship.addTo(mymap);
 
-    ownship_label = L.marker([51.5, -0.09], {icon: aircraftLabel});
+    ownship_label = L.marker(startLatLng, {icon: aircraftLabel});
     ownship_label.addTo(mymap);
 
     track = L.polyline([], {
