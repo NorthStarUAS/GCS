@@ -94,7 +94,7 @@ function map_init() {
     mymap.addLayer(drawnItems);
     
     var drawPluginOptions = {
-        position: 'topright',
+        position: 'topleft',
         draw: {
             /*polyline: {
                 showLength: true,
@@ -140,28 +140,49 @@ function map_init() {
             var msg = prompt('Enter a brief note:');
             layer.bindPopup(msg);
         } else if ( type == 'polyline' ) {
-            console.log(layer.editing);
-            console.log(layer.editing.latlngs[0]);
-            // console.log(layer._getMeasurementString());
+            // console.log(layer.editing);
+            // console.log(layer.editing.latlngs[0]);
+            // console.log(layer._getMeasurementString()); // doesn't work
             var result = confirm("Send this line route to aircraft?");
             if ( result == true ) {
                 // send route
+            }
+        } else if ( type == 'polygon' ) {
+            // console.log(layer.editing);
+            // console.log(layer.editing.latlngs[0]);
+            // console.log(layer._getMeasurementString()); // doesn't work
+            var result = confirm("Send survey area to aircraft?");
+            if ( result == true ) {
+                // send survey area
             }
         }
     
         drawnItems.addLayer(layer);
     });
     mymap.on(L.Draw.Event.EDITED, function (e) {
-        var type = e.layerType,
-            layer = e.layer;
-    
-        if ( type == 'marker' ) {
-            layer.bindPopup('A popup!');
-        } else if ( type == 'polyline' ) {
-            console.log(layer.editing.latlngs[0]);
-        }
-    
-        drawnItems.addLayer(layer);
+        console.log('edited callback called');
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+            if ( layer instanceof L.Marker ) {
+                // Do marker specific actions here
+            } else if ( layer instanceof L.Polyline ) {
+                if ( layer.options.fill ) {
+                    // filled polygon == survey area
+                    var result = confirm("Send amended survey area to aircraft?");
+                    if ( result == true ) {
+                        // send survey area
+                        console.log(layer);
+                    }
+                } else {
+                    // non-filled polygon == linear route
+                    var result = confirm("Send amended route to aircraft?");
+                    if ( result == true ) {
+                        // send route
+                        console.log(layer);
+                    }
+                }
+            }
+        });
     });
     
     ownship = L.marker(startLatLng, {icon: aircraftIcon});
