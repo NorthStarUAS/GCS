@@ -31,6 +31,9 @@ function map_init() {
         id: 'mapbox.streets'
     }).addTo(mymap);
     
+    // API key for bing. Please get your own at: http://bingmapsportal.com/ 
+    var apiKey = "AmT3B1o5RmNfyBsZ634rbefWuNbsHJsgTcyGWILtBrU74iDpQwikazUVu9TT8ZTL";
+    
     var baselayer = {
         "OpenStreetMap": new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             minZoom: 0,
@@ -46,6 +49,11 @@ function map_init() {
             minZoom: 0,
             maxZoom: 18,
             attribution: 'Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.',
+        }),
+        "Bing": L.tileLayer.bing({
+            bingMapsKey: apiKey,
+            imagerySet: 'AerialWithLabels',
+            attribution: 'bing'
         }),
     }
 
