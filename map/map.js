@@ -6,12 +6,6 @@ var dialog;
 
 var startLatLng = [44.9757, -93.2323];
 
-function circleHere(e) {
-    var command = 'task,circle,' + e.latlng.lng + ',' + e.latlng.lat
-    console.log('sending: ' + command);
-    link_send(command);
-}
-
 function moveHomeHere(e) {
     console.log('move home here');
     dialog.dialog('open');
@@ -248,24 +242,48 @@ map_update = function() {
     }
 };
 
-// dummy
-function addUser() {
-    console.log('addUser()');
-};
+var model;                      // shared among all modal dialog boxes
 
-dialog = $( "#dialog-form" ).dialog({
-    autoOpen: false,
-    height: 400,
-    width: 350,
-    modal: true,
-    buttons: {
-        "Create an account": addUser,
-        Cancel: function() {
-            dialog.dialog( "close" );
-        }
-    },
-    close: function() {
-        form[ 0 ].reset();
-        allFields.removeClass( "ui-state-error" );
+var circle_latlng;
+function circleHere(e) {
+    //modal = document.getElementById("circle-form");
+    //modal.style.display = "block";
+    modal = $("#circle-form");
+    console.log(modal);
+    modal.show();
+    //modal.css("display", "block");
+    circle_latlng = e.latlng;
+    
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.hide();
     }
-});
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#circle-dir-submit").off("click");
+    $("#circle-dir-submit").click(function() {
+        console.log( circle_latlng );
+        console.log( $("input[name='circle-dir']:checked").val() );
+        console.log( $("#circle-radius").val() );
+        //textFieldContent = $("#my-text-field").val()
+        //doSomethingWithTheText( textFieldContent )
+        modal.hide();
+        var dir = $("input[name='circle-dir']:checked").val();
+        if ( dir ) {
+            link_send('set,/task/circle/direction,' + dir);
+        }
+        var radius = $("#circle-radius").val();
+        if ( parseFloat(radius) > 10 ) {
+            link_send('set,/task/circle/radius_m,' + radius);
+        }
+        link_send('task,circle,' + circle_latlng.lng + ',' + circle_latlng.lat);
+    })
+}
+
+

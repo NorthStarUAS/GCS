@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="leaflet/plugins/leaflet.contextmenu.css">
     <link rel="stylesheet" href="leaflet/plugins/leaflet.draw.css">
     <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="../modal.css">
     <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="leaflet/leaflet.js"></script>
     
@@ -101,22 +102,32 @@
       $('#dialog-form').hide();
     </script>
     
-    <!-- demo form -->
-    <div id="dialog-form" title="Create new user" style="display: none;">
-      <p class="validateTips">All form fields are required.</p>
-      <form>
-        <fieldset>
-          <label for="name">Name</label>
-          <input type="text" name="name" id="name" value="Jane Smith" class="text ui-widget-content ui-corner-all">
-          <label for="email">Email</label>
-          <input type="text" name="email" id="email" value="jane@smith.com" class="text ui-widget-content ui-corner-all">
-          <label for="password">Password</label>
-          <input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all">
- 
-          <!-- Allow form submission with keyboard without duplicating the dialog button -->
-          <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-        </fieldset>
-      </form>
+    <!-- circle form -->
+    <div id="circle-form" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <form>
+          <div>
+            <p>Direction:</p>
+            <p>
+              <input type="radio" required="" name="circle-dir" id="circle-dir-left" value="Left" checked>
+              <label for="circle-dir-left">Left</label>
+            </p>
+            <p>
+              <input type="radio" required="" name="circle-dir" id="circle-dir-right" value="Right">
+              <label for="circle-dir-right">Right</label>
+            </p>
+            <p>
+              <label for="circle-radius">Radius</label>
+              <input type="text" name="radius" id="circle-radius" value="100">
+            </p>
+            <p>
+              <!-- Allow form submission with keyboard without duplicating the dialog button -->
+              <button type="button" id="circle-dir-submit">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
     
   </body>

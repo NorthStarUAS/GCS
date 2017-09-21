@@ -73,9 +73,9 @@ function link_update() {
 }
 
 function link_send( message ) {
+    console.log('send ' + message);
     ws.send('send ' + message);
 }
-
 
 link_init()
 link_update()
