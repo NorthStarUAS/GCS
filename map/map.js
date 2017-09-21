@@ -6,14 +6,11 @@ var dialog;
 
 var startLatLng = [44.9757, -93.2323];
 
-function moveHomeHere(e) {
-    console.log('move home here');
-    dialog.dialog('open');
-}
-
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
-    { text: 'Move Home Here', icon: 'icons/home.png', callback: moveHomeHere }
+    { text: 'Move Home Here', icon: 'icons/home.png', callback: moveHomeHere },
+    { separator: true },
+    { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
 ];
 
 function map_init() {
@@ -244,35 +241,27 @@ map_update = function() {
 
 var model;                      // shared among all modal dialog boxes
 
-var circle_latlng;
+var user_latlng;
 function circleHere(e) {
-    //modal = document.getElementById("circle-form");
-    //modal.style.display = "block";
     modal = $("#circle-form");
     console.log(modal);
     modal.show();
-    //modal.css("display", "block");
-    circle_latlng = e.latlng;
-    
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
+    user_latlng = e.latlng;
+    // activate the "x"
+    $("#circle-close").click(function() {
         modal.hide();
-    }
+    })
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target.className == "modal") {
             modal.hide();
         }
     }
-    $("#circle-dir-submit").off("click");
-    $("#circle-dir-submit").click(function() {
-        console.log( circle_latlng );
+    $("#circle-form-submit").off("click");
+    $("#circle-form-submit").click(function() {
+        console.log( user_latlng );
         console.log( $("input[name='circle-dir']:checked").val() );
         console.log( $("#circle-radius").val() );
-        //textFieldContent = $("#my-text-field").val()
-        //doSomethingWithTheText( textFieldContent )
         modal.hide();
         var dir = $("input[name='circle-dir']:checked").val();
         if ( dir ) {
@@ -282,8 +271,52 @@ function circleHere(e) {
         if ( parseFloat(radius) > 10 ) {
             link_send('set,/task/circle/radius_m,' + radius);
         }
-        link_send('task,circle,' + circle_latlng.lng + ',' + circle_latlng.lat);
+        link_send('task,circle,' + user_latlng.lng + ',' + user_latlng.lat);
     })
 }
 
+
+function moveHomeHere(e) {
+    modal = $("#home-form");
+    modal.show();
+    user_latlng = e.latlng;
+    // activate the "x"
+    $("#home-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#home-form-submit").off("click");
+    $("#home-form-submit").click(function() {
+        console.log( user_latlng );
+        modal.hide();
+        var az = parseFloat($("#home-azimuth").val()) % 360.0;
+        link_send('home,' + user_latlng.lng + ',' + user_latlng.lat + ',0,' + az);
+    })
+}
+
+function calibrate(e) {
+    modal = $("#calibrate-form");
+    modal.show();
+    user_latlng = e.latlng;
+    // activate the "x"
+    $("#calibrate-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#calibrate-form-submit").off("click");
+    $("#calibrate-form-submit").click(function() {
+        modal.hide();
+        link_send('task,calibrate');
+    })
+}
 

@@ -105,31 +105,72 @@
     <!-- circle form -->
     <div id="circle-form" class="modal">
       <div class="modal-content">
-        <span class="close">&times;</span>
+        <span id="circle-close" class="close">&times;</span>
         <form>
           <div>
-            <p>Direction:</p>
             <p>
+              Direction:
               <input type="radio" required="" name="circle-dir" id="circle-dir-left" value="Left" checked>
               <label for="circle-dir-left">Left</label>
-            </p>
-            <p>
               <input type="radio" required="" name="circle-dir" id="circle-dir-right" value="Right">
               <label for="circle-dir-right">Right</label>
             </p>
             <p>
-              <label for="circle-radius">Radius</label>
+              <label for="circle-radius">Radius (m)</label>
               <input type="text" name="radius" id="circle-radius" value="100">
             </p>
             <p>
               <!-- Allow form submission with keyboard without duplicating the dialog button -->
-              <button type="button" id="circle-dir-submit">Submit</button>
+              <button type="button" id="circle-form-submit">Submit</button>
             </p>
           </div>
         </form>
       </div>
     </div>
     
+    <!-- move home form -->
+    <div id="home-form" class="modal">
+      <div class="modal-content">
+        <span id="home-close" class="close">&times;</span>
+        <form>
+          <div>
+            <p>
+              Home can have a direction (leave as zero if you don't care):
+            </p>
+            <p>
+              <label for="home-az">Azimuth (0-359 deg)</label>
+              <input type="text" name="azimuth" id="home-azimuth" value="0">
+            </p>
+            <p>
+              <!-- Allow form submission with keyboard without duplicating the dialog button -->
+              <button type="button" id="home-form-submit">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- calibration form -->
+    <div id="calibrate-form" class="modal">
+      <div class="modal-content">
+        <span id="calibrate-close" class="close">&times;</span>
+        <form>
+          <div>
+            <ul>
+              <li>Sets home location to current aircraft location.</li>
+              <li>Zeros airspeed.</li>
+              <li>(Future: surveys ground altitude).</li>
+            </ul>
+            <p>Shield the pitot tube, click submit, then wait 10 seconds.</p>
+            <p>
+              <!-- Allow form submission with keyboard without duplicating the dialog button -->
+              <button type="button" id="calibrate-form-submit">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </body>
 </html>
 
