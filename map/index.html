@@ -6,8 +6,13 @@
     <link rel="stylesheet" href="leaflet/plugins/leaflet.draw.css">
     <link rel="stylesheet" href="map.css">
     <!-- Make sure you put this AFTER Leaflet's CSS -->
-    <script src="../js/jquery-3.2.1.js"></script>
     <script src="leaflet/leaflet.js"></script>
+    
+    <script src="../js/jquery-3.2.1.js"></script>
+    <link rel="stylesheet" href="../js/jquery-ui-1.12.1/jquery-ui.css">
+    <link rel="stylesheet" href="../js/jquery-ui-1.12.1/jquery-ui.theme.css">
+    <script src="../js/jquery-ui-1.12.1/jquery-ui.js"></script>
+    
     <script src="leaflet/plugins/leaflet.contextmenu.js"></script>
     <script src="leaflet/plugins/leaflet-bing-layer.js"></script>
     
@@ -91,10 +96,34 @@
         </div>
       </div>
     </div>
+
+    <script>
+      $('#dialog-form').hide();
+    </script>
+    
+    <!-- demo form -->
+    <div id="dialog-form" title="Create new user" style="display: none;">
+      <p class="validateTips">All form fields are required.</p>
+      <form>
+        <fieldset>
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" value="Jane Smith" class="text ui-widget-content ui-corner-all">
+          <label for="email">Email</label>
+          <input type="text" name="email" id="email" value="jane@smith.com" class="text ui-widget-content ui-corner-all">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all">
+ 
+          <!-- Allow form submission with keyboard without duplicating the dialog button -->
+          <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+      </form>
+    </div>
+    
   </body>
 </html>
 
 <script>
+  $('#dialog-form').hide();
   map_init();
   annunciator.init();
 </script>

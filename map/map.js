@@ -2,13 +2,19 @@ var mymap;
 var ownship;
 var track;
 var track_sec = 600;
+var dialog;
 
 var startLatLng = [44.9757, -93.2323];
 
 function circleHere(e) {
+    var command = 'task,circle,' + e.latlng.lng + ',' + e.latlng.lat
+    console.log('sending: ' + command);
+    link_send(command);
 }
 
 function moveHomeHere(e) {
+    console.log('move home here');
+    dialog.dialog('open');
 }
 
 menuitems = [
@@ -241,3 +247,25 @@ map_update = function() {
         points.splice(0, points.length - track_history);
     }
 };
+
+// dummy
+function addUser() {
+    console.log('addUser()');
+};
+
+dialog = $( "#dialog-form" ).dialog({
+    autoOpen: false,
+    height: 400,
+    width: 350,
+    modal: true,
+    buttons: {
+        "Create an account": addUser,
+        Cancel: function() {
+            dialog.dialog( "close" );
+        }
+    },
+    close: function() {
+        form[ 0 ].reset();
+        allFields.removeClass( "ui-state-error" );
+    }
+});
