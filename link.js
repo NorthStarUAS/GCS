@@ -72,5 +72,10 @@ function link_update() {
     setTimeout("link_update()", update_rate);
 }
 
+function link_send( message ) {
+    ws.send('send ' + message);
+}
+
+
 link_init()
 link_update()
