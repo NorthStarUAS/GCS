@@ -13,6 +13,9 @@ menuitems = [
     { separator: true },
     { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
     { text: 'Test Autopilot', icon: 'icons/preflight.png', callback: preflight },
+    { separator: true },
+    { text: 'Set Airspeed', icon: 'icons/speed.png', callback: set_airspeed },
+    { text: 'Set Altitude', icon: 'icons/altitude.jpg', callback: set_altitude },
 ];
 
 function map_init() {
@@ -384,4 +387,59 @@ function land(e) {
         link_send('task,land,' + hdg);
     })
 }
+
+function set_airspeed(e) {
+    var default_airspeed = 25;
+    modal = $("#airspeed-form");
+    modal.show();
+    // activate the "x"
+    $("#airspeed-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    var value = $("#airspeed-target"); value.html(default_airspeed);
+    var slider = $("#airspeed-slider"); slider.val(default_airspeed);
+    slider.on('input change', function() {
+        value.html(this.value);
+    });
+    $("#airspeed-form-submit").off("click");
+    $("#airspeed-form-submit").click(function() {
+        modal.hide();
+        var airspeed = $("#airspeed-slider").val();
+        link_send('set,/autopilot/targets/airspeed_kt,' + airspeed);
+    })
+}
+
+function set_altitude(e) {
+    var default_altitude = 200;
+    modal = $("#altitude-form");
+    modal.show();
+    // activate the "x"
+    $("#altitude-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    var value = $("#altitude-target"); value.html(default_altitude);
+    var slider = $("#altitude-slider"); slider.val(default_altitude);
+    slider.on('input change', function() {
+        value.html(this.value);
+    });
+    $("#altitude-form-submit").off("click");
+    $("#altitude-form-submit").click(function() {
+        modal.hide();
+        var altitude = $("#altitude-slider").val();
+        link_send('set,/autopilot/targets/altitude_agl_ft,' + altitude);
+    })
+}
+
 

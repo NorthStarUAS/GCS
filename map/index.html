@@ -282,6 +282,50 @@
       </div>
     </div>
     
+    <!-- set airspeed form -->
+    <div id="airspeed-form" class="modal">
+      <div class="modal-content">
+        <span id="airspeed-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Set Target Airspeed:</h2>
+            <p>
+              <label for="airspeed-target">Target Airspeed (kts):</label>
+              <label id="airspeed-target">25</label>
+            </p>
+            <div id="slidecontainer">
+              <input type="range" min="15" max="50" value="25" class="slider" id="airspeed-slider">
+            </div>
+            <p>
+              <button type="button" id="airspeed-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- set altitude form -->
+    <div id="altitude-form" class="modal">
+      <div class="modal-content">
+        <span id="altitude-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Set Target Altitude:</h2>
+            <p>
+              <label for="altitude-target">Target Altitude AGL (ft):</label>
+              <label id="altitude-target">200</label>
+            </p>
+            <div id="slidecontainer">
+              <input type="range" min="25" max="400" value="200" step="25" class="slider" id="altitude-slider">
+            </div>
+            <p>
+              <button type="button" id="altitude-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
   </body>
 </html>
 
