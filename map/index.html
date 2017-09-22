@@ -121,7 +121,7 @@
               <input type="text" name="radius" id="circle-radius" value="100">
             </p>
             <p>
-              <button type="button" id="circle-form-submit">Submit</button>
+              <button type="button" id="circle-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
             </p>
           </div>
         </form>
@@ -144,7 +144,7 @@
               <input type="text" name="azimuth" id="home-azimuth" value="0">
             </p>
             <p>
-              <button type="button" id="home-form-submit">Submit</button>
+              <button type="button" id="home-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
             </p>
           </div>
         </form>
@@ -166,14 +166,14 @@
             <p>Shield the pitot tube, click submit, then wait 10 seconds.</p>
             <p>Note: this command has no effect when airborne.</p>
             <p>
-              <button type="button" id="calibrate-form-submit">Submit</button>
+              <button type="button" id="calibrate-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
             </p>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- calibration form -->
+    <!-- preflight form -->
     <div id="preflight-form" class="modal">
       <div class="modal-content">
         <span id="preflight-close" class="close">&times;</span>
@@ -191,13 +191,97 @@
               <input type="text" name="duration" id="preflight-duration" value="60">
             </p>
             <p>
-              <button type="button" id="preflight-form-submit">Submit</button>
+              <button type="button" id="preflight-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
             </p>
           </div>
         </form>
       </div>
     </div>
-
+    
+    <!-- land form -->
+    <div id="land-form" class="modal">
+      <div class="modal-content">
+        <span id="land-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Land The Aircraft:</h2>
+            <p>
+              Setup the approach and flare parameters for touchdown at
+              the 'HOME' location. Expect 10-15 seconds for this
+              command and all it's parameters to be sent up to the
+              aircraft.
+            </p>
+            <p>
+              <fieldset>
+                <legend>Initial Descent Circle</legend>
+                <div>
+                  Direction:
+                  <input type="radio" required="" name="land-dir" id="land-dir-left" value="Left" checked>
+                  <label for="land-dir-left">Left</label>
+                  <input type="radio" required="" name="land-dir" id="land-dir-right" value="Right">
+                  <label for="land-dir-right">Right</label>
+                </div>
+                <div>
+                  <label for="land-radius">Radius (m):</label>
+                  <input type="text" name="radius" id="land-radius" value="75">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <fieldset>
+                <legend>Approach</legend>
+                <div>
+                  <label for="land-runway-hdg">Runway Heading (deg):</label>
+                  <input type="text" name="runway-hdg" id="land-runway-hdg" value="0">
+                </div>
+                <div>
+                  <label for="land-glideslope">Glide Slope (deg):</label>
+                  <input type="text" name="glideslope" id="land-glideslope" value="7">
+                </div>
+                <div>
+                  <label for="land-airspeed">Approach Speed (kt):</label>
+                  <input type="text" name="airspeed" id="land-airspeed" value="20">
+                </div>
+                <div>
+                  <label for="land-extend">Extend Final Leg (m):</label>
+                  <input type="text" name="extend" id="land-extend" value="100">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <fieldset>
+                <legend>Flare</legend>
+                <div>
+                  <label for="land-flare-pitch">Pitch To (deg):</label>
+                  <input type="text" name="flare-pitch" id="land-flare-pitch" value="0">
+                </div>
+                <div>
+                  <label for="land-flare-sec">Lead Time (sec):</label>
+                  <input type="text" name="flare-sec" id="land-flare-sec" value="5">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <fieldset>
+                <legend>Position Adjustments</legend>
+                <div>
+                  <label for="land-lat-offset">Lateral Offset (m):</label>
+                  <input type="text" name="flare-lat" id="land-lat-offset" value="0">
+                </div>
+                <div>
+                  <label for="land-alt-bias">Altitude Bias (ft):</label>
+                  <input type="text" name="alt-bias" id="land-alt-bias" value="0">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <button type="button" id="land-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
   </body>
 </html>
 

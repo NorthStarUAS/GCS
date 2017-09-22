@@ -9,7 +9,7 @@ var startLatLng = [44.9757, -93.2323];
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
     { text: 'Postion Home Here', icon: 'icons/home.png', callback: moveHomeHere },
-    { text: 'Land Aircraft', icon: 'icons/land.png', callback: moveHomeHere },
+    { text: 'Land Aircraft', icon: 'icons/land.png', callback: land },
     { separator: true },
     { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
     { text: 'Test Autopilot', icon: 'icons/preflight.png', callback: preflight },
@@ -339,6 +339,50 @@ function preflight(e) {
         modal.hide();
         var sec = $("#preflight-duration").val();
         link_send('task,preflight,' + sec);
+    })
+}
+
+function land(e) {
+    modal = $("#land-form");
+    modal.show();
+    // activate the "x"
+    $("#land-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#land-form-submit").off("click");
+    $("#land-form-submit").click(function() {
+        modal.hide();
+        var dir = $("input[name='land-dir']:checked").val();
+        if ( dir ) {
+            link_send('set,/task/land/direction,' + dir);
+        }
+        var radius = $("#land-radius").val();
+        if ( parseFloat(radius) > 10 ) {
+            link_send('set,/task/land/turn_radius_m,' + radius);
+        }
+        var gs = $("#land-glideslope").val();
+        link_send('set,/task/land/glideslope_deg,' + gs);
+        var airspeed = $("#land-airspeed").val();
+        link_send('set,/task/land/approach_speed_kt,' + airspeed);
+        var extend = $("#land-extend").val();
+        link_send('set,/task/land/extend_final_leg_m,' + extend);
+        var flare_pitch = $("#land-flare-pitch").val();
+        link_send('set,/task/land/flare_pitch_deg,' + flare_pitch);
+        var flare_sec = $("#land-flare-sec").val();
+        link_send('set,/task/land/flare_seconds,' + flare_sec);
+        var lat = $("#land-lat-offset").val();
+        link_send('set,/task/land/lateral_offset_m,' + lat);
+        var alt = $("#land-alt-bias").val();
+        link_send('set,/task/land/alitutude_bias_ft,' + alt);
+
+        var hdg = $("#land-runway-hdg").val();
+        link_send('task,land,' + hdg);
     })
 }
 
