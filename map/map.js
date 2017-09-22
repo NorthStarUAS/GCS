@@ -246,7 +246,6 @@ var model;                      // shared among all modal dialog boxes
 var user_latlng;
 function circleHere(e) {
     modal = $("#circle-form");
-    console.log(modal);
     modal.show();
     user_latlng = e.latlng;
     // activate the "x"
@@ -265,7 +264,7 @@ function circleHere(e) {
         console.log( $("input[name='circle-dir']:checked").val() );
         console.log( $("#circle-radius").val() );
         modal.hide();
-        var dir = $("input[name='circle-dir']:checked").val();
+        var dir = $("input[name='circle-dir']:checked").val().toLowerCase();
         if ( dir ) {
             link_send('set,/task/circle/direction,' + dir);
         }
@@ -358,7 +357,7 @@ function land(e) {
     $("#land-form-submit").off("click");
     $("#land-form-submit").click(function() {
         modal.hide();
-        var dir = $("input[name='land-dir']:checked").val();
+        var dir = $("input[name='land-dir']:checked").val().toLowerCase();
         if ( dir ) {
             link_send('set,/task/land/direction,' + dir);
         }
