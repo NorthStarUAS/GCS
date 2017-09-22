@@ -2,6 +2,8 @@ var mymap;
 var ownship;
 var track;
 var track_sec = 600;
+var default_airspeed = 25;
+var default_altitude = 200;
 var dialog;
 
 var startLatLng = [44.9757, -93.2323];
@@ -389,7 +391,6 @@ function land(e) {
 }
 
 function set_airspeed(e) {
-    var default_airspeed = 25;
     modal = $("#airspeed-form");
     modal.show();
     // activate the "x"
@@ -402,8 +403,12 @@ function set_airspeed(e) {
             modal.hide();
         }
     }
-    var value = $("#airspeed-target"); value.html(default_airspeed);
-    var slider = $("#airspeed-slider"); slider.val(default_airspeed);
+    var value = $("#airspeed-target");
+    var slider = $("#airspeed-slider");
+    if ( value.html() == "" ) {
+        value.html(default_airspeed);
+        slider.val(default_airspeed);
+    }
     slider.on('input change', function() {
         value.html(this.value);
     });
@@ -416,7 +421,6 @@ function set_airspeed(e) {
 }
 
 function set_altitude(e) {
-    var default_altitude = 200;
     modal = $("#altitude-form");
     modal.show();
     // activate the "x"
@@ -429,8 +433,12 @@ function set_altitude(e) {
             modal.hide();
         }
     }
-    var value = $("#altitude-target"); value.html(default_altitude);
-    var slider = $("#altitude-slider"); slider.val(default_altitude);
+    var value = $("#altitude-target");
+    var slider = $("#altitude-slider");
+    if ( value.html() == "" ) {
+        value.html(default_altitude);
+        slider.val(default_altitude);
+    }
     slider.on('input change', function() {
         value.html(this.value);
     });
