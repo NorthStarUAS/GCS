@@ -322,7 +322,7 @@ function calibrate(e) {
 }
 
 function preflight(e) {
-    modal = $("#preflght-form");
+    modal = $("#preflight-form");
     modal.show();
     // activate the "x"
     $("#preflight-close").click(function() {
@@ -337,7 +337,8 @@ function preflight(e) {
     $("#preflight-form-submit").off("click");
     $("#preflight-form-submit").click(function() {
         modal.hide();
-        link_send('task,preflight');
+        var sec = $("#preflight-duration").val();
+        link_send('task,preflight,' + sec);
     })
 }
 

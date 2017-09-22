@@ -108,7 +108,7 @@
         <span id="circle-close" class="close">&times;</span>
         <form>
           <div>
-            <h1>Circle Here:</h1>
+            <h2>Circle Here:</h2>
             <p>
               Direction:
               <input type="radio" required="" name="circle-dir" id="circle-dir-left" value="Left" checked>
@@ -121,7 +121,6 @@
               <input type="text" name="radius" id="circle-radius" value="100">
             </p>
             <p>
-              <!-- Allow form submission with keyboard without duplicating the dialog button -->
               <button type="button" id="circle-form-submit">Submit</button>
             </p>
           </div>
@@ -135,16 +134,16 @@
         <span id="home-close" class="close">&times;</span>
         <form>
           <div>
-            <h1>Position Home Here:</h1>
+            <h2>Position Home Here:</h2>
             <p>
-              Home can have a direction (leave as zero if you don't care):
+              The home azimuth sets the orientation of 'pattern' style
+              routes. It is fine to leave as zero.
             </p>
             <p>
               <label for="home-az">Azimuth (0-359 deg)</label>
               <input type="text" name="azimuth" id="home-azimuth" value="0">
             </p>
             <p>
-              <!-- Allow form submission with keyboard without duplicating the dialog button -->
               <button type="button" id="home-form-submit">Submit</button>
             </p>
           </div>
@@ -158,7 +157,7 @@
         <span id="calibrate-close" class="close">&times;</span>
         <form>
           <div>
-            <h1>Calibrate Aircraft:</h1>
+            <h2>Calibrate Aircraft:</h2>
             <ul>
               <li>Sets home location to current aircraft location.</li>
               <li>Zeros airspeed.</li>
@@ -167,8 +166,32 @@
             <p>Shield the pitot tube, click submit, then wait 10 seconds.</p>
             <p>Note: this command has no effect when airborne.</p>
             <p>
-              <!-- Allow form submission with keyboard without duplicating the dialog button -->
               <button type="button" id="calibrate-form-submit">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- calibration form -->
+    <div id="preflight-form" class="modal">
+      <div class="modal-content">
+        <span id="preflight-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Test Autopilot:</h2>
+            <p>
+              This command enables the pitch and roll controllers for
+              the autopilot.  The aircraft aileron and elevator should
+              respond appropriately to aircraft movement.
+            </p>
+            <p>Note: this command has no effect when airborne.</p>
+            <p>
+              <label for="preflight-duration">Duration (seconds)</label>
+              <input type="text" name="duration" id="preflight-duration" value="60">
+            </p>
+            <p>
+              <button type="button" id="preflight-form-submit">Submit</button>
             </p>
           </div>
         </form>
