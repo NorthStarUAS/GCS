@@ -8,9 +8,10 @@ var startLatLng = [44.9757, -93.2323];
 
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
-    { text: 'Move Home Here', icon: 'icons/home.png', callback: moveHomeHere },
+    { text: 'Postion Home Here', icon: 'icons/home.png', callback: moveHomeHere },
     { separator: true },
     { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
+    { text: 'Test Autopilot', icon: 'icons/preflight.png', callback: preflight },
 ];
 
 function map_init() {
@@ -302,7 +303,6 @@ function moveHomeHere(e) {
 function calibrate(e) {
     modal = $("#calibrate-form");
     modal.show();
-    user_latlng = e.latlng;
     // activate the "x"
     $("#calibrate-close").click(function() {
         modal.hide();
@@ -317,6 +317,26 @@ function calibrate(e) {
     $("#calibrate-form-submit").click(function() {
         modal.hide();
         link_send('task,calibrate');
+    })
+}
+
+function preflight(e) {
+    modal = $("#preflght-form");
+    modal.show();
+    // activate the "x"
+    $("#preflight-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#preflight-form-submit").off("click");
+    $("#preflight-form-submit").click(function() {
+        modal.hide();
+        link_send('task,preflight');
     })
 }
 

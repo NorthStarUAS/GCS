@@ -108,6 +108,7 @@
         <span id="circle-close" class="close">&times;</span>
         <form>
           <div>
+            <h1>Circle Here:</h1>
             <p>
               Direction:
               <input type="radio" required="" name="circle-dir" id="circle-dir-left" value="Left" checked>
@@ -134,6 +135,7 @@
         <span id="home-close" class="close">&times;</span>
         <form>
           <div>
+            <h1>Position Home Here:</h1>
             <p>
               Home can have a direction (leave as zero if you don't care):
             </p>
@@ -156,12 +158,14 @@
         <span id="calibrate-close" class="close">&times;</span>
         <form>
           <div>
+            <h1>Calibrate Aircraft:</h1>
             <ul>
               <li>Sets home location to current aircraft location.</li>
               <li>Zeros airspeed.</li>
               <li>(Future: surveys ground altitude).</li>
             </ul>
             <p>Shield the pitot tube, click submit, then wait 10 seconds.</p>
+            <p>Note: this command has no effect when airborne.</p>
             <p>
               <!-- Allow form submission with keyboard without duplicating the dialog button -->
               <button type="button" id="calibrate-form-submit">Submit</button>
