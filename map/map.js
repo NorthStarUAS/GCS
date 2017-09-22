@@ -9,6 +9,7 @@ var startLatLng = [44.9757, -93.2323];
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
     { text: 'Postion Home Here', icon: 'icons/home.png', callback: moveHomeHere },
+    { text: 'Land Aircraft', icon: 'icons/land.png', callback: moveHomeHere },
     { separator: true },
     { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
     { text: 'Test Autopilot', icon: 'icons/preflight.png', callback: preflight },
