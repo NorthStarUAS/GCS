@@ -165,6 +165,24 @@ function map_init() {
             var result = confirm("Send this line route to aircraft?");
             if ( result == true ) {
                 // send route
+                var route = layer.editing.latlngs[0];
+                var route_string = "route";
+                for (var i = 0; i < route.length; i++) {
+                    wpt = route[i];
+                    route_string += ",1,"
+		        + parseFloat(wpt.lng).toFixed(8) + ','
+		        + parseFloat(wpt.lat).toFixed(8) + ',-';
+                    if ( route_string.length > 200 ) {
+                        link_send(route_string);
+	                route_string = "route_cont";
+                    }
+                }
+                if ( route_string.length > 0 ) {
+                    link_send(route_string);
+                }
+                if ( layer.editing.latlngs.length > 0 ) {
+	            link_send("route_end");
+                }
             }
         } else if ( type == 'polygon' ) {
             // console.log(layer.editing);
