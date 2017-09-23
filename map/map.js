@@ -1,9 +1,11 @@
 var mymap;
 var ownship;
 var track;
+var autopan = true;
 var track_sec = 600;
 var default_airspeed = 25;
 var default_altitude = 200;
+var maxalt = 400;
 var dialog;
 
 var startLatLng = [44.9757, -93.2323];
@@ -13,11 +15,13 @@ menuitems = [
     { text: 'Postion Home Here', icon: 'icons/home.png', callback: moveHomeHere },
     { text: 'Land Aircraft', icon: 'icons/land.png', callback: land },
     { separator: true },
+    { text: 'Set Airspeed', icon: 'icons/speed.png', callback: set_airspeed },
+    { text: 'Set Altitude', icon: 'icons/altitude.jpg', callback: set_altitude },
+    { separator: true },
     { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
     { text: 'Test Autopilot', icon: 'icons/preflight.png', callback: preflight },
     { separator: true },
-    { text: 'Set Airspeed', icon: 'icons/speed.png', callback: set_airspeed },
-    { text: 'Set Altitude', icon: 'icons/altitude.jpg', callback: set_altitude },
+    { text: 'Map Settings', icon: 'icons/settings.png', callback: updateSettings },
 ];
 
 function map_init() {
@@ -407,7 +411,9 @@ function set_airspeed(e) {
     var slider = $("#airspeed-slider");
     if ( value.html() == "" ) {
         value.html(default_airspeed);
-        slider.val(default_airspeed);
+        slider[0].min = json.config.autopilot.TECS.min_kt;
+        slider[0].max = json.config.autopilot.TECS.max_kt;
+        slider.val(json.config.specs.cruise_kt);
     }
     slider.on('input change', function() {
         value.html(this.value);
@@ -435,6 +441,7 @@ function set_altitude(e) {
     }
     var value = $("#altitude-target");
     var slider = $("#altitude-slider");
+    slider[0].max = maxalt;
     if ( value.html() == "" ) {
         value.html(default_altitude);
         slider.val(default_altitude);
@@ -450,4 +457,26 @@ function set_altitude(e) {
     })
 }
 
+
+function updateSettings(e) {
+    modal = $("#settings-form");
+    modal.show();
+    user_latlng = e.latlng;
+    // activate the "x"
+    $("#settings-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#settings-form-submit").off("click");
+    $("#settings-form-submit").click(function() {
+        modal.hide();
+        maxalt = $("#settings-maxalt").val();
+        autopan = $("#settings-autopan").is(':checked');
+    });
+}
 

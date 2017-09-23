@@ -326,6 +326,35 @@
       </div>
     </div>
     
+    <!-- map settings form -->
+    <div id="settings-form" class="modal">
+      <div class="modal-content">
+        <span id="settings-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Map Settings:</h2>
+            <p>
+              <input type="checkbox" name="follow" id="settings-autopan" value="autopan" checked>Map follows aircraft.
+            </p>
+            <p>
+              <div>
+                Note: The FAA Part 107 rules set the maximum ceiling to
+                400' AGL or 400' above a structure you are inspecting.
+              </div>
+              <div>
+                <label for="settings-maxalt">Maximum Altitude AGL (ft):</label>
+                <input type="text" name="maxalt" id="settings-maxalt" value="400">
+              </div>
+            </p>
+
+            <p>
+              <button type="button" id="settings-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
   </body>
 </html>
 
