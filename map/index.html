@@ -332,21 +332,31 @@
         <span id="settings-close" class="close">&times;</span>
         <form>
           <div>
-            <h2>Map Settings:</h2>
+            <h2>Settings:</h2>
             <p>
-              <input type="checkbox" name="follow" id="settings-autopan" value="autopan" checked>Map follows aircraft.
+              <fieldset>
+                <legend>Map</legend>
+                <div>
+                  <label for="settings-autopan">Map follows aircraft:</label>
+                  <input type="checkbox" name="follow" id="settings-autopan" value="autopan" checked>Autopan
+                </div>
+                <div>
+                  <label for="settings-maxalt">Maximum Altitude AGL (ft):</label>
+                  <input type="text" name="maxalt" id="settings-maxalt" value="400">
+                </div>
+                <div style="margin-left: 40px">
+                  <em>Note: The FAA Part 107 rules set the maximum
+                  ceiling to 400' AGL or 400' above a structure you
+                  are inspecting.  It is crucial to understand and
+                  honor the FAA airspace classes for your operational
+                  area.</em>
+                </div>
+                <div>
+                  <label for="settings-track-sec">Flight Track Length (sec):</label>
+                  <input type="text" name="track-sec" id="settings-track-sec" value="600">
+                </div>
+              </fieldset>
             </p>
-            <p>
-              <div>
-                Note: The FAA Part 107 rules set the maximum ceiling to
-                400' AGL or 400' above a structure you are inspecting.
-              </div>
-              <div>
-                <label for="settings-maxalt">Maximum Altitude AGL (ft):</label>
-                <input type="text" name="maxalt" id="settings-maxalt" value="400">
-              </div>
-            </p>
-
             <p>
               <button type="button" id="settings-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
             </p>

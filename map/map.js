@@ -1,13 +1,16 @@
 var mymap;
 var ownship;
 var track;
+var dialog;
+
+// map settings
 var autopan = true;
 var track_sec = 600;
 var default_airspeed = 25;
 var default_altitude = 200;
 var maxalt = 400;
-var dialog;
 
+// hard coded configurations
 var startLatLng = [44.9757, -93.2323];
 
 menuitems = [
@@ -238,7 +241,7 @@ map_update = function() {
         + '<div>' + vel_disp + ' kts</div>';
     ownship_label._icon.innerHTML = html;
     var visible = mymap.getBounds().contains(ownship.getLatLng());
-    if ( !visible ) {
+    if ( !visible && autopan ) {
         mymap.panTo(ownship.getLatLng());
     }
     
@@ -475,8 +478,9 @@ function updateSettings(e) {
     $("#settings-form-submit").off("click");
     $("#settings-form-submit").click(function() {
         modal.hide();
-        maxalt = $("#settings-maxalt").val();
         autopan = $("#settings-autopan").is(':checked');
+        maxalt = $("#settings-maxalt").val();
+        track_sec = $("#settings-track-sec").val();
     });
 }
 
