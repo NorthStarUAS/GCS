@@ -16,6 +16,10 @@ var maxalt = 400;
 // hard coded configurations
 var startLatLng = [44.9757, -93.2323];
 
+// conversions
+var ft2m = 0.3048;
+var m2ft = 1.0 / ft2m;
+
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
     { text: 'Postion Home Here', icon: 'icons/home.png', callback: moveHomeHere },
@@ -466,12 +470,11 @@ function set_airspeed(e) {
     }
     var value = $("#airspeed-target");
     var slider = $("#airspeed-slider");
-    if ( value.html() == "" ) {
-        value.html(default_airspeed);
-        slider[0].min = json.config.autopilot.TECS.min_kt;
-        slider[0].max = json.config.autopilot.TECS.max_kt;
-        slider.val(json.config.specs.cruise_kt);
-    }
+    var target_airspeed = json.autopilot.targets.airspeed_kt;
+    value.html(target_airspeed);
+    slider[0].min = json.config.autopilot.TECS.min_kt;
+    slider[0].max = json.config.autopilot.TECS.max_kt;
+    slider.val(target_airspeed);
     slider.on('input change', function() {
         value.html(this.value);
     });
@@ -496,13 +499,15 @@ function set_altitude(e) {
             modal.hide();
         }
     }
+    // estimate onboard agl
+    var agl = json.autopilot.targets.altitude_msl_ft - json.position.altitude_ground_m * m2ft;
+    // snap to nearest 25'
+    agl = parseFloat(agl / 25).toFixed(0) * 25;
     var value = $("#altitude-target");
     var slider = $("#altitude-slider");
     slider[0].max = maxalt;
-    if ( value.html() == "" ) {
-        value.html(default_altitude);
-        slider.val(default_altitude);
-    }
+    value.html(agl);
+    slider.val(agl);
     slider.on('input change', function() {
         value.html(this.value);
     });
