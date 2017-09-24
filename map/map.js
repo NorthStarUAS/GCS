@@ -1,6 +1,9 @@
 var mymap;
 var ownship;
 var track;
+var home;
+var circle;
+var circle_center;
 var dialog;
 
 // map settings
@@ -233,6 +236,27 @@ function map_init() {
         opacity: 0.5
     });
     track.addTo(mymap);
+
+    home = L.circleMarker(startLatLng, {
+        color: 'black',
+        radius: 10,
+    });
+    home.addTo(mymap);
+
+    circle = L.circle(startLatLng, {
+        color: 'blue',
+        fill: false,
+        opacity: 0.5,
+        radius: 100,
+    });
+    circle.addTo(mymap);
+    circle_center = L.circleMarker(startLatLng, {
+        color: 'blue',
+        opacity: 0.5,
+        radius: 7,
+    });
+    circle_center.addTo(mymap);
+
 };
 
 
@@ -269,6 +293,18 @@ map_update = function() {
     if ( points.length > track_history ) {
         points.splice(0, points.length - track_history);
     }
+
+    home.setLatLng( [json.task.home.latitude_deg,
+                     json.task.home.longitude_deg] );
+
+    circle.setLatLng( [json.task.circle.latitude_deg,
+                       json.task.circle.longitude_deg] );
+    var r = json.task.circle.radius_m;
+    if ( r > 1.0 ) {
+        circle.setRadius(r);
+    }
+    circle_center.setLatLng( [json.task.circle.latitude_deg,
+                              json.task.circle.longitude_deg] );
 };
 
 var model;                      // shared among all modal dialog boxes
