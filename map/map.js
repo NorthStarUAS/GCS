@@ -332,8 +332,8 @@ map_update = function() {
         }
         wpts.push( [json.task.route.active.wpt[0].latitude_deg,
                     json.task.route.active.wpt[0].longitude_deg] );
+        active_route.setLatLngs(wpts);
     }
-    active_route.setLatLngs(wpts);
     
     if ( json.task.current_task_id == 'circle' ) {
         active_wpt.setLatLng( [json.task.circle.latitude_deg,
