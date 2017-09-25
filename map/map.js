@@ -33,7 +33,7 @@ menuitems = [
     { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
     { text: 'Test Autopilot', icon: 'icons/preflight.png', callback: preflight },
     { separator: true },
-    { text: 'Map Settings', icon: 'icons/settings.png', callback: updateSettings },
+    { text: 'Settings', icon: 'icons/settings.png', callback: updateSettings },
 ];
 
 function map_init() {
@@ -535,17 +535,24 @@ function set_altitude(e) {
             modal.hide();
         }
     }
+    $("#altitude-ground").html((json.position.altitude_ground_m * m2ft).toFixed(0));
     // estimate onboard agl
-    var agl = json.autopilot.targets.altitude_msl_ft - json.position.altitude_ground_m * m2ft;
+    var ground = json.position.altitude_ground_m * m2ft;
+    var agl = json.autopilot.targets.altitude_msl_ft - ground;
+    var msl = ground + agl;
     // snap to nearest 25'
     agl = parseFloat(agl / 25).toFixed(0) * 25;
-    var value = $("#altitude-target");
+    var label_agl = $("#altitude-target-agl");
+    var label_msl = $("#altitude-target-msl");
     var slider = $("#altitude-slider");
     slider[0].max = maxalt;
-    value.html(agl);
+    label_agl.html(agl);
+    label_msl.html(msl);
     slider.val(agl);
     slider.on('input change', function() {
-        value.html(this.value);
+        label_agl.html(this.value);
+        var msl = (parseFloat(this.value) + ground).toFixed(0);
+        label_msl.html(msl);
     });
     $("#altitude-form-submit").off("click");
     $("#altitude-form-submit").click(function() {

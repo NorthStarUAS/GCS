@@ -213,7 +213,7 @@
             </p>
             <p>
               <fieldset>
-                <legend>Initial Descent Circle</legend>
+                <legend><em>Initial Descent Circle</em></legend>
                 <div>
                   Direction:
                   <input type="radio" required="" name="land-dir" id="land-dir-left" value="Left" checked>
@@ -229,7 +229,7 @@
             </p>
             <p>
               <fieldset>
-                <legend>Approach</legend>
+                <legend><em>Approach</em></legend>
                 <div>
                   <label for="land-runway-hdg">Runway Heading (deg):</label>
                   <input type="text" name="runway-hdg" id="land-runway-hdg" value="0">
@@ -250,7 +250,7 @@
             </p>
             <p>
               <fieldset>
-                <legend>Flare</legend>
+                <legend><em>Flare</em></legend>
                 <div>
                   <label for="land-flare-pitch">Pitch To (deg):</label>
                   <input type="text" name="flare-pitch" id="land-flare-pitch" value="0">
@@ -263,7 +263,7 @@
             </p>
             <p>
               <fieldset>
-                <legend>Position Adjustments</legend>
+                <legend><em>Position Adjustments</em></legend>
                 <div>
                   <label for="land-lat-offset">Lateral Offset (m):</label>
                   <input type="text" name="flare-lat" id="land-lat-offset" value="0">
@@ -312,8 +312,18 @@
           <div>
             <h2>Set Target Altitude:</h2>
             <p>
-              <label for="altitude-target">Target Altitude AGL (ft):</label>
-              <b><label id="altitude-target">200</label></b>
+              <label for="altitude-target-agl">Target Altitude AGL (ft):</label>
+              <b><label id="altitude-target-agl"></label></b>
+            </p>
+            <p>
+              <div>
+                <label>Ground Altitude Estimate (ft):</label>
+                <b><label id="altitude-ground"></label></b>
+              </div>
+              <div>
+                <label for="altitude-target-msl">Target Altitude MSL (ft):</label>
+                <b><label id="altitude-target-msl"></label></b>
+              </div>
             </p>
             <div id="slidecontainer">
               <input type="range" min="25" max="400" value="200" step="25" class="slider" id="altitude-slider">
@@ -335,7 +345,7 @@
             <h2>Settings:</h2>
             <p>
               <fieldset>
-                <legend>Map</legend>
+                <legend><em>Map</em></legend>
                 <div>
                   <label for="settings-autopan">Map follows aircraft:</label>
                   <input type="checkbox" name="follow" id="settings-autopan" value="autopan" checked>Autopan
@@ -348,7 +358,7 @@
             </p>
             <p>
               <fieldset>
-                <legend>Aircraft</legend>
+                <legend><em>Aircraft</em></legend>
                 <div>
                   <label for="settings-maxalt">Maximum Altitude AGL (ft):</label>
                   <input type="text" name="maxalt" id="settings-maxalt" value="400">
