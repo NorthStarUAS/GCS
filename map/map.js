@@ -3,7 +3,9 @@ var ownship;
 var track;
 var home;
 var circle;
-var circle_center;
+// var circle_center;
+var active_route;
+var active_wpt;
 var dialog;
 
 // map settings
@@ -179,7 +181,7 @@ function map_init() {
                     route_string += ",1,"
 		        + parseFloat(wpt.lng).toFixed(8) + ','
 		        + parseFloat(wpt.lat).toFixed(8) + ',-';
-                    if ( route_string.length > 200 ) {
+                    if ( route_string.length > 180 ) {
                         link_send(route_string);
 	                route_string = "route_cont";
                     }
@@ -254,12 +256,24 @@ function map_init() {
         radius: 100,
     });
     circle.addTo(mymap);
-    circle_center = L.circleMarker(startLatLng, {
+    // circle_center = L.circleMarker(startLatLng, {
+    //     color: 'blue',
+    //     opacity: 0.5,
+    //     radius: 7,
+    // });
+    // circle_center.addTo(mymap);
+
+    active_route = L.polyline({
+        color: 'blue',
+        opacity: 0.5,
+    });
+    active_route.addTo(mymap);
+    active_wpt = L.circleMarker(startLatLng, {
         color: 'blue',
         opacity: 0.5,
         radius: 7,
     });
-    circle_center.addTo(mymap);
+    active_wpt.addTo(mymap);
 
 };
 
@@ -307,8 +321,30 @@ map_update = function() {
     if ( r > 1.0 ) {
         circle.setRadius(r);
     }
-    circle_center.setLatLng( [json.task.circle.latitude_deg,
-                              json.task.circle.longitude_deg] );
+    // circle_center.setLatLng( [json.task.circle.latitude_deg,
+    //                           json.task.circle.longitude_deg] );
+
+    if ( json.task.route.active.route_size > 0 ) {
+        var wpts = [];
+        for ( var i = 0; i < json.task.route.active.route_size; i++ ) {
+            wpts.push( [json.task.route.active.wpt[i].latitude_deg,
+                        json.task.route.active.wpt[i].longitude_deg] );
+        }
+        wpts.push( [json.task.route.active.wpt[0].latitude_deg,
+                    json.task.route.active.wpt[0].longitude_deg] );
+    }
+    active_route.setLatLngs(wpts);
+    
+    if ( json.task.current_task_id == 'circle' ) {
+        active_wpt.setLatLng( [json.task.circle.latitude_deg,
+                               json.task.circle.longitude_deg] );
+    } else if ( json.task.current_task_id == 'route' ) {
+        i = json.task.route.target_waypoint_idx;
+        if ( i < json.task.route.active.wpt.length ) {
+            active_wpt.setLatLng( [json.task.route.active.wpt[i].latitude_deg,
+                                   json.task.route.active.wpt[i].longitude_deg] );
+        }
+    }
 };
 
 var model;                      // shared among all modal dialog boxes
