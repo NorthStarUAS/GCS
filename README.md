@@ -22,7 +22,7 @@ A top down map for real time flight tracking, path planning, etc.
 An analog-style instrument panel that displays flight status in a
 format that is intuitive to pilots.
 
-!(screenshots/panel.png "Analog Style Instrument Panel")
+![panel](screenshots/panel.png "Analog Style Instrument Panel")
 
 
 ## Aura Props
@@ -33,4 +33,4 @@ derived from values received from the aircraft.  This is intended as a
 debugging tool and possibly for advanced users who wish to monitor
 values that are not represented in the other pages.
 
-!(screenshots/props.png "Raw Property Viewer")
+![props](screenshots/props.png "Raw Property Viewer")
