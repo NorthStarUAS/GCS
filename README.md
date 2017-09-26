@@ -14,11 +14,15 @@ displays or even pulled up on multiple devices simultaneously.
 
 A top down map for real time flight tracking, path planning, etc.
 
+!(screenshots/map.png "FAA Sectionals")
+
 
 ## Aura Panel
 
 An analog-style instrument panel that displays flight status in a
 format that is intuitive to pilots.
+
+!(screenshots/panel.png "Analog Style Instrument Panel")
 
 
 ## Aura Props
@@ -29,3 +33,4 @@ derived from values received from the aircraft.  This is intended as a
 debugging tool and possibly for advanced users who wish to monitor
 values that are not represented in the other pages.
 
+!(screenshots/props.png "Raw Property Viewer")
