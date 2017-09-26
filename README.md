@@ -14,7 +14,7 @@ displays or even pulled up on multiple devices simultaneously.
 
 A top down map for real time flight tracking, path planning, etc.
 
-!(screenshots/map.png "FAA Sectionals")
+![map](screenshots/map.png "FAA Sectionals")
 
 
 ## Aura Panel
