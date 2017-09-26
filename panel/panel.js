@@ -194,7 +194,7 @@ var panel = function() {
         var cruise_kt = parseFloat(json.config.specs.cruise_kt);
         var range_kt = max_kt - min_kt;
         var caution_kt = min_kt + 0.8 * range_kt;
-        var die_kt = 80.0;
+        var die_kt = max_kt + 10.0;
         
         var min_deg = my_interp(min_kt, asi_interpx, asi_interpy);
         var max_deg = my_interp(max_kt, asi_interpx, asi_interpy);

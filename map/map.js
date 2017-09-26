@@ -168,7 +168,7 @@ function map_init() {
             var msg = prompt('Enter a brief note:');
             layer.bindPopup(msg);
         } else if ( type == 'polyline' ) {
-            // console.log(layer.editing);
+            console.log(layer.editing);
             // console.log(layer.editing.latlngs[0]);
             // console.log(layer._getMeasurementString()); // doesn't work
             var result = confirm("Send this line route to aircraft?");
@@ -245,7 +245,7 @@ function map_init() {
 
     home = L.circleMarker(startLatLng, {
         color: 'black',
-        radius: 10,
+        radius: 14,
     });
     home.addTo(mymap);
 
