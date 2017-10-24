@@ -1,0 +1,278 @@
+    <!-- circle form -->
+    <div id="circle-form" class="modal">
+      <div class="modal-content">
+        <span id="circle-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Circle Here:</h2>
+            <p>
+              Direction:
+              <input type="radio" required="" name="circle-dir" id="circle-dir-left" value="Left" checked>
+              <label for="circle-dir-left">Left</label>
+              <input type="radio" required="" name="circle-dir" id="circle-dir-right" value="Right">
+              <label for="circle-dir-right">Right</label>
+            </p>
+            <p>
+              <label for="circle-radius">Radius (m)</label>
+              <input type="text" name="radius" id="circle-radius" value="100">
+            </p>
+            <p>
+              <button type="button" id="circle-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- move home form -->
+    <div id="home-form" class="modal">
+      <div class="modal-content">
+        <span id="home-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Position Home Here:</h2>
+            <p>
+              The home azimuth sets the orientation of 'pattern' style
+              routes. It is fine to leave as zero.
+            </p>
+            <p>
+              <label for="home-az">Azimuth (0-359 deg)</label>
+              <input type="text" name="azimuth" id="home-azimuth" value="0">
+            </p>
+            <p>
+              <button type="button" id="home-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- calibration form -->
+    <div id="calibrate-form" class="modal">
+      <div class="modal-content">
+        <span id="calibrate-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Calibrate Aircraft:</h2>
+            <ul>
+              <li>Sets home location to current aircraft location.</li>
+              <li>Zeros airspeed.</li>
+              <li>(Future: surveys ground altitude).</li>
+            </ul>
+            <p>Shield the pitot tube, click submit, then wait 10 seconds.</p>
+            <p>Note: this command has no effect when airborne.</p>
+            <p>
+              <button type="button" id="calibrate-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- preflight form -->
+    <div id="preflight-form" class="modal">
+      <div class="modal-content">
+        <span id="preflight-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Test Autopilot:</h2>
+            <p>
+              This command enables the pitch and roll controllers for
+              the autopilot.  The aircraft aileron and elevator should
+              respond appropriately to aircraft movement.
+            </p>
+            <p>Note: this command has no effect when airborne.</p>
+            <p>
+              <label for="preflight-duration">Duration (seconds)</label>
+              <input type="text" name="duration" id="preflight-duration" value="60">
+            </p>
+            <p>
+              <button type="button" id="preflight-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- land form -->
+    <div id="land-form" class="modal">
+      <div class="modal-content">
+        <span id="land-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Approach and Land:</h2>
+            <p>
+              Setup the approach and flare parameters for touchdown at
+              the 'HOME' location. Expect 10-15 seconds for this
+              command and all it's parameters to be sent up to the
+              aircraft.
+            </p>
+            <p>
+              <fieldset>
+                <legend><em>Initial Descent Circle</em></legend>
+                <div>
+                  Direction:
+                  <input type="radio" required="" name="land-dir" id="land-dir-left" value="Left" checked>
+                  <label for="land-dir-left">Left</label>
+                  <input type="radio" required="" name="land-dir" id="land-dir-right" value="Right">
+                  <label for="land-dir-right">Right</label>
+                </div>
+                <div>
+                  <label for="land-radius">Radius (m):</label>
+                  <input type="text" name="radius" id="land-radius" value="75">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <fieldset>
+                <legend><em>Approach</em></legend>
+                <div>
+                  <label for="land-runway-hdg">Runway Heading (deg):</label>
+                  <input type="text" name="runway-hdg" id="land-runway-hdg" value="0">
+                </div>
+                <div>
+                  <label for="land-glideslope">Glide Slope (deg):</label>
+                  <input type="text" name="glideslope" id="land-glideslope" value="7">
+                </div>
+                <div>
+                  <label for="land-airspeed">Approach Speed (kt):</label>
+                  <input type="text" name="airspeed" id="land-airspeed" value="20">
+                </div>
+                <div>
+                  <label for="land-extend">Extend Final Leg (m):</label>
+                  <input type="text" name="extend" id="land-extend" value="100">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <fieldset>
+                <legend><em>Flare</em></legend>
+                <div>
+                  <label for="land-flare-pitch">Pitch To (deg):</label>
+                  <input type="text" name="flare-pitch" id="land-flare-pitch" value="0">
+                </div>
+                <div>
+                  <label for="land-flare-sec">Lead Time (sec):</label>
+                  <input type="text" name="flare-sec" id="land-flare-sec" value="5">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <fieldset>
+                <legend><em>Position Adjustments</em></legend>
+                <div>
+                  <label for="land-lat-offset">Lateral Offset (m):</label>
+                  <input type="text" name="flare-lat" id="land-lat-offset" value="0">
+                </div>
+                <div>
+                  <label for="land-alt-bias">Altitude Bias (ft):</label>
+                  <input type="text" name="alt-bias" id="land-alt-bias" value="0">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <button type="button" id="land-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- set airspeed form -->
+    <div id="airspeed-form" class="modal">
+      <div class="modal-content">
+        <span id="airspeed-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Set Target Airspeed:</h2>
+            <p>
+              <label for="airspeed-target">Target Airspeed (kts):</label>
+              <b><label id="airspeed-target">25</label></b>
+            </p>
+            <div id="slidecontainer">
+              <input type="range" min="15" max="50" value="25" class="slider" id="airspeed-slider">
+            </div>
+            <p>
+              <button type="button" id="airspeed-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- set altitude form -->
+    <div id="altitude-form" class="modal">
+      <div class="modal-content">
+        <span id="altitude-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Set Target Altitude:</h2>
+            <p>
+              <label for="altitude-target-agl">Target Altitude AGL (ft):</label>
+              <b><label id="altitude-target-agl"></label></b>
+            </p>
+            <p>
+              <div>
+                <label>Ground Altitude MSL (ft):</label>
+                <b><label id="altitude-ground"></label></b>
+              </div>
+              <div>
+                <label for="altitude-target-msl">Target Altitude MSL (ft):</label>
+                <b><label id="altitude-target-msl"></label></b>
+              </div>
+            </p>
+            <div id="slidecontainer">
+              <input type="range" min="25" max="400" value="200" step="25" class="slider" id="altitude-slider">
+            </div>
+            <p>
+              <button type="button" id="altitude-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- map settings form -->
+    <div id="settings-form" class="modal">
+      <div class="modal-content">
+        <span id="settings-close" class="close">&times;</span>
+        <form>
+          <div>
+            <h2>Settings:</h2>
+            <p>
+              <fieldset>
+                <legend><em>Map</em></legend>
+                <div>
+                  <label for="settings-autopan">Map follows aircraft:</label>
+                  <input type="checkbox" name="follow" id="settings-autopan" value="autopan" checked>Autopan
+                </div>
+                <div>
+                  <label for="settings-track-sec">Flight Track Length (sec):</label>
+                  <input type="text" name="track-sec" id="settings-track-sec" value="600">
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <fieldset>
+                <legend><em>Aircraft</em></legend>
+                <div>
+                  <label for="settings-maxalt">Maximum Altitude AGL (ft):</label>
+                  <input type="text" name="maxalt" id="settings-maxalt" value="400">
+                </div>
+                <div style="margin-left: 40px">
+                  <em>The FAA Part 107 rules set the maximum ceiling
+                  to 400' AGL or 400' above a structure you are
+                  inspecting.  Flights are only allowed in Class 'G'
+                  airspace.  It is crucial to understand and honor the
+                  FAA airspace rules and classes for your operational
+                  area.</em>
+                </div>
+              </fieldset>
+            </p>
+            <p>
+              <button type="button" id="settings-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
