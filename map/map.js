@@ -35,6 +35,8 @@ menuitems = [
     { text: 'Calibrate', icon: 'icons/calibrate.png', callback: calibrate },
     { text: 'Test Autopilot', icon: 'icons/preflight.png', callback: preflight },
     { separator: true },
+    { text: 'Manage Projects', icon: 'icons/projects.png', callback: manageProjects },
+    { separator: true },
     { text: 'Settings', icon: 'icons/settings.png', callback: updateSettings },
 ];
 
@@ -594,6 +596,26 @@ function updateSettings(e) {
     });
 }
 
+function manageProjects(e) {
+    modal = $("#projects-form");
+    modal.show();
+    user_latlng = e.latlng;
+    // activate the "x"
+    $("#projects-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#projects-form-submit").off("click");
+    $("#projects-form-submit").click(function() {
+        modal.hide();
+    });
+}
+
 function survey(layer) {
     modal = $("#survey-form");
     modal.show();
@@ -627,4 +649,22 @@ function send_area(layer_id) {
     layer = drawnItems.getLayer(layer_id);
     console.log("send area:");
     console.log(layer);
+    var area = layer.editing.latlngs[0][0];
+    var area_string = "area";
+    for (var i = 0; i < area.length; i++) {
+        wpt = area[i];
+        area_string += ","
+	    + parseFloat(wpt.lng).toFixed(8) + ','
+	    + parseFloat(wpt.lat).toFixed(8) + ',';
+        if ( area_string.length > 180 ) {
+            link_send(area_string);
+	    area_string = "area_cont";
+        }
+    }
+    if ( area_string.length > 0 ) {
+        link_send(area_string);
+    }
+    if ( layer.editing.latlngs.length > 0 ) {
+	link_send("area_end");
+    }
 }
