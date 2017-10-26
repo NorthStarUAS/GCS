@@ -8,6 +8,8 @@ var active_route;
 var active_wpt;
 var dialog;
 
+var drawnItems;
+
 // map settings
 var autopan = true;
 var track_sec = 600;
@@ -118,7 +120,7 @@ function map_init() {
     L.control.layers(baselayer, overlays).addTo(mymap);
 
     // Initialise the FeatureGroup to store editable layers
-    var drawnItems = new L.FeatureGroup();
+    drawnItems = new L.FeatureGroup();
     mymap.addLayer(drawnItems);
     
     var drawPluginOptions = {
@@ -194,16 +196,22 @@ function map_init() {
                 }
             }
         } else if ( type == 'polygon' ) {
+            var route = layer.editing.latlngs[0][0];
+            console.log(layer.editing);
+            console.log(layer.editing.latlngs[0][0]);
+            if ( route.length != 4 ) {
+                alert("Only 4-sided survey areas are currently supported, this polygon has " + route.length + " sides.");
+            } else {
+                survey(layer);
+            }
             // console.log(layer.editing);
             // console.log(layer.editing.latlngs[0]);
             // console.log(layer._getMeasurementString()); // doesn't work
-            var result = confirm("Send survey area to aircraft?");
-            if ( result == true ) {
+            // var result = confirm("Send survey area to aircraft?");
+            // if ( result == true ) {
                 // send survey area
-            }
+            // }
         }
-    
-        drawnItems.addLayer(layer);
     });
     mymap.on(L.Draw.Event.EDITED, function (e) {
         console.log('edited callback called');
@@ -586,3 +594,37 @@ function updateSettings(e) {
     });
 }
 
+function survey(layer) {
+    modal = $("#survey-form");
+    modal.show();
+    // activate the "x"
+    $("#survey-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#survey-form-submit").off("click");
+    $("#survey-form-submit").click(function() {
+        modal.hide();
+        drawnItems.addLayer(layer);
+        var id = drawnItems.getLayerId(layer);
+        var name = $("#survey-name").val();
+        console.log(layer.getBounds().getCenter());
+        var marker = L.marker(layer.getBounds().getCenter()).addTo(mymap);
+        var contents = "<p>" + name + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
+        marker.bindPopup(contents);
+        // link_send('task,preflight,' + sec);
+        console.log('drawn items:');
+        console.log(drawnItems);
+    })
+}
+
+function send_area(layer_id) {
+    layer = drawnItems.getLayer(layer_id);
+    console.log("send area:");
+    console.log(layer);
+}
