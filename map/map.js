@@ -1,14 +1,16 @@
+// global variables
 var mymap;
 var ownship;
 var track;
 var home;
 var circle;
-// var circle_center;
 var active_route;
 var active_wpt;
 var dialog;
 
-var drawnItems;
+var drawnItems = new L.FeatureGroup();
+var projects = {};
+var cur_project_name = "Scratch Pad";
 
 // map settings
 var autopan = true;
@@ -122,7 +124,6 @@ function map_init() {
     L.control.layers(baselayer, overlays).addTo(mymap);
 
     // Initialise the FeatureGroup to store editable layers
-    drawnItems = new L.FeatureGroup();
     mymap.addLayer(drawnItems);
     
     var drawPluginOptions = {
@@ -609,6 +610,8 @@ function manageProjects(e) {
         if (event.target.className == "modal") {
             modal.hide();
         }
+        var name = $("#project-name").val();
+        projects[name] = drawnItems;
     }
     $("#projects-form-submit").off("click");
     $("#projects-form-submit").click(function() {
