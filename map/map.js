@@ -593,7 +593,29 @@ function updateSettings(e) {
 
 function updateProjects(p) {
     var list = $("#existing-projects-list");
-    list.html(JSON.stringify(p));
+    var html = ""
+    var keys = Object.keys(p);
+    console.log('keys ' + keys);
+    for ( var i in keys ) {
+        var key = keys[i];
+        if ( key == 'projects_magic' ) {
+            // skip
+        } else {
+            var areas = p[key];
+            html += '<p>';
+            html += "<button type=\"button\" id=\"select-project-button\" onclick=\"select_project('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Select <b>" + key + "</b></button>"
+            html += " ";
+            html += "<button type=\"button\" id=\"delete-project-button\" onclick=\"delete_project('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Delete <b>" + key + "</b></button>" 
+            html += ' (' + areas.length + ' area';
+            if ( areas.length != 1 ) {
+                html += 's';
+            }
+            html += ') ';
+           html += '</p>';
+            console.log('  key ' + keys[i] + ' len ' + areas.length);
+        }
+    }
+    list.html(html);
 }
 
 function manageProjects(e) {
