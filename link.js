@@ -18,7 +18,7 @@ function link_init() {
                 json = tmp_json;
             } else if ( tmp_json.projects_magic != null ) {
                 projects = tmp_json;
-                updateProjects(projects);
+                updateProjects();
             }
             var html = document.getElementById("aura_props");
             if ( html != null ) {
@@ -87,5 +87,5 @@ function update_project( message ) {
     ws.send('update_project ' + message)
 }
 
-link_init()
-link_update()
+link_init();
+link_update();

@@ -591,31 +591,60 @@ function updateSettings(e) {
     });
 }
 
-function updateProjects(p) {
+function updateProjects() {
     var list = $("#existing-projects-list");
     var html = ""
-    var keys = Object.keys(p);
+    var keys = Object.keys(projects);
     console.log('keys ' + keys);
     for ( var i in keys ) {
         var key = keys[i];
         if ( key == 'projects_magic' ) {
             // skip
         } else {
-            var areas = p[key];
+            var areas = projects[key];
             html += '<p>';
-            html += "<button type=\"button\" id=\"select-project-button\" onclick=\"select_project('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Select <b>" + key + "</b></button>"
+            html += "<button type=\"button\" id=\"select-project-button\" onclick=\"selectProject('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Select <b>" + key + "</b></button>"
             html += " ";
-            html += "<button type=\"button\" id=\"delete-project-button\" onclick=\"delete_project('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Delete <b>" + key + "</b></button>" 
+            html += "<button type=\"button\" id=\"delete-project-button\" onclick=\"deleteProject('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Delete <b>" + key + "</b></button>" 
             html += ' (' + areas.length + ' area';
             if ( areas.length != 1 ) {
                 html += 's';
             }
             html += ') ';
-           html += '</p>';
+            html += '</p>';
             console.log('  key ' + keys[i] + ' len ' + areas.length);
         }
     }
     list.html(html);
+}
+
+function selectProject(key) {
+    $("#projects-form").hide();
+    drawnItems.clearLayers();
+    var areas = projects[key];
+    for ( var i in areas ) {
+        a = areas[i];
+        console.log(i);
+        console.log(a);
+        ll = a.latlngs[0];
+        pts = [];
+        for ( var j in ll ) {
+            pts.push( [ ll[j].lat, ll[j].lng ] );
+        }
+        p = L.polygon( pts, { color: '#f357a1' } );
+        drawnItems.addLayer( p );
+        id = drawnItems.getLayerId( p );
+        console.log(p);
+        var marker = L.marker(p.getBounds().getCenter()).addTo(mymap);
+        var contents = "<p>" + a.name + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
+        marker.bindPopup(contents);
+        
+    }   
+}
+
+function deleteProject(key) {
+    alert(key);
+    $("#projects-form").hide();
 }
 
 function manageProjects(e) {
