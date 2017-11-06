@@ -1,7 +1,7 @@
 var ws;
-var link_connected = 0;
 var update_rate = 200;
 var json;
+var projects;
 
 function link_init() {
     try {
@@ -12,14 +12,17 @@ function link_init() {
             console.debug('Connection successfully opened (readyState ' + this.readyState+')');
         };
         ws.onmessage = function(msg) {
-            //write('Server says: '+msg.data);
-            //alert('Server says: '+msg.data);
             //console.log(msg.data);
-            json = JSON.parse( msg.data );
-            //console.log(json.sensors.imu.p_rad_sec);
-            var json_pretty = JSON.stringify(json, null, 3);
+            tmp_json = JSON.parse( msg.data );
+            if ( tmp_json.main_magic != null ) {
+                json = tmp_json;
+            } else if ( tmp_json.projects_magic != null ) {
+                projects = tmp_json;
+                updateProjects(projects);
+            }
             var html = document.getElementById("aura_props");
             if ( html != null ) {
+                var json_pretty = JSON.stringify(json, null, 3);
                 html.innerHTML = json_pretty;
             }
             if ( typeof panel != 'undefined' ) {
@@ -31,8 +34,7 @@ function link_init() {
             if ( typeof mymap != 'undefined' ) {
                 map_update();
             }
-            //console.log(json_pretty);
-            //console.log(json.sensors.imu[0].p_rad_sec);
+            // console.log(json.sensors.imu[0].p_rad_sec);
         };
         ws.onclose = function(msg) {
             //alert('Closing... The connection is going throught the closing handshake (readyState '+this.readyState+')');
@@ -57,11 +59,9 @@ function link_init() {
 function link_update() {
     try {
 	if ( ws.readyState == 1 ) {
-	    connected = 1;
 	    ws.send("get full_json\r\n");
 	} else if ( ws.readyState == 3 ) {
 	    // link closed or lost or couldn't originally be opened
-	    connected = 0;
 	    // alert( 'ready state = ' + ws.readyState );
 	    link_init(link_url);
 	}
@@ -75,6 +75,16 @@ function link_update() {
 function link_send( message ) {
     console.log('send ' + message);
     ws.send('send ' + message);
+}
+
+function get_projects() {
+    console.log('get projects');
+    ws.send('get_projects all')
+}
+
+function update_project( message ) {
+    console.log('update_project ' + message);
+    ws.send('update_project ' + message)
 }
 
 link_init()

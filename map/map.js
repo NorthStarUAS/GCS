@@ -166,8 +166,8 @@ function map_init() {
     mymap.addControl(drawControl);
     
     mymap.on(L.Draw.Event.CREATED, function (e) {
-        var type = e.layerType,
-            layer = e.layer;
+        var type = e.layerType;
+        var layer = e.layer;
     
         if ( type == 'marker' ) {
             var msg = prompt('Enter a brief note:');
@@ -199,21 +199,15 @@ function map_init() {
                 }
             }
         } else if ( type == 'polygon' ) {
-            var route = layer.editing.latlngs[0][0];
-            console.log(layer.editing);
-            console.log(layer.editing.latlngs[0][0]);
-            if ( route.length != 4 ) {
+            var route = layer.getLatLngs();
+            console.log(route);
+            //console.log(layer.editing);
+            //console.log(layer.editing.latlngs[0][0]);
+            if ( route.length != 1 && route[0].length != 4 ) {
                 alert("Only 4-sided survey areas are currently supported, this polygon has " + route.length + " sides.");
             } else {
                 survey(layer);
             }
-            // console.log(layer.editing);
-            // console.log(layer.editing.latlngs[0]);
-            // console.log(layer._getMeasurementString()); // doesn't work
-            // var result = confirm("Send survey area to aircraft?");
-            // if ( result == true ) {
-                // send survey area
-            // }
         }
     });
     mymap.on(L.Draw.Event.EDITED, function (e) {
@@ -597,10 +591,16 @@ function updateSettings(e) {
     });
 }
 
+function updateProjects(p) {
+    var list = $("#existing-projects-list");
+    list.html(JSON.stringify(p));
+}
+
 function manageProjects(e) {
     modal = $("#projects-form");
     modal.show();
     user_latlng = e.latlng;
+    get_projects();
     // activate the "x"
     $("#projects-close").click(function() {
         modal.hide();
@@ -610,12 +610,33 @@ function manageProjects(e) {
         if (event.target.className == "modal") {
             modal.hide();
         }
-        var name = $("#project-name").val();
-        projects[name] = drawnItems;
     }
     $("#projects-form-submit").off("click");
     $("#projects-form-submit").click(function() {
         modal.hide();
+        // build simplified version of drawn objects and register it
+        // with the server
+        var project = {};
+        var name = $("#project-name").val();
+        project["name"] = name;
+        project["areas"] = [];
+        console.log(name)
+        var layers = drawnItems.getLayers();
+        console.log(layers);
+        for (var i = 0; i < layers.length; i++) {
+            var l = layers[i];
+            console.log(l);
+            console.log(l.myName);
+            var ll = l.getLatLngs();
+            console.log(ll);
+            var area = {};
+            area["name"] = l.myName;
+            area["latlngs"] = l.getLatLngs();
+            project["areas"].push(area);            
+        }
+        project_str = JSON.stringify(project);
+        console.log(project_str);
+        update_project(project_str);
     });
 }
 
@@ -638,13 +659,13 @@ function survey(layer) {
         drawnItems.addLayer(layer);
         var id = drawnItems.getLayerId(layer);
         var name = $("#survey-name").val();
+        layer.myName = name;
         console.log(layer.getBounds().getCenter());
         var marker = L.marker(layer.getBounds().getCenter()).addTo(mymap);
         var contents = "<p>" + name + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
         marker.bindPopup(contents);
-        // link_send('task,preflight,' + sec);
-        console.log('drawn items:');
-        console.log(drawnItems);
+        // console.log('drawn items:');
+        // console.log(drawnItems);
     })
 }
 
@@ -652,10 +673,10 @@ function send_area(layer_id) {
     layer = drawnItems.getLayer(layer_id);
     console.log("send area:");
     console.log(layer);
-    var area = layer.editing.latlngs[0][0];
+    var polygon = layer.getLatLngs();
     var area_string = "area";
-    for (var i = 0; i < area.length; i++) {
-        wpt = area[i];
+    for (var i = 0; i < polygon[0].length; i++) {
+        wpt = polygon[0][i];
         area_string += ","
 	    + parseFloat(wpt.lng).toFixed(8) + ','
 	    + parseFloat(wpt.lat).toFixed(8) + ',';
