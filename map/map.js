@@ -24,6 +24,8 @@ var startLatLng = [44.9757, -93.2323];
 // conversions
 var ft2m = 0.3048;
 var m2ft = 1.0 / ft2m;
+var msq2acre = 0.000247105;
+var msq2hect = 0.0001;
 
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
@@ -617,6 +619,19 @@ function updateProjects() {
     list.html(html);
 }
 
+function addSurveyMarker(layer, name) {
+    var marker = L.marker(layer.getBounds().getCenter());
+    // compute survey area
+    var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+    var acres = area * msq2acre;
+    var hectare = area * msq2hect;
+    var area_str = acres.toFixed(2) + ' acres (' + hectare.toFixed(2) + ' hectares)';
+    var contents = "<p>" + name + "</p>" + "<p>" + area_str + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
+    marker.noSave = true;
+    marker.bindPopup(contents);
+    drawnItems.addLayer(marker);
+}
+
 function selectProject(key) {
     $("#project-name").val(key);
     $("#projects-form").hide();
@@ -632,14 +647,11 @@ function selectProject(key) {
             pts.push( [ ll[j].lat, ll[j].lng ] );
         }
         p = L.polygon( pts, { color: '#f357a1' } );
+        p.myName = a.name;
         drawnItems.addLayer( p );
         id = drawnItems.getLayerId( p );
         console.log(p);
-        var marker = L.marker(p.getBounds().getCenter());
-        var contents = "<p>" + a.name + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
-        marker.noSave = true;
-        marker.bindPopup(contents);
-        drawnItems.addLayer(marker);
+        addSurveyMarker(p, a.name);
     }
 }
 
@@ -701,6 +713,11 @@ function manageProjects(e) {
 function survey(layer) {
     modal = $("#survey-form");
     modal.show();
+    // compute survey acres
+    var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+    var acres = area * msq2acre;
+    var hectare = area * msq2hect;
+    $("#survey-area").html(acres.toFixed(2) + ' acres (' + hectare.toFixed(2) + ' hectares)');
     // activate the "x"
     $("#survey-close").click(function() {
         modal.hide();
@@ -719,13 +736,7 @@ function survey(layer) {
         var name = $("#survey-name").val();
         layer.myName = name;
         console.log(layer.getBounds().getCenter());
-        var marker = L.marker(layer.getBounds().getCenter());
-        var contents = "<p>" + name + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
-        marker.noSave = true;
-        marker.bindPopup(contents);
-        drawnItems.addLayer(marker);
-        // console.log('drawn items:');
-        // console.log(drawnItems);
+        addSurveyMarker(layer, name);
     })
 }
 
