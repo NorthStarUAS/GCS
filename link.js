@@ -77,14 +77,16 @@ function link_send( message ) {
     ws.send('send ' + message);
 }
 
-function get_projects() {
-    console.log('get projects');
-    ws.send('get_projects all')
+function projects_get() {
+    ws.send('projects_get all')
 }
 
-function update_project( message ) {
-    console.log('update_project ' + message);
-    ws.send('update_project ' + message)
+function projects_update( message ) {
+    ws.send('projects_update ' + message)
+}
+
+function projects_delete( key ) {
+    ws.send('projects_delete ' + key)
 }
 
 link_init();

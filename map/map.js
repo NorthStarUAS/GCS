@@ -10,7 +10,6 @@ var dialog;
 
 var drawnItems = new L.FeatureGroup();
 var projects = {};
-var cur_project_name = "Scratch Pad";
 
 // map settings
 var autopan = true;
@@ -619,6 +618,7 @@ function updateProjects() {
 }
 
 function selectProject(key) {
+    $("#project-name").val(key);
     $("#projects-form").hide();
     drawnItems.clearLayers();
     var areas = projects[key];
@@ -635,15 +635,18 @@ function selectProject(key) {
         drawnItems.addLayer( p );
         id = drawnItems.getLayerId( p );
         console.log(p);
-        var marker = L.marker(p.getBounds().getCenter()).addTo(mymap);
+        var marker = L.marker(p.getBounds().getCenter());
         var contents = "<p>" + a.name + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
+        marker.noSave = true;
         marker.bindPopup(contents);
-        
-    }   
+        drawnItems.addLayer(marker);
+    }
 }
 
 function deleteProject(key) {
-    alert(key);
+    if ( confirm('Delete project from server: "' + key + '"') ) {
+        projects_delete(key);
+    }
     $("#projects-form").hide();
 }
 
@@ -651,7 +654,7 @@ function manageProjects(e) {
     modal = $("#projects-form");
     modal.show();
     user_latlng = e.latlng;
-    get_projects();
+    projects_get();
     // activate the "x"
     $("#projects-close").click(function() {
         modal.hide();
@@ -676,18 +679,22 @@ function manageProjects(e) {
         console.log(layers);
         for (var i = 0; i < layers.length; i++) {
             var l = layers[i];
-            console.log(l);
-            console.log(l.myName);
-            var ll = l.getLatLngs();
-            console.log(ll);
-            var area = {};
-            area["name"] = l.myName;
-            area["latlngs"] = l.getLatLngs();
-            project["areas"].push(area);            
+            if ( l.noSave != null ) {
+                // skip 'noSave' layers
+            } else {
+                console.log(l);
+                console.log(l.myName);
+                var ll = l.getLatLngs();
+                console.log(ll);
+                var area = {};
+                area["name"] = l.myName;
+                area["latlngs"] = l.getLatLngs();
+                project["areas"].push(area);
+            }
         }
         project_str = JSON.stringify(project);
         console.log(project_str);
-        update_project(project_str);
+        projects_update(project_str);
     });
 }
 
@@ -712,9 +719,11 @@ function survey(layer) {
         var name = $("#survey-name").val();
         layer.myName = name;
         console.log(layer.getBounds().getCenter());
-        var marker = L.marker(layer.getBounds().getCenter()).addTo(mymap);
+        var marker = L.marker(layer.getBounds().getCenter());
         var contents = "<p>" + name + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
+        marker.noSave = true;
         marker.bindPopup(contents);
+        drawnItems.addLayer(marker);
         // console.log('drawn items:');
         // console.log(drawnItems);
     })
