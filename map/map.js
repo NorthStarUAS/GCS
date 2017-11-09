@@ -237,18 +237,6 @@ function map_init() {
         });
     });
     
-    ownship = L.marker(startLatLng, {icon: aircraftIcon});
-    ownship.addTo(mymap);
-
-    ownship_label = L.marker(startLatLng, {icon: aircraftLabel});
-    ownship_label.addTo(mymap);
-
-    track = L.polyline([], {
-        color: 'red',
-        opacity: 0.5
-    });
-    track.addTo(mymap);
-
     home = L.circleMarker(startLatLng, {
         color: 'black',
         radius: 14,
@@ -274,6 +262,7 @@ function map_init() {
         opacity: 0.5,
     });
     active_route.addTo(mymap);
+    
     active_wpt = L.circleMarker(startLatLng, {
         color: 'blue',
         opacity: 0.5,
@@ -281,6 +270,17 @@ function map_init() {
     });
     active_wpt.addTo(mymap);
 
+    track = L.polyline([], {
+        color: 'red',
+        opacity: 0.5
+    });
+    track.addTo(mymap);
+
+    ownship = L.marker(startLatLng, {icon: aircraftIcon});
+    ownship.addTo(mymap);
+
+    ownship_label = L.marker(startLatLng, {icon: aircraftLabel});
+    ownship_label.addTo(mymap);
 };
 
 
@@ -327,9 +327,8 @@ map_update = function() {
     if ( r > 1.0 ) {
         circle.setRadius(r);
     }
-    // circle_center.setLatLng( [json.task.circle.latitude_deg,
-    //                           json.task.circle.longitude_deg] );
-
+    circle.setStyle( { color: 'blue', opacity: 0.5 } );
+    
     if ( json.task.route.active.route_size > 0 ) {
         var wpts = [];
         for ( var i = 0; i < json.task.route.active.route_size; i++ ) {
@@ -339,9 +338,10 @@ map_update = function() {
         wpts.push( [json.task.route.active.wpt[0].latitude_deg,
                     json.task.route.active.wpt[0].longitude_deg] );
         active_route.setLatLngs(wpts);
+        active_route.setStyle( { color: 'blue', opacity: 0.5 } );
     }
     
-    if ( json.task.current_task_id == 'circle' ) {
+    if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
         active_wpt.setLatLng( [json.task.circle.latitude_deg,
                                json.task.circle.longitude_deg] );
     } else if ( json.task.current_task_id == 'route' ) {
