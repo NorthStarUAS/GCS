@@ -330,10 +330,15 @@ map_update = function() {
         circle.setRadius(r);
     }
     circle.setStyle( { color: 'blue', opacity: 0.5 } );
-    
-    if ( json.task.route.active.route_size > 0 ) {
+
+    var route_size = json.task.route.active.route_size;
+    if ( route_size > 0 ) {
         var wpts = [];
-        for ( var i = 0; i < json.task.route.active.route_size; i++ ) {
+        var array_size = route_size;
+        if ( json.task.route.active.wpt.length < array_size ) {
+            array_size = json.task.route.active.wpt[i].length;
+        }
+        for ( var i = 0; i < array_size; i++ ) {
             var lat = json.task.route.active.wpt[i].latitude_deg;
             var lon = json.task.route.active.wpt[i].longitude_deg;
             if ( Math.abs(lat) > 0.001 && Math.abs(lon) > 0.001 ) {

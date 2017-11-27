@@ -152,11 +152,13 @@ function send_survey_area(layer_id) {
     console.log("send area:");
     console.log(layer);
     var alt = $("#survey-alt").val();
+    var extend = $("#survey-extend").val();
     var flap = $("#survey-forward-overlap").val();
     var llap = $("#survey-side-overlap").val();
     var ffov = $("#survey-forward-fov").val();
     var lfov = $("#survey-lateral-fov").val();
-    var start_string = "survey_start," + alt + "," + flap + "," + llap + "," + ffov + "," + lfov;
+    var start_string = "survey_start," + alt + "," + extend + "," + flap
+        + "," + llap + "," + ffov + "," + lfov;
     link_send(start_string);
     var polygon = layer.getLatLngs();
     var area_string = "";
