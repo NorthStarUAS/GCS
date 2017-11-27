@@ -60,6 +60,7 @@
     <link rel="stylesheet" href="../annunciator.css">
     <script src="../annunciator.js"></script>
     <script src="aircraft.js"></script>
+    <script src="survey.js"></script>
     <script src="map.js"></script>
   </head>
   
@@ -99,12 +100,14 @@
         </div>
       </div>
     </div>
-    <div id="all-the-forms"></div>
+    <div id="main-forms"></div>
+    <div id="survey-forms"></div>
   </body>
 </html>
 
 <script>
   map_init();
   annunciator.init();
-  $('#all-the-forms').load('forms.html');
+  $('#main-forms').load('forms.html');
+  $('#survey-forms').load('survey.html');
 </script>
