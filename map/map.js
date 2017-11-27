@@ -202,10 +202,12 @@ function map_init() {
         } else if ( type == 'polygon' ) {
             var route = layer.getLatLngs();
             console.log(route);
+            console.log(route.length);
+            console.log(route[0].length);
             //console.log(layer.editing);
             //console.log(layer.editing.latlngs[0][0]);
-            if ( route.length != 1 && route[0].length != 4 ) {
-                alert("Only 4-sided survey areas are currently supported, this polygon has " + route.length + " sides.");
+            if ( route.length != 1 || route[0].length < 3 ) {
+                alert("Survey areas must include at least 3 points, this polygon has " + route[0].length + " points.");
             } else {
                 survey(layer);
             }
@@ -626,6 +628,7 @@ function addSurveyMarker(layer, name) {
     var acres = area * msq2acre;
     var hectare = area * msq2hect;
     var area_str = acres.toFixed(2) + ' acres (' + hectare.toFixed(2) + ' hectares)';
+    var id = drawnItems.getLayerId( layer );
     var contents = "<p>" + name + "</p>" + "<p>" + area_str + "</p>" + "<button type=\"button\" id=\"survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
     marker.noSave = true;
     marker.bindPopup(contents);
@@ -747,13 +750,16 @@ function send_area(layer_id) {
     var polygon = layer.getLatLngs();
     var area_string = "area";
     for (var i = 0; i < polygon[0].length; i++) {
+        if (area_string.length == 0) {
+            area_string = "area_cont";
+        }
         wpt = polygon[0][i];
         area_string += ","
 	    + parseFloat(wpt.lng).toFixed(8) + ','
-	    + parseFloat(wpt.lat).toFixed(8) + ',';
+	    + parseFloat(wpt.lat).toFixed(8);
         if ( area_string.length > 180 ) {
             link_send(area_string);
-	    area_string = "area_cont";
+	    area_string = "";
         }
     }
     if ( area_string.length > 0 ) {
