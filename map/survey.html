@@ -10,7 +10,7 @@
           <input type="text" name="name" id="survey-name" value="My Area">
         </p>
         <p>
-          <div id="survey-area"></div>
+          <div id="new-survey-area"></div>
         </p>
         <p>
           <button type="button" id="new-survey-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
@@ -20,26 +20,51 @@
   </div>
 </div>
 
-<!-- send survey area form -->
-<div id="send-survey-form" class="modal">
+<!-- request survey area form -->
+<div id="request-survey-form" class="modal">
   <div class="modal-content">
-    <span id="send-survey-close" class="close">&times;</span>
+    <span id="request-survey-close" class="close">&times;</span>
     <form>
       <div>
         <h2>Send Survey Area:</h2>
         <p>
-          Route generation will (currently) work best when the area is
-          mostly rectangular.
+          <div id="request-survey-name"></div>
         </p>
         <p>
-          <label for="survey-name">Name this area:</label>
-          <input type="text" name="name" id="survey-name" value="My Area">
+          <div id="request-survey-area"></div>
         </p>
         <p>
-          <div id="survey-area"></div>
+          <fieldset>
+            <legend><em>Flight Parameters</em></legend>
+            <div>
+              <label for="survey-alt">Survey Altitude (AGL):</label>
+              <input type="text" name="name" id="survey-alt" value="200">
+            </div>
+            <div>
+              <label for="survey-forward-overlap">Forward Overlap (fraction):</label>
+              <input type="text" name="name" id="survey-forward-overlap" value="0.70">
+            </div>
+            <div>
+              <label for="survey-side-overlap">Side Overlap (fraction):</label>
+              <input type="text" name="name" id="survey-side-overlap" value="0.70">
+            </div>
+          </fieldset>
         </p>
         <p>
-          <button type="button" id="new-survey-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+          <fieldset>
+            <legend><em>Camera Settings</em></legend>
+            <div>
+              <label for="survey-forward-fov">Camera Forward FOV (deg):</label>
+              <input type="text" name="name" id="survey-forward-fov" value="56.2">
+            </div>
+            <div>
+              <label for="survey-lateral-fov">Camera Lateral FOV (deg):</label>
+              <input type="text" name="name" id="survey-lateral-fov" value="39.0">
+            </div>
+          </fieldset>
+        </p>
+        <p>
+          <button type="button" id="request-survey-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
         </p>
       </div>
     </form>

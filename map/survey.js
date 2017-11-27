@@ -6,7 +6,7 @@ function addSurveyMarker(layer, name) {
     var hectare = area * msq2hect;
     var area_str = acres.toFixed(2) + ' acres (' + hectare.toFixed(2) + ' hectares)';
     var id = drawnItems.getLayerId( layer );
-    var contents = "<p>" + name + "</p>" + "<p>" + area_str + "</p>" + "<button type=\"button\" id=\"new-survey-form-submit\" onclick=\"send_area('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
+    var contents = "<p>" + name + "</p>" + "<p>" + area_str + "</p>" + "<button type=\"button\" id=\"new-survey-form-submit\" onclick=\"request_survey('" + id + "');\" style=\"font-size:100%; padding: 5px 20px;\">Survey Now ...</button>";
     marker.noSave = true;
     marker.bindPopup(contents);
     drawnItems.addLayer(marker);
@@ -90,14 +90,14 @@ function manageProjects(e) {
     });
 }
 
-function survey(layer) {
+function new_survey(layer) {
     modal = $("#new-survey-form");
     modal.show();
     // compute survey acres
     var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
     var acres = area * msq2acre;
     var hectare = area * msq2hect;
-    $("#survey-area").html(acres.toFixed(2) + ' acres (' + hectare.toFixed(2) + ' hectares)');
+    $("#new-survey-area").html(acres.toFixed(2) + ' acres (' + hectare.toFixed(2) + ' hectares)');
     // activate the "x"
     $("#new-survey-close").click(function() {
         modal.hide();
@@ -120,15 +120,49 @@ function survey(layer) {
     })
 }
 
-function send_area(layer_id) {
+function request_survey(layer_id) {
+    modal = $("#request-survey-form");
+    modal.show();
+    layer = drawnItems.getLayer(layer_id);
+    $("#request-survey-name").html(layer.myName)
+    // compute survey acres
+    var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+    var acres = area * msq2acre;
+    var hectare = area * msq2hect;
+    $("#request-survey-area").html(acres.toFixed(2) + ' acres (' + hectare.toFixed(2) + ' hectares)');
+    // activate the "x"
+    $("#request-survey-close").click(function() {
+        modal.hide();
+    })
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target.className == "modal") {
+            modal.hide();
+        }
+    }
+    $("#request-survey-form-submit").off("click");
+    $("#request-survey-form-submit").click(function() {
+        modal.hide();
+        send_survey_area(layer_id);
+    })
+}
+
+function send_survey_area(layer_id) {
     layer = drawnItems.getLayer(layer_id);
     console.log("send area:");
     console.log(layer);
+    var alt = $("#survey-alt").val();
+    var flap = $("#survey-forward-overlap").val();
+    var llap = $("#survey-side-overlap").val();
+    var ffov = $("#survey-forward-fov").val();
+    var lfov = $("#survey-lateral-fov").val();
+    var start_string = "survey," + alt + "," + flap + "," + llap + "," + ffov + "," + lfov;
+    link_send(start_string);
     var polygon = layer.getLatLngs();
-    var area_string = "area";
+    var area_string = "";
     for (var i = 0; i < polygon[0].length; i++) {
         if (area_string.length == 0) {
-            area_string = "area_cont";
+            area_string = "survey_cont";
         }
         wpt = polygon[0][i];
         area_string += ","
@@ -143,6 +177,6 @@ function send_area(layer_id) {
         link_send(area_string);
     }
     if ( layer.editing.latlngs.length > 0 ) {
-	link_send("area_end");
+	link_send("survey_end");
     }
 }

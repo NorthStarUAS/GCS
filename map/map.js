@@ -209,7 +209,7 @@ function map_init() {
             if ( route.length != 1 || route[0].length < 3 ) {
                 alert("Survey areas must include at least 3 points, this polygon has " + route[0].length + " points.");
             } else {
-                survey(layer);
+                new_survey(layer);
             }
         }
     });
