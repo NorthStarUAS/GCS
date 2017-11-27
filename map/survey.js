@@ -156,7 +156,7 @@ function send_survey_area(layer_id) {
     var llap = $("#survey-side-overlap").val();
     var ffov = $("#survey-forward-fov").val();
     var lfov = $("#survey-lateral-fov").val();
-    var start_string = "survey," + alt + "," + flap + "," + llap + "," + ffov + "," + lfov;
+    var start_string = "survey_start," + alt + "," + flap + "," + llap + "," + ffov + "," + lfov;
     link_send(start_string);
     var polygon = layer.getLatLngs();
     var area_string = "";
