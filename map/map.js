@@ -334,11 +334,14 @@ map_update = function() {
     if ( json.task.route.active.route_size > 0 ) {
         var wpts = [];
         for ( var i = 0; i < json.task.route.active.route_size; i++ ) {
-            wpts.push( [json.task.route.active.wpt[i].latitude_deg,
-                        json.task.route.active.wpt[i].longitude_deg] );
+            var lat = json.task.route.active.wpt[i].latitude_deg;
+            var lon = json.task.route.active.wpt[i].longitude_deg;
+            if ( Math.abs(lat) > 0.001 && Math.abs(lon) > 0.001 ) {
+                wpts.push( [lat, lon] );
+            }
         }
-        wpts.push( [json.task.route.active.wpt[0].latitude_deg,
-                    json.task.route.active.wpt[0].longitude_deg] );
+        // wpts.push( [json.task.route.active.wpt[0].latitude_deg,
+        //             json.task.route.active.wpt[0].longitude_deg] );
         active_route.setLatLngs(wpts);
         active_route.setStyle( { color: 'blue', opacity: 0.5 } );
     }
