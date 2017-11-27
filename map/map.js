@@ -252,12 +252,6 @@ function map_init() {
         radius: 100,
     });
     circle.addTo(mymap);
-    // circle_center = L.circleMarker(startLatLng, {
-    //     color: 'blue',
-    //     opacity: 0.5,
-    //     radius: 7,
-    // });
-    // circle_center.addTo(mymap);
 
     active_route = L.polyline({
         color: 'blue',
