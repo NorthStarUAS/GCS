@@ -281,56 +281,65 @@ function map_init() {
 
 
 map_update = function() {
-    if ( json.filters.filter[0].latitude_deg == null ) {
-        return;
+    if ( json.filters.filter[0].latitude_deg != null ) {
+        var newLatLng = new L.LatLng(json.filters.filter[0].latitude_deg,
+                                     json.filters.filter[0].longitude_deg);
+        ownship.setLatLng(newLatLng);
+        if (L.DomUtil.TRANSFORM) {
+            ownship._icon.style[L.DomUtil.TRANSFORM] += ' rotate('
+                + json.filters.filter[0].heading_deg + 'deg)';
+            ownship._icon.style["transform-origin"] = "50% 50%";
+        }
+        ownship_label.setLatLng(newLatLng);
+
+        var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
+        var alt_disp = Math.round(alt_ft/10) * 10;
+        var vel_disp = Math.round(json.velocity.airspeed_smoothed_kt);
+        var html = '<div>' + json.config.identity.call_sign + '</div>'
+            + '<div>' + alt_disp + ' ft</div>'
+            + '<div>' + vel_disp + ' kts</div>';
+        ownship_label._icon.innerHTML = html;
+        var visible = mymap.getBounds().contains(ownship.getLatLng());
+        if ( !visible && autopan ) {
+            mymap.panTo(ownship.getLatLng());
+        }
+    
+        track.addLatLng(newLatLng);
+        var points = track.getLatLngs();
+        var track_history = (1000/update_rate) * track_sec;
+        if ( points.length > track_history ) {
+            points.splice(0, points.length - track_history);
+        }
+
+        home.setLatLng( [json.task.home.latitude_deg,
+                         json.task.home.longitude_deg] );
+
+        circle.setLatLng( [json.task.circle.latitude_deg,
+                           json.task.circle.longitude_deg] );
+        var r = json.task.circle.radius_m;
+        if ( r > 1.0 ) {
+            circle.setRadius(r);
+        }
+        circle.setStyle( { color: 'blue', opacity: 0.5 } );
+    
+        if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
+            active_wpt.setLatLng( [json.task.circle.latitude_deg,
+                                   json.task.circle.longitude_deg] );
+        } else if ( json.task.current_task_id == 'route' ) {
+            i = json.task.route.target_waypoint_idx;
+            if ( i < json.task.route.active.wpt.length ) {
+                active_wpt.setLatLng( [json.task.route.active.wpt[i].latitude_deg,
+                                       json.task.route.active.wpt[i].longitude_deg] );
+            }
+        }
     }
     
-    var newLatLng = new L.LatLng(json.filters.filter[0].latitude_deg,
-                                 json.filters.filter[0].longitude_deg);
-    ownship.setLatLng(newLatLng);
-    if (L.DomUtil.TRANSFORM) {
-        ownship._icon.style[L.DomUtil.TRANSFORM] += ' rotate('
-            + json.filters.filter[0].heading_deg + 'deg)';
-        ownship._icon.style["transform-origin"] = "50% 50%";
-    }
-    ownship_label.setLatLng(newLatLng);
-
-    var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
-    var alt_disp = Math.round(alt_ft/10) * 10;
-    var vel_disp = Math.round(json.velocity.airspeed_smoothed_kt);
-    var html = '<div>' + json.config.identity.call_sign + '</div>'
-        + '<div>' + alt_disp + ' ft</div>'
-        + '<div>' + vel_disp + ' kts</div>';
-    ownship_label._icon.innerHTML = html;
-    var visible = mymap.getBounds().contains(ownship.getLatLng());
-    if ( !visible && autopan ) {
-        mymap.panTo(ownship.getLatLng());
-    }
-    
-    track.addLatLng(newLatLng);
-    var points = track.getLatLngs();
-    var track_history = (1000/update_rate) * track_sec;
-    if ( points.length > track_history ) {
-        points.splice(0, points.length - track_history);
-    }
-
-    home.setLatLng( [json.task.home.latitude_deg,
-                     json.task.home.longitude_deg] );
-
-    circle.setLatLng( [json.task.circle.latitude_deg,
-                       json.task.circle.longitude_deg] );
-    var r = json.task.circle.radius_m;
-    if ( r > 1.0 ) {
-        circle.setRadius(r);
-    }
-    circle.setStyle( { color: 'blue', opacity: 0.5 } );
-
     var route_size = json.task.route.active.route_size;
     if ( route_size > 0 ) {
         var wpts = [];
         var array_size = route_size;
         if ( json.task.route.active.wpt.length < array_size ) {
-            array_size = json.task.route.active.wpt[i].length;
+            array_size = json.task.route.active.wpt.length;
         }
         for ( var i = 0; i < array_size; i++ ) {
             var lat = json.task.route.active.wpt[i].latitude_deg;
@@ -343,17 +352,6 @@ map_update = function() {
         //             json.task.route.active.wpt[0].longitude_deg] );
         active_route.setLatLngs(wpts);
         active_route.setStyle( { color: 'blue', opacity: 0.5 } );
-    }
-    
-    if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
-        active_wpt.setLatLng( [json.task.circle.latitude_deg,
-                               json.task.circle.longitude_deg] );
-    } else if ( json.task.current_task_id == 'route' ) {
-        i = json.task.route.target_waypoint_idx;
-        if ( i < json.task.route.active.wpt.length ) {
-            active_wpt.setLatLng( [json.task.route.active.wpt[i].latitude_deg,
-                                   json.task.route.active.wpt[i].longitude_deg] );
-        }
     }
 };
 
