@@ -92,8 +92,8 @@ var annunciator = function() {
     function draw_volts() {
         var volts_div = $("#volts");
         var volts_inner = $("#volts #inner");
-        if ( volts_div != null && json.sensors.APM2.extern_volts != null ) {
-            var volts_per_cell = parseFloat(json.sensors.APM2.extern_volts).toFixed(2);
+        if ( volts_div != null && json.sensors.power.main_vcc != null ) {
+            var volts_per_cell = parseFloat(json.sensors.power.cell_vcc).toFixed(2);
             if ( volts_per_cell < 3.20 ) {
                 volts_div.attr("class", "error");
             } else if ( volts_per_cell < 3.30 ) {
@@ -108,8 +108,8 @@ var annunciator = function() {
     function draw_battery() {
         var batt_div = $("#battery");
         var batt_inner = $("#battery #inner");
-        if ( batt_div != null && json.sensors.APM2.extern_current_mah != null ) {
-            var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
+        if ( batt_div != null && json.sensors.power.total_mah != null ) {
+            var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
             var battery_total = parseFloat(json.config.specs.battery_mah)
             var remaining = battery_total - mah
             var battery_percent = ((remaining / battery_total) * 100).toFixed(0)

@@ -159,7 +159,7 @@ var panel = function() {
         var nw = Math.floor(img_asi3.width*scale)
         var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
-        var vcc = json.sensors.APM2.board_vcc;
+        var vcc = json.sensors.power.avionics_vcc;
         if (vcc < 4.45) { vcc = 4.45; }
         if (vcc > 5.55) { vcc = 5.55; }
         var deg = (vcc - 5.0) * 150.0;
@@ -172,7 +172,7 @@ var panel = function() {
         var nw = Math.floor(img_asi3.width*scale)
         var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
-        var cell_volts = json.sensors.APM2.extern_cell_volts;
+        var cell_volts = parseFloat(json.sensors.power.cell_vcc);
         if (cell_volts < 2.95) { cell_volts = 2.95; }
         if (cell_volts > 4.25) { cell_volts = 4.25; }
         var deg = ((3.6 - cell_volts) * 75.0 / 0.6) + 180.0;
@@ -418,7 +418,7 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var amps = json.sensors.APM2.extern_amps;
+        var amps = json.sensors.power.main_amps;
         
         // backplate
         context.drawImage(img_amp, x, y, width=size, height=size);
@@ -438,7 +438,7 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var watts = json.sensors.APM2.extern_watts;
+        var watts = json.sensors.power.main_watts;
         var max_watts = 500;
         
         // backplate
@@ -453,7 +453,7 @@ var panel = function() {
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
 
-        var mah = parseFloat(json.sensors.APM2.extern_current_mah).toFixed(0);
+        var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
         var battery_total = parseFloat(json.config.specs.battery_mah)
         var remaining = battery_total - mah
         var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
