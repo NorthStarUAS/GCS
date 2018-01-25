@@ -5,7 +5,7 @@ var annunciator = function() {
     function pad2(number) {
         return (number < 10 ? '0' : '') + number;
     }
-    
+
     function pad3(number) {
         if ( number < 10 ) {
             return '00' + number;
@@ -206,7 +206,7 @@ var annunciator = function() {
         var temp_div = $("#temp");
         var temp_inner = $("#temp #inner");
         if ( temp_div != null && json.sensors.airdata[0] != null ) {
-            var temp = parseFloat(json.sensors.airdata[0].temp_degC).toFixed(0);
+            var temp = parseFloat(json.sensors.airdata[0].temp_C).toFixed(0);
             if ( temp < -30 || temp > 50 ) {
                 temp_div.attr("class", "error");
             } else if ( temp < -10 || temp > 35 ) {
