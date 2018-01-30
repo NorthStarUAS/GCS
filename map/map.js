@@ -19,6 +19,9 @@ var default_altitude = 200;
 var maxalt = 400;
 
 // hard coded configurations
+var cycle = '20180104';
+var vfr_template = 'http://vfrmap.com/' + cycle + '/tiles/vfrc/{z}/{y}/{x}.jpg';
+var ifr_template = 'http://vfrmap.com/' + cycle + '/tiles/ifrlc/{z}/{y}/{x}.jpg';
 var startLatLng = [44.9757, -93.2323];
 
 // conversions
@@ -101,21 +104,21 @@ function map_init() {
             transparent: true
         }),
 
-        "VFRMap.com Sectionals (US)" : new L.TileLayer('http://vfrmap.com/20140918/tiles/vfrc/{z}/{y}/{x}.jpg', {
+        "VFRMap.com Sectionals (US)" : new L.TileLayer(vfr_template, {
             maxZoom : 12,
             minZoom : 3,
             attribution : '&copy; <a target="_blank" href="http://vfrmap.com">VFRMap.com</a>',
             tms : true,
-            opacity : 0.5,
+            opacity : 0.7,
             bounds : L.latLngBounds(L.latLng(16.0, -179.0), L.latLng(72.0, -60.0)),
         }),
 
-        "VFRMap.com - Low IFR (US)" : new L.TileLayer('http://vfrmap.com/20140918/tiles/ifrlc/{z}/{y}/{x}.jpg', {
+        "VFRMap.com - Low IFR (US)" : new L.TileLayer(ifr_template, {
             maxZoom : 12,
             minZoom : 5,
             attribution : '&copy; <a target="_blank" href="http://vfrmap.com">VFRMap.com</a>',
             tms : true,
-            opacity : 0.5,
+            opacity : 0.7,
             bounds : L.latLngBounds(L.latLng(16.0, -179.0), L.latLng(72.0, -60.0)),
         }),
     }
