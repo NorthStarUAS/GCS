@@ -471,6 +471,7 @@ var panel = function() {
         context.restore();
     }
 
+    var tc_filt = 0.0;
     function draw_tc( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -490,8 +491,9 @@ var panel = function() {
             var ay = json.sensors.imu[0].ay_mps_sec;
             var az = json.sensors.imu[0].az_mps_sec;
             var tc = ay / az;
+            tc_filt = 0.8 * tc_filt + 0.2 * tc;
         }
-        var xpos = tc * -500 * scale;
+        var xpos = tc_filt * -500 * scale;
         context.save();
         var nw = Math.floor(img_tc2.width*scale)
         var nh = Math.floor(img_tc2.height*scale)
@@ -616,6 +618,7 @@ var panel = function() {
 
     var vsi_interpx = [ -2000, -1500, -1000, -500, 0, 500, 1000, 1500, 2000 ];
     var vsi_interpy = [ -173.5, -131.5, -82, -36, 0, 35, 81, 131, 173 ];
+    var climb_filt = 0.0;
     function draw_vsi( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -625,7 +628,8 @@ var panel = function() {
         context.drawImage(img_vsi1, x, y, width=size, height=size);
 
         var climb_fpm = json.velocity.pressure_vertical_speed_fps * 60;
-        var needle_rot = my_interp(climb_fpm, vsi_interpx, vsi_interpy) - 90;
+        climb_filt = 0.95 * climb_filt + 0.05 * climb_fpm;
+        var needle_rot = my_interp(climb_filt, vsi_interpx, vsi_interpy) - 90;
         // needle
         context.save();
         var nw = Math.floor(img_alt5.width*scale)
