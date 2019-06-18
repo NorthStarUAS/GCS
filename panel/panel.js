@@ -543,16 +543,31 @@ var panel = function() {
         context.restore();
     }
 
+    var groundtrack_deg = 0.0;
     function draw_dg( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
 
         var heading = json.filters.filter[0].heading_deg;
-        var groundtrack = json.filters.filter[0].groundtrack_deg;
+        var groundspeed_ms = parseFloat(json.filters.filter[0].groundspeed_ms);
+        if ( groundspeed_ms > 0.25 ) {
+            groundtrack_deg = json.filters.filter[0].groundtrack_deg;
+        }
         var ap_hdg = json.autopilot.targets.groundtrack_deg
         var wind_deg = json.filters.wind.wind_dir_deg;
         
+        var display_units = json.config.specs.display_units;
+        var speed_scale = 1.0;
+        if ( display_units == "mps" ) {
+            speed_scale = kt2mps;
+        } else if ( display_units == "kts" ) {
+            speed_scale = 1.0;
+        } else {
+            // default to mps if not specified
+            speed_scale = kt2mps;
+        }
+            
         // rose
         context.save();
         var nw = Math.floor(img_hdg1.width*scale)
@@ -590,7 +605,7 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "lightblue";
         context.textAlign = "center";
-        context.fillText("WND:" + wind_kt, cx + size*0.14, cy - size*0.06);
+        context.fillText("WND:" + wind_kt*speed_scale, cx + size*0.14, cy - size*0.06);
         context.restore();
  
         // ground track
@@ -598,7 +613,7 @@ var panel = function() {
         context.strokeStyle = 'orange';
         context.lineWidth = 5;
         context.translate(cx, cy);
-        var track_rot = -parseFloat(heading) + parseFloat(groundtrack);
+        var track_rot = -parseFloat(heading) + groundtrack_deg;
         context.rotate(track_rot*d2r);
         context.beginPath();
         context.moveTo(0, size*0.5*0.65);
@@ -622,7 +637,7 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "orange";
         context.textAlign = "center";
-        context.fillText("GS:" + track_kt, cx - size*0.14, cy - size*0.06);
+        context.fillText("GS:" + track_kt*speed_scale, cx - size*0.14, cy - size*0.06);
         context.restore();
         
         // bug
