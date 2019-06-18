@@ -6,6 +6,7 @@
 var d2r = Math.PI / 180;
 var r2d = 180 / Math.PI;
 var mps2kt = 1.9438444924406046432;
+var kt2mps = 0.514444;
 
 var panel = function() {
     var canvas;
@@ -189,18 +190,31 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
+        var display_units = json.config.specs.display_units;
+        var speed_scale = 1.0;
+        if ( display_units == "mps" ) {
+            speed_scale = kt2mps;
+        } else if ( display_units == "kts" ) {
+            speed_scale = 1.0;
+        } else {
+            // default to mps if not specified
+            speed_scale = kt2mps;
+            display_units = "MPS";
+        }
+            
         var min_kt = parseFloat(json.config.autopilot.TECS.min_kt);
         var max_kt = parseFloat(json.config.autopilot.TECS.max_kt);
         var cruise_kt = parseFloat(json.config.specs.cruise_kt);
         var range_kt = max_kt - min_kt;
         var caution_kt = min_kt + 0.8 * range_kt;
         var die_kt = max_kt + 10.0;
-        
-        var min_deg = my_interp(min_kt, asi_interpx, asi_interpy);
-        var max_deg = my_interp(max_kt, asi_interpx, asi_interpy);
-        var cruise_deg = my_interp(cruise_kt, asi_interpx, asi_interpy);
-        var caution_deg = my_interp(caution_kt, asi_interpx, asi_interpy);
-        var die_deg = my_interp(die_kt, asi_interpx, asi_interpy);
+
+       
+        var min_deg = my_interp(min_kt*speed_scale, asi_interpx, asi_interpy);
+        var max_deg = my_interp(max_kt*speed_scale, asi_interpx, asi_interpy);
+        var cruise_deg = my_interp(cruise_kt*speed_scale, asi_interpx, asi_interpy);
+        var caution_deg = my_interp(caution_kt*speed_scale, asi_interpx, asi_interpy);
+        var die_deg = my_interp(die_kt*speed_scale, asi_interpx, asi_interpy);
 
         var min_rad = (min_deg - 90) * d2r;
         var max_rad = (max_deg - 90) * d2r;
@@ -237,13 +251,22 @@ var panel = function() {
         // tics
         context.drawImage(img_aura_asi2, x, y, width=size, height=size);
 
+        // units label
+        context.save()
+        var px = Math.round(size * 0.07);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        context.fillText(display_units.toUpperCase(), cx, cy + size*0.13);
+        context.restore();
+        
         // 'true' label
         context.save()
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "orange";
         context.textAlign = "center";
-        context.fillText("(TRUE)", cx, cy + size*0.25);
+        context.fillText("(TRUE)", cx, cy + size*0.21);
         context.restore();
         
         // bug
@@ -251,7 +274,7 @@ var panel = function() {
         var nw = Math.floor(img_hdg2.width*scale)
         var nh = Math.floor(img_hdg2.height*scale)
         context.translate(cx, cy);
-        var deg = my_interp( json.autopilot.targets.airspeed_kt,
+        var deg = my_interp( json.autopilot.targets.airspeed_kt*speed_scale,
                              asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.95, width=nw, height=nh);
@@ -263,7 +286,7 @@ var panel = function() {
         context.lineWidth = 5;
         context.translate(cx, cy);
         var ps = json.filters.wind.pitot_scale_factor;
-        var true_kt = json.velocity.airspeed_smoothed_kt * ps;
+        var true_kt = json.velocity.airspeed_smoothed_kt*speed_scale * ps;
         var deg = my_interp( true_kt, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.beginPath();
@@ -285,7 +308,7 @@ var panel = function() {
         var nw = Math.floor(img_asi3.width*scale)
         var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
-        var deg = my_interp( json.velocity.airspeed_smoothed_kt,
+        var deg = my_interp( json.velocity.airspeed_smoothed_kt*speed_scale,
                              asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
