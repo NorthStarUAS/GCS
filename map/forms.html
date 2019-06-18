@@ -53,7 +53,7 @@
     <span id="calibrate-close" class="close">&times;</span>
     <form>
       <div>
-        <h2>Calibrate Aircraft:</h2>
+        <h2>Calibrate Aircraft (recommended for each flight):</h2>
         <ul>
           <li>Sets home location to current aircraft location.</li>
           <li>Zeros airspeed.</li>
@@ -62,8 +62,30 @@
         <p>Shield the pitot tube, click submit, then wait 10 seconds.</p>
         <p>Note: this command has no effect when airborne.</p>
         <p>
-          <button type="button" id="calibrate-form-submit" style="font-size:110%; padding: 5px 20px;">Submit</button>
+          <button type="button" id="calibrate-form-submit" style="font-size:110%; padding: 5px 20px;">Preflight Calibration</button>
         </p>
+        <fieldset>
+          <legend><em>Danger Zone</em></legend>
+          <h2>Reset / Initialize EKF:</h2>
+          <ul>
+            <li>Resets / reinitializes the aircraft navigation filter (EKF).</li>
+            <li>For use when the EKF becomes too unhappy before launch..</li>
+          </ul>
+          <p>Note: only perform this operation when absolutely stationary on the ground!</p>
+          <p>
+            <button type="button" id="calibrate-reset-ekf" style="font-size:110%; padding: 5px 20px;">Force EKF Reset</button>
+          </p>
+          
+          <h2>Zero Gyros:</h2>
+          <ul>
+            <li>Sends a request to the FMU to zero the gyros.</li>
+            <li>For use when the EKF becomes too unhappy before launch..</li>
+          </ul>
+          <p>Note: only perform this operation when absolutely stationary on the ground!</p>
+          <p>
+            <button type="button" id="calibrate-zero-gyros" style="font-size:110%; padding: 5px 20px;">Zero Gyros</button>
+          </p>
+        </fieldset>
       </div>
     </form>
   </div>

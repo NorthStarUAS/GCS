@@ -435,6 +435,16 @@ function calibrate(e) {
         modal.hide();
         link_send('task,calibrate');
     })
+    $("#calibrate-reset-ekf").off("click");
+    $("#calibrate-reset-ekf").click(function() {
+        modal.hide();
+        link_send('set,/filters/command,reset');
+    })
+    $("#calibrate-zero-gyros").off("click");
+    $("#calibrate-zero-gyros").click(function() {
+        modal.hide();
+        link_send('set,/sensors/Aura3/command,zero_gyros');
+    })
 }
 
 function preflight(e) {
