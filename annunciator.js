@@ -183,9 +183,22 @@ var annunciator = function() {
         var wind_div = $("#wind");
         var wind_inner = $("#wind #inner");
         if ( wind_div != null && json.filters.wind.wind_dir_deg != null ) {
+            var display_units = "??";
+            var speed_scale = 1.0;
+            if ( json.config.specs.display_units == "mps" ) {
+                speed_scale = kt2mps;
+                display_units = "ms";
+            } else if ( json.config.specs.display_units == "kts" ) {
+                speed_scale = 1.0;
+                display_units = "kt";
+            } else {
+                // default to mps if not specified
+                speed_scale = kt2mps;
+                display_units = "ms";
+            }
             var wind_deg = parseFloat(json.filters.wind.wind_dir_deg);
             var dir = Math.round(parseFloat(wind_deg * 0.1).toFixed(0) * 10.0);
-            var speed = parseFloat(json.filters.wind.wind_speed_kt);
+            var speed = parseFloat(json.filters.wind.wind_speed_kt*speed_scale);
             var target_airspeed_kt = parseFloat(json.autopilot.targets.airspeed_kt);
             var ratio = 0.0;
             if ( target_airspeed_kt > 0.1 ) {
@@ -198,7 +211,7 @@ var annunciator = function() {
             } else {
                 wind_div.attr("class", "error");
             }
-            wind_inner.html(pad3(dir) + '@' + speed.toFixed(0) + 'kt');
+            wind_inner.html(pad3(dir) + '@' + speed.toFixed(0) + display_units);
         }
     }
 
