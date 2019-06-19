@@ -632,12 +632,12 @@ var panel = function() {
         // groundspeed label
         context.save()
         var track_mps = parseFloat(json.filters.filter[0].groundspeed_ms);
-        var track_kt = (track_mps * mps2kt).toFixed(0);
+        var track_speed = (track_mps * mps2kt * speed_scale).toFixed(0);
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "orange";
         context.textAlign = "center";
-        context.fillText("GS:" + track_kt*speed_scale, cx - size*0.14, cy - size*0.06);
+        context.fillText("GS:" + track_speed, cx - size*0.14, cy - size*0.06);
         context.restore();
         
         // bug
