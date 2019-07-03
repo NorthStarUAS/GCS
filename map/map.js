@@ -314,16 +314,20 @@ map_update = function() {
             points.splice(0, points.length - track_history);
         }
 
-        home.setLatLng( [json.task.home.latitude_deg,
-                         json.task.home.longitude_deg] );
-
-        circle.setLatLng( [json.task.circle.latitude_deg,
-                           json.task.circle.longitude_deg] );
-        var r = json.task.circle.radius_m;
-        if ( r > 1.0 ) {
-            circle.setRadius(r);
+        if ( json.task.home.latitude_deg != null ) {
+            home.setLatLng( [json.task.home.latitude_deg,
+                             json.task.home.longitude_deg] );
         }
-        circle.setStyle( { color: 'blue', opacity: 0.5 } );
+
+        if ( json.task.circle.latitude_deg != null ) {
+            circle.setLatLng( [json.task.circle.latitude_deg,
+                               json.task.circle.longitude_deg] );
+            var r = json.task.circle.radius_m;
+            if ( r > 1.0 ) {
+                circle.setRadius(r);
+            }
+            circle.setStyle( { color: 'blue', opacity: 0.5 } );
+        }
     
         if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
             active_wpt.setLatLng( [json.task.circle.latitude_deg,

@@ -180,6 +180,7 @@ var annunciator = function() {
     }
 
     function draw_wind() {
+        var kt2mps = 0.514444;
         var wind_div = $("#wind");
         var wind_inner = $("#wind #inner");
         if ( wind_div != null && json.filters.wind.wind_dir_deg != null ) {
