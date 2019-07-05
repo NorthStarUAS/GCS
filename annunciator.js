@@ -113,6 +113,9 @@ var annunciator = function() {
             var battery_total = parseFloat(json.config.specs.battery_mah)
             var remaining = battery_total - mah
             var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
+            if ( isNaN(battery_percent) ){
+                battery_percent = 100;
+            }
             if ( battery_percent < 0 ) {
                 battery_percent = 0;
             }
