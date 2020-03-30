@@ -112,7 +112,8 @@ var annunciator = function() {
             var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
             var battery_total = parseFloat(json.config.specs.battery_mah)
             var remaining = battery_total - mah
-            var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
+            // var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
+            var battery_percent = (parseFloat(json.sensors.power.battery_perc) * 100).toFixed(0)
             if ( isNaN(battery_percent) ){
                 battery_percent = 100;
             }
