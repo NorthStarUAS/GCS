@@ -517,7 +517,7 @@ var panel = function() {
         
         // 'true' label
         context.save()
-        px = Math.round(size * 0.08);
+        px = Math.round(size * 0.07);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
