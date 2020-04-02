@@ -29,10 +29,10 @@ var panel = function() {
     var img_alt4 = new Image();
     var img_alt5 = new Image();
     var img_power = new Image();
-    var img_tc1 = new Image();
-    var img_tc2 = new Image();
-    var img_tc3 = new Image();
-    var img_tc4 = new Image();
+    //var img_tc1 = new Image();
+    //var img_tc2 = new Image();
+    //var img_tc3 = new Image();
+    //var img_tc4 = new Image();
     var img_hdg1 = new Image();
     var img_hdg2 = new Image();
     var img_hdg3 = new Image();
@@ -45,7 +45,8 @@ var panel = function() {
         alt : {draw: draw_alt},
         amp : {draw: draw_amp},
         power : {draw: draw_power},
-        tc : {draw: draw_tc},
+        // tc : {draw: draw_tc},
+        health : {draw: draw_health},
         dg : {draw: draw_dg},
         vsi : {draw: draw_vsi},
     };
@@ -53,12 +54,12 @@ var panel = function() {
     var layout_config = {
         horizontal : {
             instruments : [['vcc', 'asi', 'ati', 'alt'],
-                           ['power', 'tc', 'dg', 'vsi']]
+                           ['power', 'health', 'dg', 'vsi']]
         },
         vertical : {
             instruments : [['vcc', 'power'],
                            ['asi', 'ati'],
-                           ['alt', 'tc'],
+                           ['alt', 'health'],
                            ['dg', 'vsi']]
         }
     };
@@ -105,10 +106,10 @@ var panel = function() {
         img_alt4.src = 'textures/alt4.png';
         img_alt5.src = 'textures/alt5.png';
         img_power.src = 'textures/power.png';
-        img_tc1.src = 'textures/tc1.png';
-        img_tc2.src = 'textures/tc2.png';
-        img_tc3.src = 'textures/tc3.png';
-        img_tc4.src = 'textures/tc4.png';
+        //img_tc1.src = 'textures/tc1.png';
+        //img_tc2.src = 'textures/tc2.png';
+        //img_tc3.src = 'textures/tc3.png';
+        //img_tc4.src = 'textures/tc4.png';
         img_hdg1.src = 'textures/hdg1.png';
         img_hdg2.src = 'textures/hdg2.png';
         img_hdg3.src = 'textures/hdg3.png';
@@ -492,6 +493,85 @@ var panel = function() {
         context.translate(cx, cy);
         context.rotate((165 - battery_percent*1.5) * d2r);
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
+        context.restore();
+    }
+
+    function get_color( x, warn, alert ) {
+        if ( x >= alert ) {
+            return "red";
+        } else if ( x >= warn )  {
+            return "yellow";
+        } else {
+            return '#0C0';
+        }
+    }
+    
+    function draw_health( x, y, size ) {
+        var px;
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+        
+        // background
+        context.drawImage(img_aura_asi1, x, y, width=size, height=size);
+        
+        // 'true' label
+        context.save()
+        px = Math.round(size * 0.08);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        context.fillText("HEALTH", cx, cy - size*0.35);
+        context.restore();
+        
+        context.save()
+        px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.textAlign = "left";
+        
+        var pos_cov = parseFloat(json.filters.filter[0].max_pos_cov)*3;
+        context.fillStyle = get_color(pos_cov, 1.0, 2.0);
+        context.fillText("EKF Pos: " + pos_cov.toFixed(2) + " m", cx - size * 0.35, cy - size*0.25);
+        
+        var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
+        context.fillStyle = get_color(vel_cov, 0.05, 0.10);
+        context.fillText("EKF Vel: " + vel_cov.toFixed(2) + " m/s", cx - size * 0.35, cy - size*0.18);
+
+        var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
+        context.fillStyle = get_color(att_cov, 0.5, 1.0);
+        context.fillText("EKF Att: " + att_cov.toFixed(2) + " deg", cx - size * 0.35, cy - size*0.11);
+        
+        var ax_bias = parseFloat(json.filters.filter[0].ax_bias);
+        var ay_bias = parseFloat(json.filters.filter[0].ay_bias);
+        var az_bias = parseFloat(json.filters.filter[0].az_bias);
+        var accel_bias = ax_bias;
+        if ( ay_bias > accel_bias ) { accel_bias = ay_bias; }
+        if ( az_bias > accel_bias ) { accel_bias = az_bias; }
+        context.fillStyle = get_color(accel_bias, 0.5, 1.0);
+        context.fillText("Accl Bias: " + accel_bias.toFixed(3) + " m/s^2", cx - size * 0.35, cy - size*0.04);
+
+        var p_bias = parseFloat(json.filters.filter[0].p_bias);
+        var q_bias = parseFloat(json.filters.filter[0].q_bias);
+        var r_bias = parseFloat(json.filters.filter[0].r_bias);
+        var gyro_bias = p_bias;
+        if ( q_bias > gyro_bias ) { gyro_bias = p_bias; }
+        if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
+        context.fillStyle = get_color(gyro_bias, 0.5 * Math.PI / 180.0,
+                                      1.0 * Math.PI / 180.0);
+        context.fillText("Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(3) + " dps", cx - size * 0.35, cy + size*0.03);
+
+        var load_avg = parseFloat(json.status.system_load_avg);
+        context.fillStyle = get_color(load_avg, 1.5, 1.75);
+        context.fillText("Load Avg: " + (load_avg).toFixed(2), cx - size * 0.35, cy + size*0.10);
+
+        var fmu_timer = parseInt(json.status.fmu_timer_misses);
+        context.fillStyle = get_color(fmu_timer, 1, 10);
+        context.fillText("FMU Timer Err: " + fmu_timer, cx - size * 0.35, cy + size*0.17);
+
+        var air_err = parseInt(json.sensors.airdata[0].error_count);
+        context.fillStyle = get_color(air_err, 10, 25);
+        context.fillText("Airdata Err: " + air_err, cx - size * 0.35, cy + size*0.24);
+        
         context.restore();
     }
 
