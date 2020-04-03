@@ -496,13 +496,27 @@ var panel = function() {
         context.restore();
     }
 
-    function get_color( x, warn, alert ) {
+    var alerts = [];
+    var warns = [];
+    var oks = [];
+        
+    function add_status_message( text, x, ok, warn, alert ) {
         if ( x >= alert ) {
-            return "red";
+            alerts.push(text);
         } else if ( x >= warn )  {
-            return "yellow";
-        } else {
-            return '#0C0';
+            warns.push(text);
+        } else if ( x >= ok ) {
+            oks.push(text);
+        }
+    }
+    
+    function add_status_message_inv( text, x, ok, warn, alert ) {
+        if ( x < alert ) {
+            alerts.push(text);
+        } else if ( x < warn )  {
+            warns.push(text);
+        } else if ( x < ok ) {
+            oks.push(text);
         }
     }
     
@@ -523,48 +537,46 @@ var panel = function() {
         context.textAlign = "center";
         context.fillText("STATUS", cx, cy - size*0.35);
         context.restore();
-        
-        context.save()
-        px = Math.round(size * 0.06);
-        context.font = px + "px Courier New, monospace";
-        context.textAlign = "left";
+
+        alerts = [];
+        warns = [];
+        oks = [];
+        var text;
+
+        // EKF messages
         
         var pos_cov = parseFloat(json.filters.filter[0].max_pos_cov)*3;
-        if ( json.filters.filter[0].status == 2 ) {
-            context.fillStyle = get_color(pos_cov, 1.0, 2.0);
-        } else {
-            context.fillStyle = "red"
-        }            
-        context.fillText("Pos Acc: " + pos_cov.toFixed(2) + " m", cx - size * 0.35, cy - size*0.25);
-        
+        if ( json.filters.filter[0].status < 2 ) {
+            pos_cov = 99.99;
+        }
+        text = "Pos Acc: " + pos_cov.toFixed(2) + " m";
+        add_status_message(text, pos_cov, 0.2, 1.0, 2.0)
+
         var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
-        if ( json.filters.filter[0].status == 2 ) {
-            context.fillStyle = get_color(vel_cov, 0.05, 0.10);
-        } else {
-            context.fillStyle = "red"
-        }            
-        context.fillText("Vel Acc: " + vel_cov.toFixed(2) + " m/s", cx - size * 0.35, cy - size*0.18);
+        if ( json.filters.filter[0].status < 2 ) {
+            vel_cov = 99.99;
+        }
+        text = "Vel Acc: " + vel_cov.toFixed(2) + " m/s";
+        add_status_message(text, vel_cov, 0.01, 0.05, 0.10);
 
         var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
-        if ( json.filters.filter[0].status == 2 ) {
-            context.fillStyle = get_color(att_cov, 0.5, 1.0);
-        } else {
-            context.fillStyle = "red"
+        if ( json.filters.filter[0].status < 2 ) {
+            att_cov = 99.99;
         }            
-        context.fillText("Att Acc: " + att_cov.toFixed(2) + " deg", cx - size * 0.35, cy - size*0.11);
-        
+        text = "Att Acc: " + att_cov.toFixed(2) + " deg";
+        add_status_message(text, att_cov, 0.1, 0.5, 1.0);
+
         var ax_bias = parseFloat(json.filters.filter[0].ax_bias);
         var ay_bias = parseFloat(json.filters.filter[0].ay_bias);
         var az_bias = parseFloat(json.filters.filter[0].az_bias);
         var accel_bias = ax_bias;
         if ( ay_bias > accel_bias ) { accel_bias = ay_bias; }
         if ( az_bias > accel_bias ) { accel_bias = az_bias; }
-        if ( json.filters.filter[0].status == 2 ) {
-            context.fillStyle = get_color(accel_bias, 0.5, 1.0);
-        } else {
-            context.fillStyle = "red"
+        if ( json.filters.filter[0].status < 2 ) {
+            accel_bias = 99.99;
         }            
-        context.fillText("Accel Bias: " + accel_bias.toFixed(2) + " m/s^2", cx - size * 0.35, cy - size*0.04);
+        text = "Accel Bias: " + accel_bias.toFixed(2) + " m/s^2";
+        add_status_message(text, accel_bias, 0.1, 0.5, 1.0);
 
         var p_bias = parseFloat(json.filters.filter[0].p_bias);
         var q_bias = parseFloat(json.filters.filter[0].q_bias);
@@ -572,31 +584,104 @@ var panel = function() {
         var gyro_bias = p_bias;
         if ( q_bias > gyro_bias ) { gyro_bias = p_bias; }
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
-        if ( json.filters.filter[0].status == 2 ) {
-            context.fillStyle = get_color(gyro_bias, 0.5 * Math.PI / 180.0,
-                                          1.0 * Math.PI / 180.0);
-        } else {
-            context.fillStyle = "red"
-        }            
-        context.fillText("Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(2) + " dps", cx - size * 0.35, cy + size*0.03);
+        if ( json.filters.filter[0].status < 2 ) {
+            gyro_bias = 99.99;
+        }
+        text = "Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(2) + " dps";
+        add_status_message(text, gyro_bias,
+                           0.1 * Math.PI / 180.0,
+                           0.5 * Math.PI / 180.0,
+                           1.0 * Math.PI / 180.0);
 
+        var imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        text = "IMU Temp: " + (imu_temp).toFixed(0) + "C";
+        add_status_message(text, imu_temp, 30, 40, 50);
+        
+        // Other system stuff
+        
         var load_avg = parseFloat(json.status.system_load_avg);
-        context.fillStyle = get_color(load_avg, 1.75, 1.95);
-        context.fillText("Load Avg: " + (load_avg).toFixed(2), cx - size * 0.35, cy + size*0.10);
+        text = "Load Avg: " + (load_avg).toFixed(2);
+        add_status_message(text, load_avg, 0.01, 1.75, 1.95);
 
         var fmu_timer = parseInt(json.status.fmu_timer_misses);
-        context.fillStyle = get_color(fmu_timer, 1, 10);
-        context.fillText("FMU Timer Err: " + fmu_timer, cx - size * 0.35, cy + size*0.17);
+        text = "FMU Timer Err: " + fmu_timer
+        add_status_message(text, fmu_timer, 1, 10, 25);
 
         var air_err = parseInt(json.sensors.airdata[0].error_count);
-        context.fillStyle = get_color(air_err, 10, 25);
-        context.fillText("Airdata Err: " + air_err, cx - size * 0.35, cy + size*0.24);
+        text = "Airdata Err: " + air_err;
+        add_status_message(text, air_err, 1, 10, 25);
+
+        // GPS messages
+        
+        var gps_sats = parseInt(json.sensors.gps[0].satellites);
+        text = "GPS sats: " + gps_sats;
+        add_status_message_inv(text, gps_sats, 10, 7, 5);
         
         var gps_pdop = parseFloat(json.sensors.gps[0].pdop);
-        context.fillStyle = get_color(gps_pdop, 1.0, 2.0);
-        context.fillText("GPS pdop: " + (gps_pdop).toFixed(2), cx - size * 0.35, cy + size*0.31);
+        text = "GPS pdop: " + (gps_pdop).toFixed(2);
+        add_status_message(text, gps_pdop, 0.1, 1.0, 2.0);
+
+        // Power messages
         
-     context.restore();
+        var av_vcc = parseFloat(json.sensors.power.avionics_vcc);
+        var av_error = Math.abs(5.0 - av_vcc);
+        text = "Avionics: " + (av_vcc).toFixed(2) + " v";
+        add_status_message(text, av_error, 0.025, 0.1, 0.2);
+        
+        var cell_vcc = parseFloat(json.sensors.power.cell_vcc);
+        text = "Batt Cell: " + (cell_vcc).toFixed(2) + " v";
+        add_status_message_inv(text, cell_vcc, 3.7, 3.6, 3.5);
+
+        if ( json.status.in_flight == "True" ) {
+            var throttle = parseFloat(json.actuators.throttle);
+            text = "Throttle: " + (throttle*100).toFixed() + "%";
+            add_status_message(text, throttle, 0.6, 0.75, 0.9);
+        }
+
+        // Wind
+        
+        if ( json.status.in_flight == "True" ) {
+            var wind_kt = parseFloat(json.filters.wind.wind_speed_kt);
+            var target_airspeed_kt = parseFloat(json.autopilot.targets.airspeed_kt);
+            text = "Wind: " + wind_kt.toFixed(0) + " kt";
+            var ratio = 0.0;
+            if ( target_airspeed_kt > 0.1 ) {
+                ratio = wind_kt / target_airspeed_kt;
+            }
+            add_status_message(text, wind_kt, 0.3, 0.5, 0.7);
+        }
+
+        // coms
+
+        var pos = -0.25;
+        
+        context.save()
+        px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.textAlign = "left";
+        
+        // draw alerts
+        context.fillStyle = "red";
+        for ( var i = 0; i < alerts.length; i++ ) {
+            context.fillText(alerts[i], cx - size * 0.35, cy + size*pos);
+            pos += 0.07;
+        }
+        
+        // draw alerts
+        context.fillStyle = "yellow";
+        for ( var i = 0; i < warns.length; i++ ) {
+            context.fillText(warns[i], cx - size * 0.35, cy + size*pos);
+            pos += 0.07;
+        }
+        
+        // draw oks
+        context.fillStyle = '#0C0';
+        for ( var i = 0; i < oks.length; i++ ) {
+            context.fillText(oks[i], cx - size * 0.35, cy + size*pos);
+            pos += 0.07;
+        }
+        
+        context.restore();
     }
 
     var tc_filt = 0.0;

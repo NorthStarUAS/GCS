@@ -42,9 +42,9 @@ var annunciator = function() {
             if ( isNaN(sats) ) {
                 sats = 0;
             }
-            if ( sats <= 4 ) {
+            if ( sats < 5 ) {
                 sats_div.attr("class", "error");
-            } else if ( sats <= 6 ) {
+            } else if ( sats < 7 ) {
                 sats_div.attr("class", "warn");
             } else {
                 sats_div.attr("class", "ok");
