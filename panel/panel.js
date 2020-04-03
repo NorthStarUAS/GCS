@@ -46,7 +46,7 @@ var panel = function() {
         amp : {draw: draw_amp},
         power : {draw: draw_power},
         // tc : {draw: draw_tc},
-        health : {draw: draw_health},
+        status : {draw: draw_status},
         dg : {draw: draw_dg},
         vsi : {draw: draw_vsi},
     };
@@ -54,12 +54,12 @@ var panel = function() {
     var layout_config = {
         horizontal : {
             instruments : [['vcc', 'asi', 'ati', 'alt'],
-                           ['power', 'health', 'dg', 'vsi']]
+                           ['power', 'status', 'dg', 'vsi']]
         },
         vertical : {
             instruments : [['vcc', 'power'],
                            ['asi', 'ati'],
-                           ['alt', 'health'],
+                           ['alt', 'status'],
                            ['dg', 'vsi']]
         }
     };
@@ -506,7 +506,7 @@ var panel = function() {
         }
     }
     
-    function draw_health( x, y, size ) {
+    function draw_status( x, y, size ) {
         var px;
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -521,7 +521,7 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText("HEALTH", cx, cy - size*0.35);
+        context.fillText("STATUS", cx, cy - size*0.35);
         context.restore();
         
         context.save()
@@ -531,15 +531,15 @@ var panel = function() {
         
         var pos_cov = parseFloat(json.filters.filter[0].max_pos_cov)*3;
         context.fillStyle = get_color(pos_cov, 1.0, 2.0);
-        context.fillText("EKF Pos: " + pos_cov.toFixed(2) + " m", cx - size * 0.35, cy - size*0.25);
+        context.fillText("Pos Acc: " + pos_cov.toFixed(2) + " m", cx - size * 0.35, cy - size*0.25);
         
         var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
         context.fillStyle = get_color(vel_cov, 0.05, 0.10);
-        context.fillText("EKF Vel: " + vel_cov.toFixed(2) + " m/s", cx - size * 0.35, cy - size*0.18);
+        context.fillText("Vel Acc: " + vel_cov.toFixed(2) + " m/s", cx - size * 0.35, cy - size*0.18);
 
         var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
         context.fillStyle = get_color(att_cov, 0.5, 1.0);
-        context.fillText("EKF Att: " + att_cov.toFixed(2) + " deg", cx - size * 0.35, cy - size*0.11);
+        context.fillText("Att Acc: " + att_cov.toFixed(2) + " deg", cx - size * 0.35, cy - size*0.11);
         
         var ax_bias = parseFloat(json.filters.filter[0].ax_bias);
         var ay_bias = parseFloat(json.filters.filter[0].ay_bias);
@@ -548,7 +548,7 @@ var panel = function() {
         if ( ay_bias > accel_bias ) { accel_bias = ay_bias; }
         if ( az_bias > accel_bias ) { accel_bias = az_bias; }
         context.fillStyle = get_color(accel_bias, 0.5, 1.0);
-        context.fillText("Accl Bias: " + accel_bias.toFixed(3) + " m/s^2", cx - size * 0.35, cy - size*0.04);
+        context.fillText("Accel Bias: " + accel_bias.toFixed(2) + " m/s^2", cx - size * 0.35, cy - size*0.04);
 
         var p_bias = parseFloat(json.filters.filter[0].p_bias);
         var q_bias = parseFloat(json.filters.filter[0].q_bias);
@@ -558,10 +558,10 @@ var panel = function() {
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
         context.fillStyle = get_color(gyro_bias, 0.5 * Math.PI / 180.0,
                                       1.0 * Math.PI / 180.0);
-        context.fillText("Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(3) + " dps", cx - size * 0.35, cy + size*0.03);
+        context.fillText("Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(2) + " dps", cx - size * 0.35, cy + size*0.03);
 
         var load_avg = parseFloat(json.status.system_load_avg);
-        context.fillStyle = get_color(load_avg, 1.5, 1.75);
+        context.fillStyle = get_color(load_avg, 1.7, 1.9);
         context.fillText("Load Avg: " + (load_avg).toFixed(2), cx - size * 0.35, cy + size*0.10);
 
         var fmu_timer = parseInt(json.status.fmu_timer_misses);
@@ -572,7 +572,11 @@ var panel = function() {
         context.fillStyle = get_color(air_err, 10, 25);
         context.fillText("Airdata Err: " + air_err, cx - size * 0.35, cy + size*0.24);
         
-        context.restore();
+        var gps_pdop = parseFloat(json.sensors.gps[0].pdop);
+        context.fillStyle = get_color(gps_pdop, 1.0, 2.0);
+        context.fillText("GPS pdop: " + (gps_pdop).toFixed(2), cx - size * 0.35, cy + size*0.31);
+        
+     context.restore();
     }
 
     var tc_filt = 0.0;
