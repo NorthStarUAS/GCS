@@ -69,14 +69,16 @@ var annunciator = function() {
             var az_bias = parseFloat(json.filters.filter[0].az_bias);
             var imu_time = parseFloat(json.sensors.imu[0].timestamp);
             var filter_time = parseFloat(json.filters.filter[0].timestamp);
-            if ( Math.abs(p_bias) >= gyro_error ||
+            if ( json.filters.filter[0].status == 0 ||
+                 Math.abs(p_bias) >= gyro_error ||
                  Math.abs(q_bias) >= gyro_error ||
                  Math.abs(r_bias) >= gyro_error ||
                  Math.abs(ax_bias) >= accel_error ||
                  Math.abs(ay_bias) >= accel_error ||
                  Math.abs(az_bias) >= accel_error ) {
                 ekf_div.attr("class", "error");
-            } else if ( Math.abs(p_bias) >= gyro_warn ||
+            } else if ( json.filters.filter[0].status == 1 ||
+                        Math.abs(p_bias) >= gyro_warn ||
                         Math.abs(q_bias) >= gyro_warn ||
                         Math.abs(r_bias) >= gyro_warn ||
                         Math.abs(ax_bias) >= accel_warn ||

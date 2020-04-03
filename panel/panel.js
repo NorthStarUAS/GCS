@@ -530,15 +530,27 @@ var panel = function() {
         context.textAlign = "left";
         
         var pos_cov = parseFloat(json.filters.filter[0].max_pos_cov)*3;
-        context.fillStyle = get_color(pos_cov, 1.0, 2.0);
+        if ( json.filters.filter[0].status == 2 ) {
+            context.fillStyle = get_color(pos_cov, 1.0, 2.0);
+        } else {
+            context.fillStyle = "red"
+        }            
         context.fillText("Pos Acc: " + pos_cov.toFixed(2) + " m", cx - size * 0.35, cy - size*0.25);
         
         var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
-        context.fillStyle = get_color(vel_cov, 0.05, 0.10);
+        if ( json.filters.filter[0].status == 2 ) {
+            context.fillStyle = get_color(vel_cov, 0.05, 0.10);
+        } else {
+            context.fillStyle = "red"
+        }            
         context.fillText("Vel Acc: " + vel_cov.toFixed(2) + " m/s", cx - size * 0.35, cy - size*0.18);
 
         var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
-        context.fillStyle = get_color(att_cov, 0.5, 1.0);
+        if ( json.filters.filter[0].status == 2 ) {
+            context.fillStyle = get_color(att_cov, 0.5, 1.0);
+        } else {
+            context.fillStyle = "red"
+        }            
         context.fillText("Att Acc: " + att_cov.toFixed(2) + " deg", cx - size * 0.35, cy - size*0.11);
         
         var ax_bias = parseFloat(json.filters.filter[0].ax_bias);
@@ -547,7 +559,11 @@ var panel = function() {
         var accel_bias = ax_bias;
         if ( ay_bias > accel_bias ) { accel_bias = ay_bias; }
         if ( az_bias > accel_bias ) { accel_bias = az_bias; }
-        context.fillStyle = get_color(accel_bias, 0.5, 1.0);
+        if ( json.filters.filter[0].status == 2 ) {
+            context.fillStyle = get_color(accel_bias, 0.5, 1.0);
+        } else {
+            context.fillStyle = "red"
+        }            
         context.fillText("Accel Bias: " + accel_bias.toFixed(2) + " m/s^2", cx - size * 0.35, cy - size*0.04);
 
         var p_bias = parseFloat(json.filters.filter[0].p_bias);
@@ -556,8 +572,12 @@ var panel = function() {
         var gyro_bias = p_bias;
         if ( q_bias > gyro_bias ) { gyro_bias = p_bias; }
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
-        context.fillStyle = get_color(gyro_bias, 0.5 * Math.PI / 180.0,
-                                      1.0 * Math.PI / 180.0);
+        if ( json.filters.filter[0].status == 2 ) {
+            context.fillStyle = get_color(gyro_bias, 0.5 * Math.PI / 180.0,
+                                          1.0 * Math.PI / 180.0);
+        } else {
+            context.fillStyle = "red"
+        }            
         context.fillText("Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(2) + " dps", cx - size * 0.35, cy + size*0.03);
 
         var load_avg = parseFloat(json.status.system_load_avg);
