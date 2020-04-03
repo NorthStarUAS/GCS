@@ -648,7 +648,7 @@ var panel = function() {
             if ( target_airspeed_kt > 0.1 ) {
                 ratio = wind_kt / target_airspeed_kt;
             }
-            add_status_message(text, wind_kt, 0.3, 0.5, 0.7);
+            add_status_message(text, ratio, 0.3, 0.5, 0.7);
         }
 
         // coms
