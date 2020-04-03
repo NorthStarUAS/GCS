@@ -581,7 +581,7 @@ var panel = function() {
         context.fillText("Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(2) + " dps", cx - size * 0.35, cy + size*0.03);
 
         var load_avg = parseFloat(json.status.system_load_avg);
-        context.fillStyle = get_color(load_avg, 1.7, 1.9);
+        context.fillStyle = get_color(load_avg, 1.75, 1.95);
         context.fillText("Load Avg: " + (load_avg).toFixed(2), cx - size * 0.35, cy + size*0.10);
 
         var fmu_timer = parseInt(json.status.fmu_timer_misses);
