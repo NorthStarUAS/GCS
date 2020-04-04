@@ -443,11 +443,12 @@ function calibrate(e) {
     $("#calibrate-reset-ekf").click(function() {
         modal.hide();
         link_send('set,/filters/command,reset');
+        link_send('set,/sensors/Aura4/command,reset_ekf');
     })
     $("#calibrate-zero-gyros").off("click");
     $("#calibrate-zero-gyros").click(function() {
         modal.hide();
-        link_send('set,/sensors/Aura3/command,zero_gyros');
+        link_send('set,/sensors/Aura4/command,zero_gyros');
     })
 }
 
