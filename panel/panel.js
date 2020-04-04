@@ -550,14 +550,14 @@ var panel = function() {
             pos_cov = 99.99;
         }
         text = "Pos Acc: " + pos_cov.toFixed(2) + " m";
-        add_status_message(text, pos_cov, 0.2, 1.0, 2.0)
+        add_status_message(text, pos_cov, 2.0, 3.5, 5.0)
 
         var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
         if ( json.filters.filter[0].status < 2 ) {
             vel_cov = 99.99;
         }
         text = "Vel Acc: " + vel_cov.toFixed(2) + " m/s";
-        add_status_message(text, vel_cov, 0.01, 0.05, 0.10);
+        add_status_message(text, vel_cov, 0.1, 0.2, 0.30);
 
         var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
         if ( json.filters.filter[0].status < 2 ) {
@@ -599,7 +599,7 @@ var panel = function() {
         
         var load_avg = parseFloat(json.status.system_load_avg);
         text = "Load Avg: " + (load_avg).toFixed(2);
-        add_status_message(text, load_avg, 0.01, 1.75, 1.95);
+        add_status_message(text, load_avg, 0.01, 1.8, 2.0);
 
         var fmu_timer = parseInt(json.status.fmu_timer_misses);
         text = "FMU Timer Err: " + fmu_timer
@@ -617,7 +617,7 @@ var panel = function() {
         
         var gps_pdop = parseFloat(json.sensors.gps[0].pdop);
         text = "GPS pdop: " + (gps_pdop).toFixed(2);
-        add_status_message(text, gps_pdop, 0.1, 1.0, 2.0);
+        add_status_message(text, gps_pdop, 1.5, 3.0, 5.0);
 
         // Power messages
         
