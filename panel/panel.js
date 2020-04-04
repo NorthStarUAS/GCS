@@ -584,14 +584,12 @@ var panel = function() {
         var gyro_bias = p_bias;
         if ( q_bias > gyro_bias ) { gyro_bias = p_bias; }
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
+        var gyro_bias_deg = gyro_bias*180/Math.PI;
         if ( json.filters.filter[0].status < 2 ) {
-            gyro_bias = 99.99;
+            gyro_bias_deg = 99.99;
         }
-        text = "Gyro Bias: " + (gyro_bias*180/Math.PI).toFixed(2) + " dps";
-        add_status_message(text, gyro_bias,
-                           0.1 * Math.PI / 180.0,
-                           0.5 * Math.PI / 180.0,
-                           1.0 * Math.PI / 180.0);
+        text = "Gyro Bias: " + gyro_bias_deg.toFixed(2) + " dps";
+        add_status_message(text, gyro_bias_deg, 0.1, 0.5, 1.0);
 
         var imu_temp = parseFloat(json.sensors.imu[0].temp_C);
         text = "IMU Temp: " + (imu_temp).toFixed(0) + "C";
@@ -650,8 +648,6 @@ var panel = function() {
             }
             add_status_message(text, ratio, 0.3, 0.5, 0.7);
         }
-
-        // coms
 
         var pos = -0.25;
         
@@ -790,12 +786,15 @@ var panel = function() {
         
         // wind label
         context.save()
-        var wind_kt = parseFloat(json.filters.wind.wind_speed_kt).toFixed(0);
+        var wind_kt = 0;
+        if ( json.filters.wind.wind_speed_kt != null ) {
+            wind_kt = parseFloat(json.filters.wind.wind_speed_kt*speed_scale).toFixed(0);
+        }
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "lightblue";
         context.textAlign = "center";
-        context.fillText("WND:" + wind_kt*speed_scale, cx + size*0.14, cy - size*0.06);
+        context.fillText("WND:" + wind_kt, cx + size*0.14, cy - size*0.06);
         context.restore();
  
         // ground track

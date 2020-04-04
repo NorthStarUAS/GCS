@@ -225,7 +225,7 @@ var annunciator = function() {
     function draw_temp() {
         var temp_div = $("#temp");
         var temp_inner = $("#temp #inner");
-        if ( temp_div != null && json.sensors.airdata[0] != null ) {
+        if ( temp_div != null && json.sensors.airdata[0].temp_C != null ) {
             var temp = parseFloat(json.sensors.airdata[0].temp_C).toFixed(0);
             if ( temp < -30 || temp > 50 ) {
                 temp_div.attr("class", "error");
