@@ -319,10 +319,10 @@ map_update = function() {
                              json.task.home.longitude_deg] );
         }
 
-        if ( json.task.circle.latitude_deg != null ) {
-            circle.setLatLng( [json.task.circle.latitude_deg,
-                               json.task.circle.longitude_deg] );
-            var r = json.task.circle.radius_m;
+        if ( json.task.circle.active.latitude_deg != null ) {
+            circle.setLatLng( [json.task.circle.active.latitude_deg,
+                               json.task.circle.active.longitude_deg] );
+            var r = json.task.circle.active.radius_m;
             if ( r > 1.0 ) {
                 circle.setRadius(r);
             }
@@ -330,8 +330,8 @@ map_update = function() {
         }
     
         if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
-            active_wpt.setLatLng( [json.task.circle.latitude_deg,
-                                   json.task.circle.longitude_deg] );
+            active_wpt.setLatLng( [json.task.circle.active.latitude_deg,
+                                   json.task.circle.active.longitude_deg] );
         } else if ( json.task.current_task_id == 'route' ) {
             i = json.task.route.target_waypoint_idx;
             if ( i < json.task.route.active.wpt.length ) {
@@ -387,11 +387,11 @@ function circleHere(e) {
         modal.hide();
         var dir = $("input[name='circle-dir']:checked").val().toLowerCase();
         if ( dir ) {
-            link_send('set,/task/circle/direction,' + dir);
+            link_send('set,/task/circle/standby/direction,' + dir);
         }
         var radius = $("#circle-radius").val();
         if ( parseFloat(radius) > 10 ) {
-            link_send('set,/task/circle/radius_m,' + radius);
+            link_send('set,/task/circle/standby/radius_m,' + radius);
         }
         link_send('task,circle,' + user_latlng.lng + ',' + user_latlng.lat);
     })
