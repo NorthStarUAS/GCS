@@ -437,7 +437,7 @@ function calibrate(e) {
     $("#calibrate-form-submit").off("click");
     $("#calibrate-form-submit").click(function() {
         modal.hide();
-        link_send('task,calibrate');
+        link_send('task,calib_home');
     })
     $("#calibrate-reset-ekf").off("click");
     $("#calibrate-reset-ekf").click(function() {
