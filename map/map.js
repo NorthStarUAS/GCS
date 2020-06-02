@@ -297,7 +297,19 @@ map_update = function() {
 
         var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
         var alt_disp = Math.round(alt_ft/10) * 10;
-        var vel_disp = Math.round(json.velocity.airspeed_smoothed_kt);
+        var vel = 0.0;
+        var vel_disp = 0.0;
+        if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
+            vel = json.velocity.airspeed_smoothed_kt;
+        } else {
+            vel = json.filters.filter[0].groundspeed_kt;
+        }
+        if ( vel < 10.0 ) {
+            vel_disp = parseFloat(vel).toFixed(1);
+        } else {
+            vel_disp = parseFloat(vel).toFixed(0);
+        }
+        
         var html = '<div>' + json.config.identity.call_sign + '</div>'
             + '<div>' + alt_disp + ' ft</div>'
             + '<div>' + vel_disp + ' kts</div>';

@@ -309,8 +309,14 @@ var panel = function() {
         var nw = Math.floor(img_asi3.width*scale)
         var nh = Math.floor(img_asi3.height*scale)
         context.translate(cx, cy);
-        var deg = my_interp( json.velocity.airspeed_smoothed_kt*speed_scale,
-                             asi_interpx, asi_interpy);
+        var speed = 0.0;
+        if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
+            speed = json.velocity.airspeed_smoothed_kt;
+        } else {
+            speed = json.filters.filter[0].groundspeed_kt;
+        }
+  
+        var deg = my_interp( speed * speed_scale, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
@@ -655,6 +661,10 @@ var panel = function() {
         px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.textAlign = "left";
+	context.shadowOffsetX = 2;
+	context.shadowOffsetY = 2;
+	context.shadowBlur = 3;
+	context.shadowColor = "rgba(255, 255, 255, 0.5)";
         
         // draw alerts
         context.fillStyle = "red";

@@ -136,8 +136,13 @@ var annunciator = function() {
     function draw_timer() {
         var timer_div = $("#timer");
         var timer_inner = $("#timer #inner");
-        if ( timer_div != null && json.status.flight_timer != null ) {
-            var secs = parseFloat(json.status.flight_timer).toFixed(0);
+        if ( timer_div != null ) {
+            var secs = 0.0;
+            if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
+                secs = parseFloat(json.status.throttle_timer).toFixed(0);
+            } else {
+                secs = parseFloat(json.status.flight_timer).toFixed(0);
+            }
             timer_div.attr("class", "ok");
             var hours = Math.floor(secs / 3600);
             var rem = secs - (hours * 3600);
@@ -189,6 +194,9 @@ var annunciator = function() {
         var kt2mps = 0.514444;
         var wind_div = $("#wind");
         var wind_inner = $("#wind #inner");
+        if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
+            return;
+        }
         if ( wind_div != null && json.filters.wind.wind_dir_deg != null ) {
             var display_units = "??";
             var speed_scale = 1.0;
@@ -225,6 +233,9 @@ var annunciator = function() {
     function draw_temp() {
         var temp_div = $("#temp");
         var temp_inner = $("#temp #inner");
+        if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
+            return;
+        }
         if ( temp_div != null && json.sensors.airdata[0].temp_C != null ) {
             var temp = parseFloat(json.sensors.airdata[0].temp_C).toFixed(0);
             if ( temp < -30 || temp > 50 ) {
