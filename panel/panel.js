@@ -584,9 +584,9 @@ var panel = function() {
         text = "Accel Bias: " + accel_bias.toFixed(2) + " m/s^2";
         add_status_message(text, accel_bias, 0.1, 0.5, 1.0);
 
-        var p_bias = parseFloat(json.filters.filter[0].p_bias);
-        var q_bias = parseFloat(json.filters.filter[0].q_bias);
-        var r_bias = parseFloat(json.filters.filter[0].r_bias);
+        var p_bias = parseFloat(json.filters.filter[0].p_bias) * r2d;
+        var q_bias = parseFloat(json.filters.filter[0].q_bias) * r2d;
+        var r_bias = parseFloat(json.filters.filter[0].r_bias) * r2d;
         var gyro_bias = p_bias;
         if ( q_bias > gyro_bias ) { gyro_bias = p_bias; }
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
