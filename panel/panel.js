@@ -244,7 +244,7 @@ var panel = function() {
         // red arc
         context.beginPath();
         context.arc(cx, cy, size*0.430, max_rad, die_rad)
-        context.strokeStyle = 'red';
+        context.strokeStyle = '#e03030';
         context.lineWidth = 10;
         context.stroke();
         context.restore();
@@ -396,7 +396,7 @@ var panel = function() {
 
         // ground elevation
         context.save();
-        context.strokeStyle = 'red';
+        context.strokeStyle = '#e03030';
         context.lineWidth = 7;
         context.translate(cx, cy);
         context.rotate((ground_ft*0.36)*d2r);
@@ -483,7 +483,7 @@ var panel = function() {
         context.save();
         context.lineWidth = h;
         var range = maxv - minv;
-        context.strokeStyle = 'red';
+        context.strokeStyle = '#e03030';
         for ( var i = 0; i < reds.length; i++ ) {
             var x1 = ((reds[i][0] - minv) / range) * w;
             var x2 = ((reds[i][1] - minv) / range) * w;
@@ -544,7 +544,7 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var pad = Math.round(size * 0.02);
+        var pad = Math.round(size * 0.025);
         var r = Math.round(size * 0.5);
         var px =  Math.round(size * 0.06);
         context.save();
