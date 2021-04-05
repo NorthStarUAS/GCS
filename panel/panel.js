@@ -44,7 +44,7 @@ var panel = function() {
         ati : {draw: draw_ati},
         alt : {draw: draw_alt},
         amp : {draw: draw_amp},
-        power : {draw: draw_power},
+        power : {draw: draw_power2},
         // tc : {draw: draw_tc},
         status : {draw: draw_status},
         dg : {draw: draw_dg},
@@ -463,6 +463,137 @@ var panel = function() {
         context.restore();
     }
 
+    function myroundRect2(x,y,width,height,radius) {
+        radius = Math.min(Math.max(width-1,1),Math.max(height-1,1),radius);
+        var rectX = x;
+        var rectY = y;
+        var rectWidth = width;
+        var rectHeight = height;
+        var cornerRadius = radius;
+
+        context.lineJoin = "round";
+        context.lineWidth = cornerRadius;
+        context.strokeRect(rectX+(cornerRadius/2), rectY+(cornerRadius/2), rectWidth-cornerRadius, rectHeight-cornerRadius);
+        context.fillRect(rectX+(cornerRadius/2), rectY+(cornerRadius/2), rectWidth-cornerRadius, rectHeight-cornerRadius);
+        //context.stroke();
+        //context.fill();
+    }
+
+    function draw_bar(x, y, w, h, px, val, text1, text2, minv, maxv, tics, reds, yellows, greens) {
+        context.save();
+        context.lineWidth = h;
+        var range = maxv - minv;
+        context.strokeStyle = 'red';
+        for ( var i = 0; i < reds.length; i++ ) {
+            var x1 = ((reds[i][0] - minv) / range) * w;
+            var x2 = ((reds[i][1] - minv) / range) * w;
+            context.beginPath();
+            context.moveTo(x+x1, y + Math.round(h*0.5));
+            context.lineTo(x+x2, y + Math.round(h*0.5));
+            context.stroke();
+        }
+        context.strokeStyle = 'yellow';
+        for ( var i = 0; i < yellows.length; i++ ) {
+            var x1 = ((yellows[i][0] - minv) / range) * w;
+            var x2 = ((yellows[i][1] - minv) / range) * w;
+            context.beginPath();
+            context.moveTo(x+x1, y + Math.round(h*0.5));
+            context.lineTo(x+x2, y + Math.round(h*0.5));
+            context.stroke();
+        }
+        context.strokeStyle = '#0C0';
+        for ( var i = 0; i < greens.length; i++ ) {
+            var x1 = ((greens[i][0] - minv) / range) * w;
+            var x2 = ((greens[i][1] - minv) / range) * w;
+            context.beginPath();
+            context.moveTo(x+x1, y + Math.round(h*0.5));
+            context.lineTo(x+x2, y + Math.round(h*0.5));
+            context.stroke();
+        }
+        context.strokeStyle = "black";
+        context.lineWidth = 1;
+        for ( var xt = minv+tics; xt < maxv; xt += tics ) {
+            var x1 = ((xt - minv) / range) * w;
+            context.beginPath();
+            context.moveTo(x+x1, y);
+            context.lineTo(x+x1, y + Math.round(h*0.5));
+            context.stroke();
+        }
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "left";
+        context.fillText(text1, x, y + Math.round(2.2*h));
+        context.textAlign = "right";
+        context.fillText(text2, x + w, y + Math.round(2.2*h));
+        context.beginPath();
+        var x1 = ((val - minv) / range) * w
+        var y1 = Math.round(h*0.5);
+        context.lineWidth = 1;
+        context.strokeStyle = 'black';
+        context.fillStyle = 'white';
+        context.moveTo(x+x1, y + y1);
+        context.lineTo(x+x1-y1, y+y1-y1*Math.sqrt(3));
+        context.lineTo(x+x1+y1, y+y1-y1*Math.sqrt(3));
+        context.stroke();
+        context.fill();
+        context.restore();
+    }
+    
+    function draw_power2( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+
+        var pad = Math.round(size * 0.02);
+        var r = Math.round(size * 0.5);
+        var px =  Math.round(size * 0.06);
+        context.save();
+        context.strokeStyle = '#202020';
+        context.fillStyle = '#202020';
+        myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
+        context.restore();
+
+        var y1 = Math.round(size*0.18);
+        var vcc = json.sensors.power.avionics_vcc;
+        var val_text = (vcc).toFixed(2) + "V";
+        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                 px, vcc, "Avionics Voltage", val_text,
+                 4.5, 5.5, 0.1,
+                 [[4.5,4.8], [5.3,5.5]], [[4.8,4.9], [5.2,5.3]], [[4.9,5.2]]);
+        
+        y1 += Math.round(size*0.18);
+        var cell_volts = json.sensors.power.cell_vcc;
+        var val_text = (cell_volts).toFixed(2) + "V";
+        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                 px, cell_volts, "Per Cell Voltage", val_text,
+                 3.0, 4.2, 0.1,
+                 [[3.0,3.3]], [[3.3,3.5]], [[3.5,4.2]]);
+        
+        var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
+        var battery_total = parseFloat(json.config.specs.battery_mah)
+        var remaining = battery_total - mah
+        // var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
+        var battery_percent = parseFloat(json.sensors.power.battery_perc)*100
+        if ( battery_percent < 0 ) {
+            battery_percent = 0;
+        }
+        y1 += Math.round(size*0.18);
+        var val_text = (battery_percent).toFixed(0) + "%";
+        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                 px, battery_percent, "Battery Capacity", val_text,
+                 0.0, 100, 10,
+                 [[0,10]], [[10,25]], [[25,100]]);
+
+        y1 += Math.round(size*0.18);
+        var watts = json.sensors.power.main_watts;
+        var val_text = (watts).toFixed(0) + "W";
+        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                 px, cell_volts, "Current Draw", val_text,
+                 0, 500, 100,
+                 [[350,500]], [[200,350]], [[0,200]]);
+        
+    }
+
     function draw_power( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -501,7 +632,7 @@ var panel = function() {
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
-
+    
     var alerts = [];
     var warns = [];
     var oks = [];
@@ -533,7 +664,15 @@ var panel = function() {
         var scale = size/512;
         
         // background
-        context.drawImage(img_aura_asi1, x, y, width=size, height=size);
+        //context.drawImage(img_aura_asi1, x, y, width=size, height=size);
+        var pad = Math.floor(size * 0.02);
+        var r = Math.floor(size * 0.5);
+        context.save();
+        context.strokeStyle = '#202020';
+        context.fillStyle = '#202020';
+        myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
+        context.restore();
+        
         
         // 'true' label
         context.save()
