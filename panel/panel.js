@@ -56,7 +56,7 @@ var panel = function() {
     var layout_config = {
         horizontal : {
             instruments : [['asi', 'ati', 'alt', 'power2'],
-                           ['controls', 'dg', 'vsi', 'status']]
+                           ['status', 'dg', 'vsi', 'controls']]
         },
         vertical : {
             instruments : [['power2', 'status'],
@@ -483,6 +483,7 @@ var panel = function() {
 
     class MyBar {
         constructor(text1, minv, maxv, tics, reds, yellows, greens) {
+            this.time_factor = 60;
             this.text1 = text1;
             this.minv = minv;
             this.maxv = maxv;
@@ -492,17 +493,24 @@ var panel = function() {
             this.yellows = yellows;
             this.greens = greens;
             this.avg = null;
-            this.std = null;
+            this.std2 = null;
+            this.last_time = 0;
         }
         update_stats(val) {
+            var timestamp = parseFloat(json.sensors.imu[0].timestamp);
+            var dt = timestamp - this.last_time;
+            this.last_time = timestamp;
             if (this.avg == null) {
                 this.avg = val;
-                this.std = 0;
-            } else {
-                this.avg = 0.995*this.avg + 0.005*val;
+                this.std2 = 0;
+            } else if (dt > 0) {
+                var wf = dt / this.time_factor;
+                if ( wf < 0 ) { wf = 0; }
+                if ( wf > 1 ) { wf = 1; }
+                this.avg = (1-wf)*this.avg + wf*val;
+                var err = Math.abs(val - this.avg);
+                this.std2 = (1-wf)*this.std2 + wf*err*err;
             }
-            var std = (val - this.avg)*(val - this.avg);
-            this.std = 0.995*this.std + 0.005*std;
         }        
         draw(x, y, w, h, px, val, text2) {
             this.update_stats(val);
@@ -545,12 +553,24 @@ var panel = function() {
                 context.stroke();
             }
             context.strokeStyle = "white";
-            context.lineWidth = 1;
+            context.lineWidth = 3;
             var x1 = ((this.avg - this.minv) / this.range) * w;
-                context.beginPath();
-                context.moveTo(x+x1, y);
-                context.lineTo(x+x1, y + Math.round(h*0.5));
-                context.stroke();
+            context.beginPath();
+            context.moveTo(x+x1, y);
+            context.lineTo(x+x1, y + h);
+            context.stroke();
+            context.lineWidth = 2;
+            var std = Math.sqrt(this.std2);
+            var v1 = this.avg - std;
+            if (v1 < this.minv) { v1 = this.minv; }
+            var v2 = this.avg + std;
+            if (v2 > this.maxv) { v2 = this.maxv; }
+            var x1 = ((v1 - this.minv) / this.range) * w;
+            var x2 = ((v2 - this.minv) / this.range) * w;
+            context.beginPath();
+            context.moveTo(x+x1, y + h);
+            context.lineTo(x+x2, y + h);
+            context.stroke();
             
             context.font = px + "px Courier New, monospace";
             context.fillStyle = "white";
@@ -583,6 +603,8 @@ var panel = function() {
                              [[3.0,3.3]], [[3.3,3.5]], [[3.5,4.2]]);
     var curr_bar = new MyBar("Current Draw", 0, 500, 100,
                              [[350,500]], [[200,350]], [[0,200]]);
+    var imu_temp_bar = new MyBar("IMU Temp", 0, 60, 10,
+                                 [[50,60]], [[40,50]], [[0,40]]);
   
     function draw_power2( x, y, size ) {
         var cx = x + size*0.5;
@@ -590,7 +612,11 @@ var panel = function() {
         var scale = size/512;
 
         var pad = Math.round(size * 0.025);
+        var ipad = pad * 6;
         var r = Math.round(size * 0.5);
+        var h = Math.round(size * 0.04);
+        var vspace = Math.round(size * 0.15);
+
         context.save();
         context.strokeStyle = '#202020';
         context.fillStyle = '#202020';
@@ -603,15 +629,15 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText("POWER", cx, cy - size*0.35);
+        context.fillText("POWER", cx, cy - size*0.40);
         context.restore();
         
         px =  Math.round(size * 0.05);
         
-        var y1 = Math.round(size*0.20);
+        var y1 = Math.round(size*0.15);
         var vcc = json.sensors.power.avionics_vcc;
         var val_text = (vcc).toFixed(2) + "V";
-        vcc_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+        vcc_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, vcc, val_text);
         
         var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
@@ -622,22 +648,29 @@ var panel = function() {
         if ( battery_percent < 0 ) {
             battery_percent = 0;
         }
-        y1 += Math.round(size*0.18);
+        y1 += vspace;
         var val_text = (battery_percent).toFixed(0) + "%";
-        batt_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+        batt_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, battery_percent, val_text)
 
-        y1 += Math.round(size*0.18);
+        y1 += vspace;
         var cell_volts = json.sensors.power.cell_vcc;
         var val_text = (cell_volts).toFixed(2) + "V";
-        cell_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+        cell_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, cell_volts, val_text);
         
-        y1 += Math.round(size*0.18);
+        y1 += vspace;
         var watts = json.sensors.power.main_watts;
         var val_text = (watts).toFixed(0) + "W";
-        curr_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
-                      px, cell_volts, val_text);        
+        curr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                      px, cell_volts, val_text);
+
+        y1 += vspace;
+        var imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        var val_text = (imu_temp).toFixed(0) + "C";
+        imu_temp_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                          px, imu_temp, val_text);
+
     }
 
     var ail_bar = new MyBar("Aileron", -1, 1, 0.2,
@@ -648,13 +681,19 @@ var panel = function() {
                             [], [[-1,-0.5], [0.5,1]], [[-0.5,0.5]]);
     var thr_bar = new MyBar("Throttle", 0, 100, 10,
                             [[90,100]], [[75,90]], [[0,75]]);
+    var flaps_bar = new MyBar("Flaps", -0, 1, 0.1,
+                              [], [[0.75,1.0]], [[0,0.75]]);
     function draw_controls( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
 
         var pad = Math.round(size * 0.025);
+        var ipad = pad * 6;
         var r = Math.round(size * 0.5);
+        var h = Math.round(size * 0.04);
+        var vspace = Math.round(size * 0.15);
+
         context.save();
         context.strokeStyle = '#202020';
         context.fillStyle = '#202020';
@@ -667,34 +706,40 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText("FLIGHT CONTROLS", cx, cy - size*0.35);
+        context.fillText("FLIGHT CTRLS", cx, cy - size*0.40);
         context.restore();
         
         px =  Math.round(size * 0.05);
         
-        var y1 = Math.round(size*0.20);
+        var y1 = Math.round(size*0.15);
         var ail = json.actuators.aileron;
         var val_text = (ail).toFixed(2);
-        ail_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+        ail_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, ail, val_text);
         
-        y1 += Math.round(size*0.18);
+        y1 += vspace;
         var ele = json.actuators.elevator;
         var val_text = (ele).toFixed(2);
-        ele_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+        ele_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, ele, val_text);
         
-        y1 += Math.round(size*0.18);
+        y1 += vspace;
         var rud = json.actuators.rudder;
         var val_text = (rud).toFixed(2);
-        rud_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+        rud_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, rud, val_text);
         
-        y1 += Math.round(size*0.18);
+        y1 += vspace;
         var thr = parseFloat(json.actuators.throttle)*100;
         var val_text = (thr).toFixed(0) + "%";
-        thr_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+        thr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, thr, val_text);
+        
+        y1 += vspace;
+        var flaps = json.actuators.flaps;
+        var val_text = (flaps).toFixed(2);
+        flaps_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                       px, flaps, val_text);
     }
 
     function draw_power( x, y, size ) {
