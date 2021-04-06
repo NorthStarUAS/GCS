@@ -625,17 +625,19 @@ var panel = function() {
 
         // power label
         context.save()
+        var y1 = Math.round(size*0.12);
         var px = Math.round(size * 0.07);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText("POWER", cx, cy - size*0.40);
+        context.fillText("POWER", cx, y + y1);
         context.restore();
         
         px =  Math.round(size * 0.05);
         
-        var y1 = Math.round(size*0.15);
+        y1 = Math.round(size*0.17);
         var vcc = json.sensors.power.avionics_vcc;
+        if ( vcc == null ) { vcc = 0; }
         var val_text = (vcc).toFixed(2) + "V";
         vcc_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, vcc, val_text);
@@ -655,6 +657,7 @@ var panel = function() {
 
         y1 += vspace;
         var cell_volts = json.sensors.power.cell_vcc;
+        if ( cell_volts == null ) { cell_volts = 0; }
         var val_text = (cell_volts).toFixed(2) + "V";
         cell_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, cell_volts, val_text);
@@ -702,41 +705,47 @@ var panel = function() {
 
         // controls label
         context.save()
-        var px = Math.round(size * 0.07);
+        var px = Math.round(size * 0.08);
+        var y1 = Math.round(size*0.12);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText("FLIGHT CTRLS", cx, cy - size*0.40);
+        context.fillText("FLIGHT CTRLS", cx, y + y1);
         context.restore();
         
         px =  Math.round(size * 0.05);
         
-        var y1 = Math.round(size*0.15);
+        y1 = Math.round(size*0.17);
         var ail = json.actuators.aileron;
+        if ( ail == null ) { ail = 0; }
         var val_text = (ail).toFixed(2);
         ail_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, ail, val_text);
         
         y1 += vspace;
         var ele = json.actuators.elevator;
+        if ( ele == null ) { ele = 0; }
         var val_text = (ele).toFixed(2);
         ele_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, ele, val_text);
         
         y1 += vspace;
         var rud = json.actuators.rudder;
+        if ( rud == null ) { rud = 0; }
         var val_text = (rud).toFixed(2);
         rud_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, rud, val_text);
         
         y1 += vspace;
         var thr = parseFloat(json.actuators.throttle)*100;
+        if ( thr == null ) { thr = 0; }
         var val_text = (thr).toFixed(0) + "%";
         thr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, thr, val_text);
         
         y1 += vspace;
         var flaps = json.actuators.flaps;
+        if ( flaps == null ) { flaps = 0; }
         var val_text = (flaps).toFixed(2);
         flaps_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                        px, flaps, val_text);
