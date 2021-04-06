@@ -19,10 +19,11 @@ A top down map for real time flight tracking, path planning, etc.
 
 ## Instrument Panel
 
-An analog-style instrument panel that displays flight status in a
-format that is intuitive to pilots.
+An instrument panel displays flight status in a format that is
+intuitive to pilots. A large amount of status and trend information is
+tucked away in the various displays.
 
-![panel](screenshots/panel.png "Analog Style Instrument Panel")
+![panel](screenshots/new-panel.png "Instrument Panel")
 
 
 ## Property Tree Viewer
