@@ -44,23 +44,25 @@ var panel = function() {
         ati : {draw: draw_ati},
         alt : {draw: draw_alt},
         amp : {draw: draw_amp},
-        power : {draw: draw_power2},
-        // tc : {draw: draw_tc},
+        power : {draw: draw_power},
+        power2 : {draw: draw_power2},
+        tc : {draw: draw_tc},
         status : {draw: draw_status},
         dg : {draw: draw_dg},
         vsi : {draw: draw_vsi},
+        controls : {draw: draw_controls},
     };
 
     var layout_config = {
         horizontal : {
-            instruments : [['vcc', 'asi', 'ati', 'alt'],
-                           ['power', 'status', 'dg', 'vsi']]
+            instruments : [['asi', 'ati', 'alt', 'power2'],
+                           ['controls', 'dg', 'vsi', 'status']]
         },
         vertical : {
-            instruments : [['vcc', 'power'],
+            instruments : [['power2', 'status'],
                            ['asi', 'ati'],
-                           ['alt', 'status'],
-                           ['dg', 'vsi']]
+                           ['alt', 'dg'],
+                           ['vsi', '']]
         }
     };
 
@@ -479,66 +481,109 @@ var panel = function() {
         //context.fill();
     }
 
-    function draw_bar(x, y, w, h, px, val, text1, text2, minv, maxv, tics, reds, yellows, greens) {
-        context.save();
-        context.lineWidth = h;
-        var range = maxv - minv;
-        context.strokeStyle = '#e03030';
-        for ( var i = 0; i < reds.length; i++ ) {
-            var x1 = ((reds[i][0] - minv) / range) * w;
-            var x2 = ((reds[i][1] - minv) / range) * w;
-            context.beginPath();
-            context.moveTo(x+x1, y + Math.round(h*0.5));
-            context.lineTo(x+x2, y + Math.round(h*0.5));
-            context.stroke();
+    class MyBar {
+        constructor(text1, minv, maxv, tics, reds, yellows, greens) {
+            this.text1 = text1;
+            this.minv = minv;
+            this.maxv = maxv;
+            this.range = this.maxv - this.minv;
+            this.tics = tics;
+            this.reds = reds;
+            this.yellows = yellows;
+            this.greens = greens;
+            this.avg = null;
+            this.std = null;
         }
-        context.strokeStyle = 'yellow';
-        for ( var i = 0; i < yellows.length; i++ ) {
-            var x1 = ((yellows[i][0] - minv) / range) * w;
-            var x2 = ((yellows[i][1] - minv) / range) * w;
+        update_stats(val) {
+            if (this.avg == null) {
+                this.avg = val;
+                this.std = 0;
+            } else {
+                this.avg = 0.995*this.avg + 0.005*val;
+            }
+            var std = (val - this.avg)*(val - this.avg);
+            this.std = 0.995*this.std + 0.005*std;
+        }        
+        draw(x, y, w, h, px, val, text2) {
+            this.update_stats(val);
+            context.save();
+            context.lineWidth = h;
+            context.strokeStyle = '#e03030';
+            for ( var i = 0; i < this.reds.length; i++ ) {
+                var x1 = ((this.reds[i][0] - this.minv) / this.range) * w;
+                var x2 = ((this.reds[i][1] - this.minv) / this.range) * w;
+                context.beginPath();
+                context.moveTo(x+x1, y + Math.round(h*0.5));
+                context.lineTo(x+x2, y + Math.round(h*0.5));
+                context.stroke();
+            }
+            context.strokeStyle = 'yellow';
+            for ( var i = 0; i < this.yellows.length; i++ ) {
+                var x1 = ((this.yellows[i][0] - this.minv) / this.range) * w;
+                var x2 = ((this.yellows[i][1] - this.minv) / this.range) * w;
+                context.beginPath();
+                context.moveTo(x+x1, y + Math.round(h*0.5));
+                context.lineTo(x+x2, y + Math.round(h*0.5));
+                context.stroke();
+            }
+            context.strokeStyle = '#0C0';
+            for ( var i = 0; i < this.greens.length; i++ ) {
+                var x1 = ((this.greens[i][0] - this.minv) / this.range) * w;
+                var x2 = ((this.greens[i][1] - this.minv) / this.range) * w;
+                context.beginPath();
+                context.moveTo(x+x1, y + Math.round(h*0.5));
+                context.lineTo(x+x2, y + Math.round(h*0.5));
+                context.stroke();
+            }
+            context.strokeStyle = "black";
+            context.lineWidth = 1;
+            for ( var xt = this.minv+this.tics; xt < this.maxv; xt += this.tics ) {
+                var x1 = ((xt - this.minv) / this.range) * w;
+                context.beginPath();
+                context.moveTo(x+x1, y);
+                context.lineTo(x+x1, y + Math.round(h*0.5));
+                context.stroke();
+            }
+            context.strokeStyle = "white";
+            context.lineWidth = 1;
+            var x1 = ((this.avg - this.minv) / this.range) * w;
+                context.beginPath();
+                context.moveTo(x+x1, y);
+                context.lineTo(x+x1, y + Math.round(h*0.5));
+                context.stroke();
+            
+            context.font = px + "px Courier New, monospace";
+            context.fillStyle = "white";
+            context.textAlign = "left";
+            context.fillText(this.text1, x, y + Math.round(2.2*h));
+            context.textAlign = "right";
+            context.fillText(text2, x + w, y + Math.round(2.2*h));
             context.beginPath();
-            context.moveTo(x+x1, y + Math.round(h*0.5));
-            context.lineTo(x+x2, y + Math.round(h*0.5));
+            var x1 = ((val - this.minv) / this.range) * w
+            var y1 = Math.round(h*0.5);
+            context.lineWidth = 1;
+            context.strokeStyle = 'black';
+            context.fillStyle = 'white';
+            context.moveTo(x+x1, y + y1);
+            context.lineTo(x+x1-y1, y+y1-y1*Math.sqrt(3));
+            context.lineTo(x+x1+y1, y+y1-y1*Math.sqrt(3));
             context.stroke();
+            context.fill();
+            context.restore();
         }
-        context.strokeStyle = '#0C0';
-        for ( var i = 0; i < greens.length; i++ ) {
-            var x1 = ((greens[i][0] - minv) / range) * w;
-            var x2 = ((greens[i][1] - minv) / range) * w;
-            context.beginPath();
-            context.moveTo(x+x1, y + Math.round(h*0.5));
-            context.lineTo(x+x2, y + Math.round(h*0.5));
-            context.stroke();
-        }
-        context.strokeStyle = "black";
-        context.lineWidth = 1;
-        for ( var xt = minv+tics; xt < maxv; xt += tics ) {
-            var x1 = ((xt - minv) / range) * w;
-            context.beginPath();
-            context.moveTo(x+x1, y);
-            context.lineTo(x+x1, y + Math.round(h*0.5));
-            context.stroke();
-        }
-        context.font = px + "px Courier New, monospace";
-        context.fillStyle = "white";
-        context.textAlign = "left";
-        context.fillText(text1, x, y + Math.round(2.2*h));
-        context.textAlign = "right";
-        context.fillText(text2, x + w, y + Math.round(2.2*h));
-        context.beginPath();
-        var x1 = ((val - minv) / range) * w
-        var y1 = Math.round(h*0.5);
-        context.lineWidth = 1;
-        context.strokeStyle = 'black';
-        context.fillStyle = 'white';
-        context.moveTo(x+x1, y + y1);
-        context.lineTo(x+x1-y1, y+y1-y1*Math.sqrt(3));
-        context.lineTo(x+x1+y1, y+y1-y1*Math.sqrt(3));
-        context.stroke();
-        context.fill();
-        context.restore();
     }
-    
+
+    var vcc_bar = new MyBar("Avionics", 4.5, 5.5, 0.1,
+                            [[4.5,4.8], [5.2,5.5]],
+                            [[4.8,4.9], [5.1,5.2]],
+                            [[4.9,5.1]]);
+    var batt_bar = new MyBar("Battery", 0.0, 100, 10,
+                             [[0,10]], [[10,25]], [[25,100]]);
+    var cell_bar = new MyBar("Per Cell", 3.0, 4.2, 0.1,
+                             [[3.0,3.3]], [[3.3,3.5]], [[3.5,4.2]]);
+    var curr_bar = new MyBar("Current Draw", 0, 500, 100,
+                             [[350,500]], [[200,350]], [[0,200]]);
+  
     function draw_power2( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -546,28 +591,28 @@ var panel = function() {
 
         var pad = Math.round(size * 0.025);
         var r = Math.round(size * 0.5);
-        var px =  Math.round(size * 0.06);
         context.save();
         context.strokeStyle = '#202020';
         context.fillStyle = '#202020';
         myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
         context.restore();
 
-        var y1 = Math.round(size*0.18);
+        // power label
+        context.save()
+        var px = Math.round(size * 0.07);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        context.fillText("POWER", cx, cy - size*0.35);
+        context.restore();
+        
+        px =  Math.round(size * 0.05);
+        
+        var y1 = Math.round(size*0.20);
         var vcc = json.sensors.power.avionics_vcc;
         var val_text = (vcc).toFixed(2) + "V";
-        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
-                 px, vcc, "Avionics Voltage", val_text,
-                 4.5, 5.5, 0.1,
-                 [[4.5,4.8], [5.3,5.5]], [[4.8,4.9], [5.2,5.3]], [[4.9,5.2]]);
-        
-        y1 += Math.round(size*0.18);
-        var cell_volts = json.sensors.power.cell_vcc;
-        var val_text = (cell_volts).toFixed(2) + "V";
-        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
-                 px, cell_volts, "Per Cell Voltage", val_text,
-                 3.0, 4.2, 0.1,
-                 [[3.0,3.3]], [[3.3,3.5]], [[3.5,4.2]]);
+        vcc_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                     px, vcc, val_text);
         
         var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
         var battery_total = parseFloat(json.config.specs.battery_mah)
@@ -579,19 +624,77 @@ var panel = function() {
         }
         y1 += Math.round(size*0.18);
         var val_text = (battery_percent).toFixed(0) + "%";
-        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
-                 px, battery_percent, "Battery Capacity", val_text,
-                 0.0, 100, 10,
-                 [[0,10]], [[10,25]], [[25,100]]);
+        batt_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                      px, battery_percent, val_text)
 
+        y1 += Math.round(size*0.18);
+        var cell_volts = json.sensors.power.cell_vcc;
+        var val_text = (cell_volts).toFixed(2) + "V";
+        cell_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                      px, cell_volts, val_text);
+        
         y1 += Math.round(size*0.18);
         var watts = json.sensors.power.main_watts;
         var val_text = (watts).toFixed(0) + "W";
-        draw_bar(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
-                 px, cell_volts, "Current Draw", val_text,
-                 0, 500, 100,
-                 [[350,500]], [[200,350]], [[0,200]]);
+        curr_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                      px, cell_volts, val_text);        
+    }
+
+    var ail_bar = new MyBar("Aileron", -1, 1, 0.2,
+                            [], [[-1,-0.5], [0.5,1]], [[-0.5,0.5]]);
+    var ele_bar = new MyBar("Elevator", -1, 1, 0.2,
+                            [], [[-1,-0.5], [0.5,1]], [[-0.5,0.5]]);
+    var rud_bar = new MyBar("Rudder", -1, 1, 0.2,
+                            [], [[-1,-0.5], [0.5,1]], [[-0.5,0.5]]);
+    var thr_bar = new MyBar("Throttle", 0, 100, 10,
+                            [[90,100]], [[75,90]], [[0,75]]);
+    function draw_controls( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+
+        var pad = Math.round(size * 0.025);
+        var r = Math.round(size * 0.5);
+        context.save();
+        context.strokeStyle = '#202020';
+        context.fillStyle = '#202020';
+        myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
+        context.restore();
+
+        // controls label
+        context.save()
+        var px = Math.round(size * 0.07);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        context.fillText("FLIGHT CONTROLS", cx, cy - size*0.35);
+        context.restore();
         
+        px =  Math.round(size * 0.05);
+        
+        var y1 = Math.round(size*0.20);
+        var ail = json.actuators.aileron;
+        var val_text = (ail).toFixed(2);
+        ail_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                     px, ail, val_text);
+        
+        y1 += Math.round(size*0.18);
+        var ele = json.actuators.elevator;
+        var val_text = (ele).toFixed(2);
+        ele_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                     px, ele, val_text);
+        
+        y1 += Math.round(size*0.18);
+        var rud = json.actuators.rudder;
+        var val_text = (rud).toFixed(2);
+        rud_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                     px, rud, val_text);
+        
+        y1 += Math.round(size*0.18);
+        var thr = parseFloat(json.actuators.throttle)*100;
+        var val_text = (thr).toFixed(0) + "%";
+        thr_bar.draw(x + 4*pad, y + y1, size - 8*pad, Math.round(size * 0.05),
+                     px, thr, val_text);
     }
 
     function draw_power( x, y, size ) {
@@ -673,8 +776,7 @@ var panel = function() {
         myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
         context.restore();
         
-        
-        // 'true' label
+        // 'status' label
         context.save()
         px = Math.round(size * 0.07);
         context.font = px + "px Courier New, monospace";
