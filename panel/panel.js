@@ -514,6 +514,12 @@ var panel = function() {
         }        
         draw(x, y, w, h, px, val, text2) {
             this.update_stats(val);
+            if ( val < this.minv - 0.05*this.range ) {
+                val = this.minv - 0.05*this.range;
+            }
+            if ( val > this.maxv + 0.05*this.range ) {
+                val = this.maxv + 0.05*this.range;
+            }
             context.save();
             context.lineWidth = h;
             context.strokeStyle = '#e03030';
@@ -563,7 +569,9 @@ var panel = function() {
             var std = Math.sqrt(this.std2);
             var v1 = this.avg - std;
             if (v1 < this.minv) { v1 = this.minv; }
+            if (v1 > this.maxv) { v1 = this.maxv; }
             var v2 = this.avg + std;
+            if (v2 < this.minv) { v2 = this.minv; }
             if (v2 > this.maxv) { v2 = this.maxv; }
             var x1 = ((v1 - this.minv) / this.range) * w;
             var x2 = ((v2 - this.minv) / this.range) * w;
