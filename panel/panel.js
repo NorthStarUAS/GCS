@@ -601,15 +601,19 @@ var panel = function() {
             var x1 = ((val - this.minv) / this.range) * w
             var y1 = Math.round(h*0.5);
             context.lineWidth = 1;
-            context.strokeStyle = 'black';
+            context.strokeStyle = 'white';
             context.fillStyle = 'white';
             context.beginPath();
             context.moveTo(x+x1, y+y1);
             context.lineTo(x+x1-y1, y+y1-y1*Math.sqrt(3));
             context.lineTo(x+x1+y1, y+y1-y1*Math.sqrt(3));
             context.lineTo(x+x1, y+y1);
-            context.fill();
             context.stroke();
+	    context.shadowOffsetX = 1;
+	    context.shadowOffsetY = 2;
+	    context.shadowBlur = 3;
+	    context.shadowColor = "rgba(0, 0, 0, 0.8)";
+            context.fill();
             
             context.font = px + "px Courier New, monospace";
             context.fillStyle = "white";
@@ -775,13 +779,13 @@ var panel = function() {
     var sats_bar = new MyBar("GPS Sats", 0, 20, 2,
                             [[5]], [], [[7,20]]);
     var pdop_bar = new MyBar("GPS pdop", 0, 10, 2,
-                             [[5]], [], [[0,3]]);
+                             [[5]], [], [[0,3.5]]);
     var pos_bar = new MyBar("Pos Acc", 0, 10, 2,
-                            [[5]], [], [[0,3.5]]);
+                            [[5]], [], [[0,3]]);
     var vel_bar = new MyBar("Vel Acc", 0, 1, 0.2,
-                            [[0.3]], [], [[0,0.2]]);
-    var att_bar = new MyBar("Att Acc", 0, 5, 11,
-                            [[1]], [], [[0,5]]);
+                            [[0.4]], [], [[0,0.2]]);
+    var att_bar = new MyBar("Att Acc", 0, 2.5, 0.5,
+                            [[1]], [], [[0,0.5]]);
     var accel_bar = new MyBar("Accel Bias", 0, 2, 0.4,
                               [[1]], [], [[0,0.5]]);
     var gyro_bar = new MyBar("Gyro Bias", 0, 2, 0.4,
@@ -854,7 +858,7 @@ var panel = function() {
         if ( ay_bias > accel_bias ) { accel_bias = ay_bias; }
         if ( az_bias > accel_bias ) { accel_bias = az_bias; }
         if ( json.filters.filter[0].status < 2 ) {
-            accel_bias = 99.99;
+            accel_bias = 0.0;
         }            
         var val_text = (accel_bias).toFixed(2) + " mps2";
         accel_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
@@ -869,7 +873,7 @@ var panel = function() {
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
         var gyro_bias_deg = gyro_bias*180/Math.PI;
         if ( json.filters.filter[0].status < 2 ) {
-            gyro_bias_deg = 99.99;
+            gyro_bias_deg = 0;
         }
         var val_text = (gyro_bias).toFixed(2) + " dps";
         gyro_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
@@ -969,21 +973,21 @@ var panel = function() {
         
         var pos_cov = parseFloat(json.filters.filter[0].max_pos_cov)*3;
         if ( json.filters.filter[0].status < 2 ) {
-            pos_cov = 99.99;
+            pos_cov = 0;
         }
         text = "Pos Acc: " + pos_cov.toFixed(2) + " m";
         add_status_message(text, pos_cov, 2.0, 3.5, 5.0)
 
         var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
         if ( json.filters.filter[0].status < 2 ) {
-            vel_cov = 99.99;
+            vel_cov = 0;
         }
         text = "Vel Acc: " + vel_cov.toFixed(2) + " m/s";
         add_status_message(text, vel_cov, 0.1, 0.2, 0.30);
 
         var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
         if ( json.filters.filter[0].status < 2 ) {
-            att_cov = 99.99;
+            att_cov = 0;
         }            
         text = "Att Acc: " + att_cov.toFixed(2) + " deg";
         add_status_message(text, att_cov, 0.1, 0.5, 1.0);
@@ -995,7 +999,7 @@ var panel = function() {
         if ( ay_bias > accel_bias ) { accel_bias = ay_bias; }
         if ( az_bias > accel_bias ) { accel_bias = az_bias; }
         if ( json.filters.filter[0].status < 2 ) {
-            accel_bias = 99.99;
+            accel_bias = 0;
         }            
         text = "Accel Bias: " + accel_bias.toFixed(2) + " mps2";
         add_status_message(text, accel_bias, 0.1, 0.5, 1.0);
@@ -1008,7 +1012,7 @@ var panel = function() {
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
         var gyro_bias_deg = gyro_bias*180/Math.PI;
         if ( json.filters.filter[0].status < 2 ) {
-            gyro_bias_deg = 99.99;
+            gyro_bias_deg = 0;
         }
         text = "Gyro Bias: " + gyro_bias_deg.toFixed(2) + " dps";
         add_status_message(text, gyro_bias_deg, 0.1, 0.5, 1.0);
