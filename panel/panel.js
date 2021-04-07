@@ -513,13 +513,13 @@ var panel = function() {
             }
         }        
         draw(x, y, w, h, px, val, text2) {
-            this.update_stats(val);
             if ( val < this.minv - 0.05*this.range ) {
                 val = this.minv - 0.05*this.range;
             }
             if ( val > this.maxv + 0.05*this.range ) {
                 val = this.maxv + 0.05*this.range;
             }
+            this.update_stats(val);
             context.save();
             context.lineWidth = h;
             context.strokeStyle = '#e03030';
@@ -634,7 +634,7 @@ var panel = function() {
         // power label
         context.save()
         var y1 = Math.round(size*0.12);
-        var px = Math.round(size * 0.07);
+        var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
@@ -713,12 +713,12 @@ var panel = function() {
 
         // controls label
         context.save()
-        var px = Math.round(size * 0.08);
+        var px = Math.round(size * 0.06);
         var y1 = Math.round(size*0.12);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText("FLIGHT CTRLS", cx, y + y1);
+        context.fillText("FLIGHT CONTROLS", cx, y + y1);
         context.restore();
         
         px =  Math.round(size * 0.05);
@@ -840,7 +840,7 @@ var panel = function() {
         
         // 'status' label
         context.save()
-        px = Math.round(size * 0.07);
+        px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
