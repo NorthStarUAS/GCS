@@ -575,13 +575,7 @@ var panel = function() {
                     context.stroke();
                 }
             }
-            context.strokeStyle = "white";
-            context.lineWidth = 3;
-            var x1 = ((this.avg - this.minv) / this.range) * w;
-            context.beginPath();
-            context.moveTo(x+x1, y);
-            context.lineTo(x+x1, y + h);
-            context.stroke();
+            context.strokeStyle = "cyan";
             var std = Math.sqrt(this.std2);
             var v1 = this.avg - std;
             if (v1 < this.minv) { v1 = this.minv; }
@@ -591,13 +585,21 @@ var panel = function() {
             if (v2 > this.maxv) { v2 = this.maxv; }
             var x1 = ((v1 - this.minv) / this.range) * w;
             var x2 = ((v2 - this.minv) / this.range) * w;
+            var y1 = Math.round(h*0.5);
+            context.lineWidth = Math.round(h*0.4);
             context.beginPath();
-            context.moveTo(x+x1, y + h);
-            context.lineTo(x+x2, y + h);
-            context.strokeStyle = "white";
-            context.fillStyle = "white";
+            context.moveTo(x+x1, y + y1);
+            context.lineTo(x+x2, y + y1);
+            context.stroke();
+            context.strokeStyle = "white"
+            context.lineWidth = 3;
+            var x1 = ((this.avg - this.minv) / this.range) * w;
+            context.beginPath();
+            context.moveTo(x+x1, y);
+            context.lineTo(x+x1, y + h);
             context.stroke();
 
+            context.save()
             var x1 = ((val - this.minv) / this.range) * w
             var y1 = Math.round(h*0.5);
             context.lineWidth = 1;
@@ -614,6 +616,7 @@ var panel = function() {
 	    context.shadowBlur = 3;
 	    context.shadowColor = "rgba(0, 0, 0, 0.9)";
             context.fill();
+            context.restore();
             
             context.font = px + "px Courier New, monospace";
             context.fillStyle = "white";
@@ -626,16 +629,16 @@ var panel = function() {
         }
     }
 
-    var vcc_bar = new MyBar("Avionics", 4.5, 5.5, 0.1,
-                            [[4.8], [5.2]],
-                            [],
-                            [[4.9,5.1]]);
     var batt_bar = new MyBar("Battery", 0.0, 100, 10,
                              [[10]], [], [[25,100]]);
     var cell_bar = new MyBar("Per Cell", 3.0, 4.2, 0.1,
                              [[3.3]], [], [[3.5,4.2]]);
     var curr_bar = new MyBar("Current Draw", 0, 500, 100,
                              [[350]], [], [[0,200]]);
+    var vcc_bar = new MyBar("Avionics", 4.5, 5.5, 0.1,
+                            [[4.8], [5.2]],
+                            [],
+                            [[4.9,5.1]]);
     var imu_temp_bar = new MyBar("IMU Temp", 0, 60, 10,
                                  [[50]], [], [[0,40]]);
   
@@ -664,13 +667,6 @@ var panel = function() {
         
         px =  Math.round(size * 0.05);
         
-        y1 = Math.round(size*0.17);
-        var vcc = json.sensors.power.avionics_vcc;
-        if ( vcc == null ) { vcc = 0; }
-        var val_text = (vcc).toFixed(2) + "V";
-        vcc_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                     px, vcc, val_text);
-        
         var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
         var battery_total = parseFloat(json.config.specs.battery_mah)
         var remaining = battery_total - mah
@@ -679,7 +675,7 @@ var panel = function() {
         if ( battery_percent < 0 ) {
             battery_percent = 0;
         }
-        y1 += vspace;
+        y1 = Math.round(size*0.17);
         var val_text = (battery_percent).toFixed(0) + "%";
         batt_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, battery_percent, val_text)
@@ -697,6 +693,13 @@ var panel = function() {
         curr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, cell_volts, val_text);
 
+        y1 += vspace;
+        var vcc = json.sensors.power.avionics_vcc;
+        if ( vcc == null ) { vcc = 0; }
+        var val_text = (vcc).toFixed(2) + "V";
+        vcc_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                     px, vcc, val_text);
+        
         y1 += vspace;
         var imu_temp = parseFloat(json.sensors.imu[0].temp_C);
         var val_text = (imu_temp).toFixed(0) + "C";
