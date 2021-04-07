@@ -612,7 +612,7 @@ var panel = function() {
 	    context.shadowOffsetX = 1;
 	    context.shadowOffsetY = 2;
 	    context.shadowBlur = 3;
-	    context.shadowColor = "rgba(0, 0, 0, 0.8)";
+	    context.shadowColor = "rgba(0, 0, 0, 0.9)";
             context.fill();
             
             context.font = px + "px Courier New, monospace";
