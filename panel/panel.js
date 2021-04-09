@@ -492,7 +492,48 @@ var panel = function() {
             this.avg = null;
             this.std2 = null;
             this.last_time = 0;
+	    this.pointer_color = 'white';
+	    this.start = 0;
+	    this.state = 0;
         }
+	set_pointer_color(val) {
+            for ( var i = 0; i < this.greens.length; i++ ) {
+		if ( val >= this.greens[i][0] && val <= this.greens[i][1] ) {
+		    this.pointer_color = 'white';
+		    return;
+		}
+	    }
+            for ( var i = 0; i < this.reds.length; i++ ) {
+		var alert = 0;
+		if ( val >= this.reds[i][0] && val <= this.reds[i][1] ) {
+		    alert = 1;
+		} else if ( val < this.minv ) {
+		    alert = 1;
+		} else if ( val > this.maxv ) {
+		    alert = 1;
+		}
+		if ( alert ) {
+		    if ( this.state == 0 ) {
+			if ( Date.now() > this.start+300 ) {
+			    this.state = 1;
+			    this.start = Date.now();
+			}
+		    } else if ( this.state == 1 ) {
+			if ( Date.now() > this.start+1000 ) {
+			    this.state = 0;
+			    this.start = Date.now();
+			}
+		    }
+		    if ( this.state == 1 ) {
+			this.pointer_color = 'red';
+		    } else {
+			this.pointer_color = 'white';
+		    }
+		    return;
+		}
+	    }
+	    this.pointer_color = 'yellow';
+	}
         update_stats(val) {
             var timestamp = parseFloat(json.sensors.imu[0].timestamp);
             var dt = timestamp - this.last_time;
@@ -517,6 +558,7 @@ var panel = function() {
                 val = this.maxv + 0.05*this.range;
             }
             this.update_stats(val);
+	    this.set_pointer_color(val);
             context.save();
 
             context.shadowColor = "transparent";
@@ -558,20 +600,19 @@ var panel = function() {
             context.stroke();
             context.strokeStyle = '#e03030';
             for ( var i = 0; i < this.reds.length; i++ ) {
-                if ( this.reds[i].length > 1 ) {
-                    context.lineWidth = h;
-                    var x1 = ((this.reds[i][0] - this.minv) / this.range) * w;
-                    var x2 = ((this.reds[i][1] - this.minv) / this.range) * w;
-                    context.beginPath();
-                    context.moveTo(x+x1, y + Math.round(h*0.5));
-                    context.lineTo(x+x2, y + Math.round(h*0.5));
-                    context.stroke();
-                } else {
-                    context.lineWidth = Math.round(w*0.02);
-                    var x1 = ((this.reds[i][0] - this.minv) / this.range) * w;
+                context.lineWidth = Math.round(w*0.02);
+                var x1 = ((this.reds[i][0] - this.minv) / this.range) * w;
+                var x2 = ((this.reds[i][1] - this.minv) / this.range) * w;
+		if ( x1 > 1 && x1 < w-1 ) {
                     context.beginPath();
                     context.moveTo(x+x1, y);
                     context.lineTo(x+x1, y + h);
+                    context.stroke();
+                }
+		if ( x2 > 1 && x2 < w-1 ) {
+                    context.beginPath();
+                    context.moveTo(x+x2, y);
+                    context.lineTo(x+x2, y + h);
                     context.stroke();
                 }
             }
@@ -603,8 +644,8 @@ var panel = function() {
             var x1 = ((val - this.minv) / this.range) * w
             var y1 = Math.round(h*0.5);
             context.lineWidth = 1;
-            context.strokeStyle = 'white';
-            context.fillStyle = 'white';
+            context.strokeStyle = this.pointer_color;
+            context.fillStyle = this.pointer_color;
             context.beginPath();
             context.moveTo(x+x1, y+y1);
             context.lineTo(x+x1-y1, y+y1-y1*Math.sqrt(3));
@@ -619,6 +660,7 @@ var panel = function() {
             context.restore();
             
             context.font = px + "px Courier New, monospace";
+	    context.strokeStyle = "white";
             context.fillStyle = "white";
             context.textAlign = "left";
             context.fillText(this.text1, x, y + Math.round(2.2*h));
@@ -630,17 +672,17 @@ var panel = function() {
     }
 
     var batt_bar = new MyBar("Battery", 0.0, 100, 10,
-                             [[10]], [], [[25,100]]);
+                             [[0,10]], [], [[25,100]]);
     var cell_bar = new MyBar("Per Cell", 3.0, 4.2, 0.1,
-                             [[3.3]], [], [[3.5,4.2]]);
+                             [[3.0,3.3]], [], [[3.5,4.2]]);
     var curr_bar = new MyBar("Current Draw", 0, 500, 100,
-                             [[350]], [], [[0,200]]);
+                             [[350,500]], [], [[0,200]]);
     var vcc_bar = new MyBar("Avionics", 4.5, 5.5, 0.1,
-                            [[4.8], [5.2]],
+                            [[4.5,4.8], [5.2,5.5]],
                             [],
                             [[4.9,5.1]]);
     var imu_temp_bar = new MyBar("IMU Temp", 0, 60, 10,
-                                 [[50]], [], [[0,40]]);
+                                 [[50,60]], [], [[0,40]]);
   
     function draw_power2( x, y, size ) {
         var cx = x + size*0.5;
@@ -715,7 +757,7 @@ var panel = function() {
     var rud_bar = new MyBar("Rudder", -1, 1, 0.2,
                             [], [], [[-0.5,0.5]]);
     var thr_bar = new MyBar("Throttle", 0, 100, 10,
-                            [[90]], [], [[0,75]]);
+                            [[90,100]], [], [[0,75]]);
     var flaps_bar = new MyBar("Flaps", 0, 1, 0.1,
                               [], [], [[0,0.5]]);
     function draw_controls( x, y, size ) {
@@ -780,19 +822,19 @@ var panel = function() {
     }
 
     var sats_bar = new MyBar("GPS Sats", 0, 20, 2,
-                            [[5]], [], [[7,20]]);
+                             [[0,5]], [], [[7,20]]);
     var pdop_bar = new MyBar("GPS pdop", 0, 10, 2,
-                             [[5]], [], [[0,3.5]]);
+                             [[5,10]], [], [[0,3.5]]);
     var pos_bar = new MyBar("Pos Acc", 0, 10, 2,
-                            [[5]], [], [[0,3]]);
+                            [[5,10]], [], [[0,3]]);
     var vel_bar = new MyBar("Vel Acc", 0, 1, 0.2,
-                            [[0.4]], [], [[0,0.2]]);
+                            [[0.4,1]], [], [[0,0.2]]);
     var att_bar = new MyBar("Att Acc", 0, 2.5, 0.5,
-                            [[1]], [], [[0,0.5]]);
+                            [[1,2.5]], [], [[0,0.5]]);
     var accel_bar = new MyBar("Accel Bias", 0, 2, 0.4,
-                              [[1]], [], [[0,0.5]]);
+                              [[1,2]], [], [[0,0.5]]);
     var gyro_bar = new MyBar("Gyro Bias", 0, 2, 0.4,
-                             [[1]], [], [[0,0.5]]);
+                             [[1,2]], [], [[0,0.5]]);
     function draw_insgns( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -860,27 +902,27 @@ var panel = function() {
         var accel_bias = ax_bias;
         if ( ay_bias > accel_bias ) { accel_bias = ay_bias; }
         if ( az_bias > accel_bias ) { accel_bias = az_bias; }
-        if ( json.filters.filter[0].status < 2 ) {
-            accel_bias = 0.0;
-        }            
+        //if ( json.filters.filter[0].status < 2 ) {
+        //    accel_bias = 0.0;
+        //}            
         var val_text = (accel_bias).toFixed(2) + " mps2";
         accel_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, accel_bias, val_text);
         
         y1 += vspace;
-        var p_bias = Math.abs(parseFloat(json.filters.filter[0].p_bias)) * r2d;
-        var q_bias = Math.abs(parseFloat(json.filters.filter[0].q_bias)) * r2d;
-        var r_bias = Math.abs(parseFloat(json.filters.filter[0].r_bias)) * r2d;
+        var p_bias = Math.abs(parseFloat(json.filters.filter[0].p_bias));
+        var q_bias = Math.abs(parseFloat(json.filters.filter[0].q_bias));
+        var r_bias = Math.abs(parseFloat(json.filters.filter[0].r_bias));
         var gyro_bias = p_bias;
-        if ( q_bias > gyro_bias ) { gyro_bias = p_bias; }
-        if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
-        var gyro_bias_deg = gyro_bias*180/Math.PI;
-        if ( json.filters.filter[0].status < 2 ) {
-            gyro_bias_deg = 0;
-        }
-        var val_text = (gyro_bias).toFixed(2) + " dps";
+        if ( q_bias > gyro_bias ) { gyro_bias = q_bias; }
+        if ( r_bias > gyro_bias ) { gyro_bias = r_bias; }
+        var gyro_bias_deg = gyro_bias * r2d;
+        //if ( json.filters.filter[0].status < 2 ) {
+        //    gyro_bias_deg = 0;
+        //}
+        var val_text = (gyro_bias_deg).toFixed(2) + " dps";
         gyro_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                       px, gyro_bias, val_text);
+                       px, gyro_bias_deg, val_text);
     }
 
     function draw_power( x, y, size ) {
