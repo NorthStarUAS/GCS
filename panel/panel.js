@@ -52,12 +52,13 @@ var panel = function() {
         vsi : {draw: draw_vsi},
         controls : {draw: draw_controls},
         insgns : {draw: draw_insgns},
+	stream : {draw: draw_stream},
     };
 
     var layout_config = {
         horizontal : {
             instruments : [['asi', 'ati', 'alt', 'power2'],
-                           ['status', 'dg', 'insgns', 'controls']]
+                           ['status', 'dg', 'insgns', 'stream']]
         },
         vertical : {
             instruments : [['power2', 'status'],
@@ -821,6 +822,56 @@ var panel = function() {
                        px, flaps, val_text);
     }
 
+    var sigma1_bar = new MyBar("Sigma 1", 0, 25, 5, [[20, 25]], [], [[0, 5]]);
+    var sigma2_bar = new MyBar("Sigma 2", 0, 25, 5, [[20, 25]], [], [[0, 5]]);
+    var sigma3_bar = new MyBar("Sigma 3", 0, 25, 5, [[20, 25]], [], [[0, 5]]);
+    function draw_stream( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+
+        var pad = Math.round(size * 0.025);
+        var ipad = pad * 6;
+        var r = Math.round(size * 0.5);
+        var h = Math.round(size * 0.04);
+        var vspace = Math.round(size * 0.15);
+
+        context.strokeStyle = '#202020';
+        context.fillStyle = '#202020';
+        myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
+
+        // STREAM label
+        var px = Math.round(size * 0.06);
+        var y1 = Math.round(size*0.12);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        context.fillText("STREAM", cx, y + y1);
+        
+        px =  Math.round(size * 0.05);
+        
+        y1 = Math.round(size*0.17);
+        var sigma1 = parseFloat(json.stream.sigma1);
+        if ( sigma1 == null ) { sigma1 = 0; }
+        var val_text = (sigma1).toFixed(2);
+        sigma1_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+			px, sigma1, val_text);
+        
+        y1 += vspace;
+        var sigma2 = parseFloat(json.stream.sigma2);
+        if ( sigma2 == null ) { sigma2 = 0; }
+        var val_text = (sigma2).toFixed(2);
+        sigma2_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+			px, sigma2, val_text);
+	
+        y1 += vspace;
+        var sigma3 = parseFloat(json.stream.sigma3);
+        if ( sigma3 == null ) { sigma3 = 0; }
+        var val_text = (sigma3).toFixed(2);
+        sigma3_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+			px, sigma3, val_text);
+    }
+    
     var sats_bar = new MyBar("GPS Sats", 0, 20, 2,
                              [[0,5]], [], [[7,20]]);
     var pdop_bar = new MyBar("GPS pdop", 0, 10, 2,
