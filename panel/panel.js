@@ -826,7 +826,7 @@ var panel = function() {
     var pdop_bar = new MyBar("GPS pdop", 0, 10, 2,
                              [[5,10]], [], [[0,3.5]]);
     var pos_bar = new MyBar("Pos Acc", 0, 10, 2,
-                            [[5,10]], [], [[0,3]]);
+                            [[6,10]], [], [[0,4]]);
     var vel_bar = new MyBar("Vel Acc", 0, 1, 0.2,
                             [[0.4,1]], [], [[0,0.2]]);
     var att_bar = new MyBar("Att Acc", 0, 2.5, 0.5,
@@ -1021,7 +1021,7 @@ var panel = function() {
             pos_cov = 0;
         }
         text = "Pos Acc: " + pos_cov.toFixed(2) + " m";
-        add_status_message(text, pos_cov, 2.0, 3.5, 5.0)
+        add_status_message(text, pos_cov, 4.0, 5, 6.0)
 
         var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
         if ( json.filters.filter[0].status < 2 ) {
