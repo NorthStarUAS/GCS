@@ -180,7 +180,7 @@ var annunciator = function() {
         var auto_inner = $("#auto #inner");
         if ( auto_div != null && json.autopilot.master_switch != null ) {
             var auto_switch = json.autopilot.master_switch;
-            if ( auto_switch == "True" ) {
+            if ( auto_switch ) {
                 auto_div.attr("class", "ok");
                 auto_inner.html("Auto");
             } else {
