@@ -1055,12 +1055,11 @@ var panel = function() {
         var gyro_bias = p_bias;
         if ( q_bias > gyro_bias ) { gyro_bias = p_bias; }
         if ( r_bias > gyro_bias ) { gyro_bias = q_bias; }
-        var gyro_bias_deg = gyro_bias*180/Math.PI;
         if ( json.filters.filter[0].status < 2 ) {
-            gyro_bias_deg = 0;
+            gyro_bias = 0;
         }
-        text = "Gyro Bias: " + gyro_bias_deg.toFixed(2) + " dps";
-        add_status_message(text, gyro_bias_deg, 0.1, 0.5, 1.0);
+        text = "Gyro Bias: " + gyro_bias.toFixed(2) + " dps";
+        add_status_message(text, gyro_bias, 0.1, 0.5, 1.0);
 
         var imu_temp = parseFloat(json.sensors.imu[0].temp_C);
         text = "IMU Temp: " + (imu_temp).toFixed(0) + "C";
