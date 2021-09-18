@@ -37,8 +37,8 @@ var annunciator = function() {
         //var sats_div = $("#sats");
         var sats_div = $("#sats");
         var sats_inner = $("#sats #inner");
-        if ( sats_div != null && json.sensors.gps[0].satellites != null ) {
-            sats = parseInt(json.sensors.gps[0].satellites);
+        if ( sats_div != null && json.sensors.gps[0].num_sats != null ) {
+            sats = parseInt(json.sensors.gps[0].num_sats);
             if ( isNaN(sats) ) {
                 sats = 0;
             }
@@ -141,13 +141,13 @@ var annunciator = function() {
             if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
                 secs = parseFloat(json.status.throttle_timer).toFixed(0);
             } else {
-                secs = parseFloat(json.status.flight_timer).toFixed(0);
+                secs = parseFloat(json.sensors.airdata.flight_timer_millis)/1000.0;
             }
             timer_div.attr("class", "ok");
             var hours = Math.floor(secs / 3600);
             var rem = secs - (hours * 3600);
             var mins = Math.floor(rem / 60);
-            var rem = rem - (mins * 60);
+            var rem = rem.toFixed(0) - (mins * 60);
             var timer_str = "";
             if ( secs < 3600 ) {
                 timer_str = mins + ":" + pad2(rem);
@@ -178,9 +178,9 @@ var annunciator = function() {
     function draw_auto() {
         var auto_div = $("#auto");
         var auto_inner = $("#auto #inner");
-        if ( auto_div != null && json.autopilot.master_switch != null ) {
-            var auto_switch = json.autopilot.master_switch;
-            if ( auto_switch == "True" ) {
+        if ( auto_div != null && json.switches.master_switch != null ) {
+            var auto_switch = json.switches.master_switch;
+            if ( auto_switch ) {
                 auto_div.attr("class", "ok");
                 auto_inner.html("Auto");
             } else {
@@ -236,8 +236,8 @@ var annunciator = function() {
         if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
             return;
         }
-        if ( temp_div != null && json.sensors.airdata[0].temp_C != null ) {
-            var temp = parseFloat(json.sensors.airdata[0].temp_C).toFixed(0);
+        if ( temp_div != null && json.sensors.airdata.temp_C != null ) {
+            var temp = parseFloat(json.sensors.airdata.temp_C).toFixed(0);
             if ( temp < -30 || temp > 50 ) {
                 temp_div.attr("class", "error");
             } else if ( temp < -10 || temp > 35 ) {
