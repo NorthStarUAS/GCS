@@ -1,5 +1,5 @@
 var ws;
-var update_rate = 200;
+var update_rate = 100;
 var json;
 var projects;
 

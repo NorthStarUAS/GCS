@@ -290,7 +290,7 @@ map_update = function() {
         ownship.setLatLng(newLatLng);
         if (L.DomUtil.TRANSFORM) {
             ownship._icon.style[L.DomUtil.TRANSFORM] += ' rotate('
-                + json.filters.filter[0].heading_deg + 'deg)';
+                + json.filters.filter[0].yaw_deg + 'deg)';
             ownship._icon.style["transform-origin"] = "50% 50%";
         }
         ownship_label.setLatLng(newLatLng);

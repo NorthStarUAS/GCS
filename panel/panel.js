@@ -282,8 +282,8 @@ var panel = function() {
         context.strokeStyle = 'orange';
         context.lineWidth = 5;
         context.translate(cx, cy);
-        var ps = json.filters.wind.pitot_scale_factor;
-        var true_kt = json.velocity.airspeed_smoothed_kt*speed_scale * ps;
+        var ps = json.sensors.airdata.pitot_scale_factor;
+        var true_kt = json.sensors.airdata.airspeed_mps*mps2kt*speed_scale * ps;
         var deg = my_interp( true_kt, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.beginPath();
@@ -307,7 +307,7 @@ var panel = function() {
         context.translate(cx, cy);
         var speed = 0.0;
         if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
-            speed = json.velocity.airspeed_smoothed_kt;
+            speed = json.sensors.airdata.airspeed_mps*mps2kt;
         } else {
             speed = json.filters.filter[0].groundspeed_kt;
         }
@@ -377,7 +377,7 @@ var panel = function() {
         //var alt_ft = json.position.altitude_true_m / 0.3048;
         var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
         var ground_ft = json.position.altitude_ground_m / 0.3048;
-        var target_ft = json.autopilot.targets.altitude_msl_ft;
+        var target_ft = ground_ft + json.autopilot.targets.altitude_agl_ft;
 
         // kollsman
         context.save();
@@ -825,8 +825,8 @@ var panel = function() {
                        px, flaps, val_text);
     }
 
-    var sats_bar = new MyBar("GPS Sats", 0, 20, 2,
-                             [[0,5]], [], [[7,20]]);
+    var sats_bar = new MyBar("GPS Sats", 0, 25, 5,
+                             [[0,5]], [], [[7,25]]);
     var hdop_bar = new MyBar("GPS hdop", 0, 10, 2,
                              [[5,10]], [], [[0,3.5]]);
     var pos_bar = new MyBar("Pos Acc", 0, 10, 2,
@@ -1114,7 +1114,7 @@ var panel = function() {
         // Wind
         
         if ( json.status.in_flight == "True" ) {
-            var wind_kt = parseFloat(json.filters.wind.wind_speed_kt);
+            var wind_kt = parseFloat(json.sensors.airdata.wind_speed_mps)*mps2kt;
             var target_airspeed_kt = parseFloat(json.autopilot.targets.airspeed_kt);
             text = "Wind: " + wind_kt.toFixed(0) + " kt";
             var ratio = 0.0;
@@ -1211,13 +1211,13 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var heading = json.filters.filter[0].heading_deg;
+        var heading = json.filters.filter[0].yaw_deg;
         var groundspeed_ms = parseFloat(json.filters.filter[0].groundspeed_ms);
         if ( groundspeed_ms > 0.25 ) {
             groundtrack_deg = json.filters.filter[0].groundtrack_deg;
         }
         var ap_hdg = json.autopilot.targets.groundtrack_deg
-        var wind_deg = json.filters.wind.wind_dir_deg;
+        var wind_deg = json.sensors.airdata.wind_dir_deg;
         
         var display_units = json.config.specs.display_units;
         var speed_scale = 1.0;
@@ -1262,8 +1262,8 @@ var panel = function() {
         
         // wind label
         var wind_kt = 0;
-        if ( json.filters.wind.wind_speed_kt != null ) {
-            wind_kt = parseFloat(json.filters.wind.wind_speed_kt*speed_scale).toFixed(0);
+        if ( json.sensors.airdata.wind_speed_mps != null ) {
+            wind_kt = parseFloat(json.sensors.airdata.wind_speed_mps*mps2kt*speed_scale).toFixed(0);
         }
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
