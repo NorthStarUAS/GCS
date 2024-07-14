@@ -1,7 +1,7 @@
 # asynchat example adapted from here:
 #   http://www.grantjenks.com/wiki/random/python_asynchat_chat_example
 
-import asynchat
+import asynchat  # dnf install python3-pyasynchat; pip install pyasynchat
 import asyncore
 import socket
 import re
@@ -60,7 +60,7 @@ class ChatHandler(asynchat.async_chat):
 
     def my_push(self, msg):
         self.push(str.encode(msg))
-        
+
     def process_command(self, msg):
         tokens = msg.split()
         if len(tokens) == 0:

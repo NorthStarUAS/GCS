@@ -1,12 +1,12 @@
 # tornado based websocket server
 
 import json
-import tornado
+import tornado             # dnf install python3-tornado; pip install tornado
 import tornado.httpserver
 import tornado.websocket
 
 from PropertyTree import PropertyNode
-import props_json
+# import props_json
 
 import commands
 import projects
@@ -14,8 +14,8 @@ import projects
 class WSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         print('new connection')
-        self.bind_props()
-      
+        # self.bind_props()
+
     def on_message(self, message):
         # print('message received:  %s' % message)
         [command, args] = message.rstrip().split(' ', 1)
@@ -41,31 +41,31 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         print('connection closed')
- 
+
     def check_origin(self, origin):
         return True
 
-    def bind_props(self):
-        print('binding property nodes')
-        self.gps_node = PropertyNode('/sensors/gps/0')
-        self.imu_node = PropertyNode('/sensors/imu/0')
-        self.airdata_node = PropertyNode('/sensors/airdata')
-        self.pilot_node = PropertyNode('/sensors/pilot_input')
-        self.filter_node = PropertyNode('/filters/filter')
-        self.pos_combined_node = PropertyNode('/position/combined')
-        self.velocity_node = PropertyNode('/velocity')
-        self.act_node = PropertyNode('/actuators/actuator')
-        self.ap_node = PropertyNode('/autopilot')
-        self.targets_node = PropertyNode('/autopilot/targets')
-        self.route_node = PropertyNode('/task/route')
-        self.active_node = PropertyNode('/task/route/active')
-        self.home_node = PropertyNode('/task/home')
-        self.circle_node = PropertyNode('/task/circle')
-        self.status_node = PropertyNode('/status')
-        self.cam_node = PropertyNode('/payload/camera') 
-        self.wind_node = PropertyNode('/filters/wind') 
-        self.apm2_node = PropertyNode('/sensors/APM2') 
-   
+    # def bind_props(self):
+    #     print('binding property nodes')
+    #     self.gps_node = PropertyNode('/sensors/gps/0')
+    #     self.imu_node = PropertyNode('/sensors/imu/0')
+    #     self.airdata_node = PropertyNode('/sensors/airdata')
+    #     self.pilot_node = PropertyNode('/sensors/pilot_input')
+    #     self.filter_node = PropertyNode('/filters/filter')
+    #     self.pos_combined_node = PropertyNode('/position/combined')
+    #     self.velocity_node = PropertyNode('/velocity')
+    #     self.act_node = PropertyNode('/actuators/actuator')
+    #     self.ap_node = PropertyNode('/autopilot')
+    #     self.targets_node = PropertyNode('/autopilot/targets')
+    #     self.route_node = PropertyNode('/task/route')
+    #     self.active_node = PropertyNode('/task/route/active')
+    #     self.home_node = PropertyNode('/task/home')
+    #     self.circle_node = PropertyNode('/task/circle')
+    #     self.status_node = PropertyNode('/status')
+    #     self.cam_node = PropertyNode('/payload/camera')
+    #     self.wind_node = PropertyNode('/filters/wind')
+    #     self.apm2_node = PropertyNode('/sensors/APM2')
+
 def nullfunc():
     pass
 
@@ -80,7 +80,7 @@ def init(port=8888, html_root='.'):
     http_server.listen(port)
     print('Http server on http://localhost:' + str(port) + '/')
     print('Websocket server on http://localhost:' + str(port) + '/ws')
-    
+
 def update():
     tornado.ioloop.IOLoop.instance().run_sync(nullfunc)
-    
+

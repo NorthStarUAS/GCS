@@ -4,9 +4,9 @@ from PropertyTree import PropertyNode
 
 import sys
 sys.path.append("../../src")
-from comms import ns_messages
-import comms.packer
-import comms.serial_parser
+import ns_messages
+# import comms.packer
+from serial_link import wrap_packet
 
 filter_node = PropertyNode('/filters/filter')
 remote_link_node = PropertyNode('/comms/remote_link')
@@ -26,7 +26,7 @@ def serial_send(serial, sequence_num, command):
     cmd.sequence_num = sequence_num
     cmd.message = command
     buf = cmd.pack()
-    packet = comms.serial_parser.wrap_packet(cmd.id, buf)
+    packet = wrap_packet(cmd.id, buf)
     result = serial.write(packet)
     if result != len(packet):
         print("ERROR: wrote %d of %d bytes to serial port!\n" % (result, len(packet)))

@@ -12,6 +12,7 @@ targets_node = PropertyNode("/autopilot/targets")
 tecs_node = PropertyNode("/autopilot/tecs")
 power_node = PropertyNode("/sensors/power")
 tecs_config_node = PropertyNode("/config/autopilot/TECS")
+switches_node = PropertyNode("/switches")
 
 r2d = 180.0 / math.pi
 mps2kt = 1.9438444924406046432
@@ -31,6 +32,10 @@ batp = [ 0.0, 0.05, 0.27, 0.83, 1.00 ]
 from scipy.interpolate import interp1d
 batf = interp1d(batv, batp)
 filt_perc = 1.0
+flight_timer = 0.0
+throttle_timer = 0.0
+ap_timer = 0.0
+odometer = 0.0
 
 def compute_tecs():
     if filter_node.getDouble('timestamp') < 0.01:
@@ -70,11 +75,15 @@ def compute_tecs():
 
 def compute_derived_data():
     global last_time
+    global flight_timer
+    global ap_timer
+    global throttle_timer
+    global odometer
     
     # compute ground track heading/speed
-    vn = filter_node.getDouble("vn_ms")
-    ve = filter_node.getDouble("ve_ms")
-    vd = filter_node.getDouble("vd_ms")
+    vn = filter_node.getDouble("vn_mps")
+    ve = filter_node.getDouble("ve_mps")
+    vd = filter_node.getDouble("vd_mps")
     hdg = (math.pi * 0.5 - math.atan2(vn, ve)) * r2d
     vel_ms = math.sqrt( vn*vn + ve*ve + vd*vd )
     filter_node.setDouble("groundtrack_deg", hdg)
@@ -87,36 +96,23 @@ def compute_derived_data():
     last_time = current_time
 
     # local 'airborne' helper (not official)
-    if vel_node.getDouble('airspeed_smoothed_kt') >= 15:
-        in_flight = True
-    else:
-        in_flight = False
-    status_node.setBool("in_flight", in_flight)
+    is_airborne = airdata_node.getDouble("is_airborne")
     
     # local autopilot timer
-    ap_enabled = False
-    if pilot_node.getDouble("channel", 0) > 0:
-        ap_enabled = True
+    ap_enabled = switches_node.getBool("master_switch")
         
-    if in_flight and ap_enabled:
-        timer = status_node.getDouble('local_autopilot_timer')
-        timer += dt
-        status_node.setDouble('local_autopilot_timer', timer)
-
-    # estimate distance traveled from filter velocity and dt
-    if in_flight:
-        if not status_node.getBool('onboard_flight_time'):
-            ft = status_node.getDouble('flight_timer')
-            ft += dt
-            status_node.setDouble('flight_timer', ft)
-        od = status_node.getDouble('flight_odometer')
-        od += vel_ms * dt
-        status_node.setDouble('flight_odometer', od)
-
-    throttle_timer = status_node.getDouble("throttle_timer")
+    # estimate odometer and timers
+    if is_airborne:
+        flight_timer += dt
+        odometer += vel_ms * dt
+        if ap_enabled:
+            ap_timer += dt
     if pilot_node.getDouble("channel", 2) > 0.1:
         throttle_timer += dt
+    status_node.setDouble("flight_timer", flight_timer)
+    status_node.setDouble("autopilot_timer", ap_timer)
     status_node.setDouble("throttle_timer", throttle_timer)
+    status_node.setDouble("odometer_m", odometer)
         
     # autopilot error metrics
     roll_error = targets_node.getDouble('roll_deg') - filter_node.getDouble('roll_deg')
