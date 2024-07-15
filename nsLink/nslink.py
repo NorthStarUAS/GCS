@@ -15,6 +15,7 @@ from fmu_link import fmu_link
 import httpserver
 import joystick
 import requests
+from sim_link import sim_link
 import telnet
 
 argparser = argparse.ArgumentParser(description='aura link')
@@ -47,7 +48,7 @@ commands.set_serial(ser)
 fmu_link.set_serial(ser)
 
 def main_loop():
-    print("main loop")
+    sim_link.update()
     fmu_link.update()
     current.compute_derived_data()
     joystick.update()
