@@ -1,20 +1,92 @@
 import time
 
-from PropertyTree import PropertyNode
-
 import ns_messages
+from props import remote_link_node
 from serial_link import wrap_packet
 
-filter_node = PropertyNode('/filters/filter')
-remote_link_node = PropertyNode('/comms/remote_link')
+class Commands():
+    def __init__(self):
+        self.ser = None
 
-cmd_send_index = 1
-cmd_recv_index = 0
-prime_state = True
+        self.cmd_send_index = 1
+        self.cmd_recv_index = 0
+        self.prime_state = True
 
-cmd_queue =  []
-last_sent_time = 0.0
-last_received_time = 0.0
+        self.cmd_queue =  []
+        self.last_sent_time = 0.0
+        self.last_received_time = 0.0
+
+    def set_serial(self, ser):
+        self.ser = ser
+
+    # send current command until acknowledged
+    def update(self):
+        # look at the remote's report of last message received from base
+        sequence_num = remote_link_node.getInt('sequence_num')
+        if sequence_num != self.cmd_recv_index:
+            self.last_received_time = time.time()
+            self.cmd_recv_index = sequence_num
+            print("received ack:", self.cmd_recv_index)
+
+        # if current command has been received, advance to next command
+        if self.cmd_recv_index == self.cmd_send_index:
+            if len(self.cmd_queue):
+                if not self.prime_state:
+                    self.cmd_queue.pop(0)
+                    self.cmd_send_index += 1
+                    if self.cmd_send_index > 255:
+                        self.cmd_send_index = 1
+                else:
+                    self.prime_state = False
+
+        self.gen_heartbeat()
+
+        if len(self.cmd_queue):
+            current_time = time.time()
+            if current_time > self.last_sent_time + 0.5:
+                # discard any pending heartbeat commands if we have real work
+                while len(self.cmd_queue) > 1 and self.cmd_queue[0] == 'hb':
+                    self.cmd_queue.pop(0)
+                # send the command
+                command = self.cmd_queue[0]
+                result = serial_send(self.ser, self.cmd_send_index, command)
+                self.last_sent_time = current_time
+                return self.cmd_send_index
+        else:
+            # nothing to do if command queue empty
+            self.prime_state = True
+
+        return 0
+
+    def add(self, command):
+        print('command queue:', command)
+        self.cmd_queue.append(command)
+
+    def cmd_queue_size(self):
+        return len(self.cmd_queue)
+
+    def cmd_queue_empty(self):
+        return len(self.cmd_queue) == 0
+
+    def get_cmd_recv_index(self):
+        return self.cmd_recv_index
+
+    # schedule a heartbeat message if needed.
+    def gen_heartbeat(self):
+        elapsed_sec = time.time() - self.last_received_time
+        if self.cmd_queue_empty() and elapsed_sec > 10.0:
+            self.add('hb')
+
+    def remote_lost_link_predict(self):
+        # print("last = %.2f  cur = %.2f", (last_delivered_time, current_time))
+        if self.last_received_time + 60 > time.time():
+            remote_link_node.setString("link_state", "ok")
+            return True
+        else:
+            remote_link_node.setString("link_state", "lost")
+            return False
+
+commands = Commands()
 
 # package and send the serial command, returns number of bytes written
 def serial_send(serial, sequence_num, command):
@@ -28,80 +100,4 @@ def serial_send(serial, sequence_num, command):
     if result != len(packet):
         print("ERROR: wrote %d of %d bytes to serial port!\n" % (result, len(packet)))
     return result
-
-# send current command until acknowledged
-def update(serial):
-    global cmd_send_index
-    global cmd_recv_index
-    global last_sent_time
-    global last_received_time
-    global prime_state
-
-    # look at the remote's report of last message received from base
-    sequence_num = remote_link_node.getInt('sequence_num')
-    if sequence_num != cmd_recv_index:
-        last_received_time = time.time()
-        cmd_recv_index = sequence_num
-        print("received ack:", cmd_recv_index)
-
-    # if current command has been received, advance to next command
-    if cmd_recv_index == cmd_send_index:
-        if len(cmd_queue):
-            if not prime_state:
-                cmd_queue.pop(0)
-                cmd_send_index += 1
-                if cmd_send_index > 255:
-                    cmd_send_index = 1
-            else:
-                prime_state = False
-
-    gen_heartbeat()
-
-    if len(cmd_queue):
-        current_time = time.time()
-        if current_time > last_sent_time + 0.5:
-            # discard any pending heartbeat commands if we have real work
-            while len(cmd_queue) > 1 and cmd_queue[0] == 'hb':
-                cmd_queue.pop(0)
-            # send the command
-            command = cmd_queue[0]
-            result = serial_send(serial, cmd_send_index, command)
-            last_sent_time = current_time
-            return cmd_send_index
-    else:
-        # nothing to do if command queue empty
-        prime_state = True
-
-    return 0
-
-def add(command):
-    print('command queue:', command)
-    cmd_queue.append(command)
-
-def cmd_queue_size():
-    return len(cmd_queue)
-
-def cmd_queue_empty():
-    return len(cmd_queue) == 0
-
-def get_cmd_recv_index():
-    return cmd_recv_index
-
-# schedule a heartbeat message if needed.
-def gen_heartbeat():
-    global last_received_time
-    elapsed_sec = time.time() - last_received_time
-    if cmd_queue_empty() and elapsed_sec > 10.0:
-        add('hb')
-
-def remote_lost_link_predict():
-    global last_received_time
-
-    # print("last = %.2f  cur = %.2f", (last_delivered_time, current_time))
-    if last_received_time + 60 > time.time():
-        remote_link_node.setString("link_state", "ok")
-        return True
-    else:
-        remote_link_node.setString("link_state", "lost")
-        return False
 

@@ -8,7 +8,7 @@ import tornado.websocket
 from PropertyTree import PropertyNode
 # import props_json
 
-import commands
+from commands import commands
 import projects
 
 class WSHandler(tornado.websocket.WebSocketHandler):

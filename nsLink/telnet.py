@@ -8,7 +8,7 @@ import re
 
 from PropertyTree import PropertyNode
 
-import commands
+from commands import commands
 
 class ChatHandler(asynchat.async_chat):
     def __init__(self, sock):

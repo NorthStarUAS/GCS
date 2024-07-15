@@ -2,11 +2,8 @@
 
 from PropertyTree import PropertyNode
 
-import commands
-
-ident_node = PropertyNode('/config/identity')
-specs_node = PropertyNode('/config/specs')
-tecs_config_node = PropertyNode('/config/autopilot/TECS')
+from commands import commands
+from props import ident_node, specs_node, tecs_config_node
 
 requests_pending = True
 def gen_requests():
