@@ -17,6 +17,7 @@ class FMULink:
             parse_msg(pkt_id, self.parser.payload)
             self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
 
+# working on eliminating "packer" and replacing it with auto-generated message code.
 def parse_msg(id, buf):
     if id == ns_messages.gps_v3_id:
         index = packer.unpack_gps_v3(buf)
