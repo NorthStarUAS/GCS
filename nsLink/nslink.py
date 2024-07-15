@@ -3,9 +3,9 @@
 import argparse
 import serial
 
-import commands
+from commands import commands
 import current
-from fmu_link import FMULink
+from fmu_link import fmu_link
 import httpserver
 import joystick
 import requests
@@ -37,13 +37,14 @@ except:
         print(p)
     quit()
 
-fmu_link = FMULink(ser)
+commands.set_serial(ser)
+fmu_link.set_serial(ser)
 
 while True:
     fmu_link.update()
     current.compute_derived_data()
     joystick.update()
     requests.gen_requests()
-    commands.update(ser)
+    commands.update()
     telnet.update()
     httpserver.update()
