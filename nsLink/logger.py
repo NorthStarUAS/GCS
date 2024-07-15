@@ -4,7 +4,7 @@ from serial_link import START_OF_MSG0, START_OF_MSG1
 
 class Logger:
     def __init__(self):
-        d = datetime.datetime.utcnow()
+        d = datetime.datetime.now(datetime.UTC)
         logfile = 'flight-' + d.strftime("%Y%m%d-%H%M%S") + '.log'
         try:
             self.f = open(logfile, 'wb')
