@@ -2,6 +2,12 @@
 
 import argparse
 import serial
+import sys
+
+# dnf install python3-pyqt6; pip install pyqt6
+from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QPushButton
+from PyQt6.QtCore import QTimer
 
 from commands import commands
 import current
@@ -40,7 +46,8 @@ except:
 commands.set_serial(ser)
 fmu_link.set_serial(ser)
 
-while True:
+def main_loop():
+    print("main loop")
     fmu_link.update()
     current.compute_derived_data()
     joystick.update()
@@ -48,3 +55,32 @@ while True:
     commands.update()
     telnet.update()
     httpserver.update()
+
+class MainApp(QWidget):
+    def __init__(self):
+        super(MainApp, self).__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("nsLink")
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        quit = QPushButton("Quit")
+        layout.addWidget(quit)
+        quit.clicked.connect(self.quit)
+
+        self.show()
+
+    def quit(self):
+        sys.exit(0)
+
+app = QApplication(sys.argv)
+
+timer = QTimer()
+timer.timeout.connect(main_loop)
+timer.setInterval(10)  # 100 hz
+timer.start()
+
+ex = MainApp()
+sys.exit(app.exec())
