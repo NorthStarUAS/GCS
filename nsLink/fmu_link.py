@@ -6,16 +6,20 @@ from props import airdata_node, imu_node, nav_node, pilot_node, power_node, remo
 from serial_link import serial_link, checksum, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
-    def __init__(self, ser):
+    def __init__(self):
         self.parser = serial_link()
-        self.ser = ser
         self.log = Logger()
+
+    def set_serial(self, ser):
+        self.ser = ser
 
     def update(self):
         pkt_id = self.parser.read(self.ser)
         if pkt_id >= 0:
             parse_msg(pkt_id, self.parser.payload)
             self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
+
+fmu_link = FMULink()
 
 # working on eliminating "packer" and replacing it with auto-generated message code.
 def parse_msg(id, buf):
