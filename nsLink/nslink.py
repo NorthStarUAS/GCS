@@ -5,7 +5,7 @@ import serial
 
 import commands
 import current
-import auraparser
+from fmu_link import FMULink
 import httpserver
 import joystick
 import requests
@@ -13,8 +13,8 @@ import telnet
 
 argparser = argparse.ArgumentParser(description='aura link')
 argparser.add_argument('--hertz', default=10, type=int, help='specify main loop rate')
-argparser.add_argument('--serial', required=True, help='input serial port') 
-argparser.add_argument('--baud', default=115200, type=int, help='serial port baud rate') 
+argparser.add_argument('--serial', required=True, help='input serial port')
+argparser.add_argument('--baud', default=115200, type=int, help='serial port baud rate')
 argparser.add_argument('--telnet-port', default=5050, help='telnet port')
 argparser.add_argument('--http-port', default=8888, help='http/ws port')
 argparser.add_argument('--html-root', default='.')
@@ -36,11 +36,11 @@ except:
     for p in ports:
         print(p)
     quit()
-    
-auraparser.init()
+
+fmu_link = FMULink(ser)
 
 while True:
-    auraparser.update(ser)
+    fmu_link.update()
     current.compute_derived_data()
     joystick.update()
     requests.gen_requests()

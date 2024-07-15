@@ -1,22 +1,22 @@
-#!/usr/bin/python
+import datetime
 
-import gzip
-import socket
+from serial_link import START_OF_MSG0, START_OF_MSG1
 
-#UDP_IP = "127.0.0.1"
-UDP_IP = "0.0.0.0"
-UDP_PORT = 6550
+class Logger:
+    def __init__(self):
+        d = datetime.datetime.utcnow()
+        logfile = 'flight-' + d.strftime("%Y%m%d-%H%M%S") + '.log'
+        try:
+            self.f = open(logfile, 'wb')
+        except:
+            print("Cannot open:", logfile)
+            quit()
 
-sock = socket.socket(socket.AF_INET,    # Internet
-                     socket.SOCK_DGRAM) # UDP
-sock.bind((UDP_IP, UDP_PORT))
-
-f = gzip.open('flight.dat.gz', 'wb')
-
-print "Aura Logger"
-print "listening for", UDP_IP, UDP_PORT
-
-while True:
-    data, addr = sock.recvfrom(1024)    # buffer size is 1024 bytes
-    print "received message:", len(data)
-    f.write(data)
+    def log_msg(self, pkt_id, pkt_len, payload, cksum_lo, cksum_hi):
+        self.f.write(bytes([START_OF_MSG0]))
+        self.f.write(bytes([START_OF_MSG1]))
+        self.f.write(bytes([pkt_id]))
+        self.f.write(bytes([pkt_len]))
+        self.f.write(payload)
+        self.f.write(bytes([cksum_lo]))
+        self.f.write(bytes([cksum_hi]))
