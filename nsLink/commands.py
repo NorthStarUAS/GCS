@@ -2,10 +2,7 @@ import time
 
 from PropertyTree import PropertyNode
 
-import sys
-sys.path.append("../../src")
 import ns_messages
-# import comms.packer
 from serial_link import wrap_packet
 
 filter_node = PropertyNode('/filters/filter')
