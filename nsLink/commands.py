@@ -88,15 +88,21 @@ class Commands():
 
 commands = Commands()
 
+from serial import SerialTimeoutException
+
 # package and send the serial command, returns number of bytes written
 def serial_send(serial, sequence_num, command):
-    print('writing:', sequence_num, command)
+    print('writing:', sequence_num, command, serial.out_waiting)
     cmd = ns_messages.command_v1()
     cmd.sequence_num = sequence_num
     cmd.message = command
     buf = cmd.pack()
     packet = wrap_packet(cmd.id, buf)
-    result = serial.write(packet)
+    try:
+        result = serial.write(packet)
+    except SerialTimeoutException:
+        result = 0
+        print("serial send buffer full!  Command not sent.")
     if result != len(packet):
         print("ERROR: wrote %d of %d bytes to serial port!\n" % (result, len(packet)))
     return result
