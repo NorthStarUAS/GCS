@@ -24,7 +24,7 @@ argparser.add_argument('--serial', required=True, help='input serial port')
 argparser.add_argument('--baud', default=115200, type=int, help='serial port baud rate')
 argparser.add_argument('--telnet-port', default=5050, help='telnet port')
 argparser.add_argument('--http-port', default=8888, help='http/ws port')
-argparser.add_argument('--html-root', default='.')
+argparser.add_argument('--html-root', default='../html')
 
 args = argparser.parse_args()
 
@@ -34,7 +34,7 @@ telnet.init(args.telnet_port)
 httpserver.init(args.http_port, args.html_root)
 
 try:
-    ser = serial.Serial(args.serial, args.baud, timeout=dt)
+    ser = serial.Serial(args.serial, args.baud, timeout=dt, write_timeout=dt)
 except:
     print("Cannot open:", args.serial)
     import serial.tools.list_ports
