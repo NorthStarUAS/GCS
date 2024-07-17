@@ -18,6 +18,8 @@ class FMULink:
         if pkt_id >= 0:
             parse_msg(pkt_id, self.parser.payload)
             self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
+        remote_link_node.setInt("good_packet_count", self.parser.good_count)
+        remote_link_node.setInt("bad_packet_count", self.parser.bad_count)
 
 fmu_link = FMULink()
 

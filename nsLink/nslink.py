@@ -73,6 +73,7 @@ class MainApp(QWidget):
         self.setLayout(layout)
 
         self.callsign = QLabel("Callsign: n/a")
+        # self.callsign.setTextFormat(QtRichText)
         layout.addWidget(self.callsign)
         self.connected = QLabel("Connection: no")
         layout.addWidget(self.connected)
@@ -94,9 +95,15 @@ class MainApp(QWidget):
             self.callsign.setText("Callsign: " + callsign)
         connected = remote_link_node.getString("link_state")
         if connected == "ok":
-            self.connected.setText("Connection: ok")
+            text = "Connection: ok"
         else:
-            self.connected.setText("Connection: no")
+            text = "Connection: no"
+        good = remote_link_node.getInt("good_packet_count")
+        bad = remote_link_node.getInt("bad_packet_count")
+        text += " <font color=\"green\">%d</font>" % good
+        if bad > 0:
+            text += " <font color=\"red\">%d</font>" % bad
+        self.connected.setText(text)
 
     def quit(self):
         sys.exit(0)

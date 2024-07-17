@@ -56,6 +56,8 @@ class serial_link():
         self.cksum_lo = 0
         self.cksum_hi = 0
         self.payload = bytearray()
+        self.good_count = 0
+        self.bad_count = 0
 
     def read(self, ser):
         start_time = time.time()    # sec
@@ -136,11 +138,13 @@ class serial_link():
                 if cksum0 == self.cksum_lo and cksum1 == self.cksum_hi and self.pkt_len > 0:
                     # print("checksum passes:", self.pkt_id, "len:", self.pkt_len)
                     self.state = 0
+                    self.good_count += 1
                     return self.pkt_id
                 else:
                     #print("pkt id=%d checksum failed %d %d (computed) != %d %d (message)" % (self.pkt_id, cksum0, cksum1, self.cksum_lo, self.cksum_hi))
                     print("pkt id=%d len=%d checksum failed" % (self.pkt_id, self.pkt_len))
                     self.state = 0
+                    self.bad_count += 1
 
         return -1
 
