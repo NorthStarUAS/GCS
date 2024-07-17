@@ -6,7 +6,7 @@ import sys
 
 # dnf install python3-pyqt6; pip install pyqt6
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget
-from PyQt6.QtWidgets import QPushButton
+from PyQt6.QtWidgets import QLabel, QPushButton
 from PyQt6.QtCore import QTimer
 
 from commands import commands
@@ -14,6 +14,7 @@ import current
 from fmu_link import fmu_link
 import httpserver
 import joystick
+from props import ident_node, remote_link_node
 import requests
 from sim_link import sim_link
 import telnet
@@ -61,11 +62,24 @@ class MainApp(QWidget):
     def __init__(self):
         super(MainApp, self).__init__()
         self.initUI()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update)
+        self.timer.setInterval(100)  # 10 hz
+        self.timer.start()
 
     def initUI(self):
         self.setWindowTitle("nsLink")
         layout = QVBoxLayout()
         self.setLayout(layout)
+
+        self.callsign = QLabel("Callsign: n/a")
+        layout.addWidget(self.callsign)
+        self.connected = QLabel("Connection: no")
+        layout.addWidget(self.connected)
+
+        url = QLabel("<a href=\"http://localhost:8888\">http://localhost:8888</a>")
+        url.setOpenExternalLinks(True)
+        layout.addWidget(url)
 
         quit = QPushButton("Quit")
         layout.addWidget(quit)
@@ -73,15 +87,26 @@ class MainApp(QWidget):
 
         self.show()
 
+    def update(self):
+        callsign = ident_node.getString("call_sign")
+        if len(callsign):
+            self.setWindowTitle("nsLink: " + callsign)
+            self.callsign.setText("Callsign: " + callsign)
+        connected = remote_link_node.getString("link_state")
+        if connected == "ok":
+            self.connected.setText("Connection: ok")
+        else:
+            self.connected.setText("Connection: no")
+
     def quit(self):
         sys.exit(0)
 
 app = QApplication(sys.argv)
 
-timer = QTimer()
-timer.timeout.connect(main_loop)
-timer.setInterval(10)  # 100 hz
-timer.start()
+main_timer = QTimer()
+main_timer.timeout.connect(main_loop)
+main_timer.setInterval(10)  # 100 hz
+main_timer.start()
 
 ex = MainApp()
 sys.exit(app.exec())
