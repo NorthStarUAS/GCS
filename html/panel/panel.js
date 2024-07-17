@@ -37,7 +37,7 @@ var panel = function() {
     var img_hdg2 = new Image();
     var img_hdg3 = new Image();
     var img_vsi1 = new Image();
-    
+
     var instrument_config = {
         vcc : {draw: draw_vcc},
         asi : {draw: draw_asi},
@@ -87,7 +87,7 @@ var panel = function() {
         canvas.width = window.innerWidth - 30;
         canvas.height = window.innerHeight - 30;
     }
-    
+
     function init() {
         canvas = document.getElementById("panel");
         context = canvas.getContext('2d');
@@ -117,7 +117,7 @@ var panel = function() {
         img_hdg2.src = 'textures/hdg2.png';
         img_hdg3.src = 'textures/hdg3.png';
         img_vsi1.src = 'textures/vsi1.png';
-        
+
         console.log('finished scheduling texture loads');
     }
 
@@ -155,7 +155,7 @@ var panel = function() {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
-        
+
         // background
         context.drawImage(img_volts, x, y, width=size, height=size);
 
@@ -171,7 +171,7 @@ var panel = function() {
         context.rotate(deg*d2r);
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
-        
+
         // volts needle
         context.save();
         var nw = Math.floor(img_asi3.width*scale)
@@ -184,7 +184,7 @@ var panel = function() {
         context.rotate(deg*d2r);
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
-        
+
     }
 
     var asi_interpx = [ 0, 80,  160 ];
@@ -205,7 +205,7 @@ var panel = function() {
             speed_scale = kt2mps;
             display_units = "MPS";
         }
-            
+
         var min_kt = parseFloat(json.config.autopilot.TECS.min_kt);
         var max_kt = parseFloat(json.config.autopilot.TECS.max_kt);
         var cruise_kt = parseFloat(json.config.specs.cruise_kt);
@@ -213,7 +213,7 @@ var panel = function() {
         var caution_kt = min_kt + 0.8 * range_kt;
         var die_kt = max_kt + 10.0;
 
-       
+
         var min_deg = my_interp(min_kt*speed_scale, asi_interpx, asi_interpy);
         var max_deg = my_interp(max_kt*speed_scale, asi_interpx, asi_interpy);
         var cruise_deg = my_interp(cruise_kt*speed_scale, asi_interpx, asi_interpy);
@@ -224,7 +224,7 @@ var panel = function() {
         var max_rad = (max_deg - 90) * d2r;
         var caution_rad = (caution_deg - 90) * d2r;
         var die_rad = (die_deg - 90) * d2r;
-        
+
         // background
         context.drawImage(img_aura_asi1, x, y, width=size, height=size);
 
@@ -241,14 +241,14 @@ var panel = function() {
         context.strokeStyle = 'yellow';
         context.lineWidth = 15;
         context.stroke();
-        
+
         // red arc
         context.beginPath();
         context.arc(cx, cy, size*0.430, max_rad, die_rad)
         context.strokeStyle = '#e03030';
         context.lineWidth = 10;
         context.stroke();
-        
+
         // tics
         context.drawImage(img_aura_asi2, x, y, width=size, height=size);
 
@@ -258,14 +258,14 @@ var panel = function() {
         context.fillStyle = "white";
         context.textAlign = "center";
         context.fillText(display_units.toUpperCase(), cx, cy + size*0.13);
-        
+
         // 'true' label
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "orange";
         context.textAlign = "center";
         context.fillText("(TRUE)", cx, cy + size*0.21);
-        
+
         // bug
         context.save();
         var nw = Math.floor(img_hdg2.width*scale)
@@ -311,13 +311,13 @@ var panel = function() {
         } else {
             speed = json.filters.filter[0].groundspeed_kt;
         }
-  
+
         var deg = my_interp( speed * speed_scale, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
-    
+
     function draw_ati( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -325,7 +325,7 @@ var panel = function() {
 
         var roll = json.filters.filter[0].roll_deg;
         var pitch = json.filters.filter[0].pitch_deg;
-        
+
         // backplate
         context.save();
         var nw = Math.floor(img_ati1.width*scale)
@@ -347,7 +347,7 @@ var panel = function() {
         var y_offset = (p * 4.5) * scale;
         context.drawImage(img_ati2, -nw*0.5, -nh*0.5+y_offset, width=nw, height=nh);
         context.restore();
-        
+
         // roll
         context.save();
         var nw = Math.floor(img_ati3.width*scale)
@@ -356,7 +356,7 @@ var panel = function() {
         context.rotate(-roll*d2r);
         context.drawImage(img_ati3, -nw*0.5, -nh*0.5, width=nw, height=nh);
         context.restore();
-        
+
         // bird
         context.save();
         var nw = Math.floor(img_ati4.width*scale)
@@ -445,7 +445,7 @@ var panel = function() {
         var scale = size/512;
 
         var amps = json.sensors.power.main_amps;
-        
+
         // backplate
         context.drawImage(img_amp, x, y, width=size, height=size);
 
@@ -460,7 +460,7 @@ var panel = function() {
     }
 
     function myroundRect2(x,y,width,height,radius) {
-        
+
         var r = Math.min(Math.max(width-1,1),Math.max(height-1,1),radius);
         var rectX = x;
         var rectY = y;
@@ -536,21 +536,23 @@ var panel = function() {
 	    this.pointer_color = 'yellow';
 	}
         update_stats(val) {
-            var timestamp = parseFloat(json.sensors.imu[0].timestamp);
-            var dt = timestamp - this.last_time;
-            this.last_time = timestamp;
-            if (this.avg == null || isNaN(this.avg) ) {
-                this.avg = val;
-                this.std2 = 0;
-            } else if (dt > 0) {
-                var wf = dt / this.time_factor;
-                if ( wf < 0 ) { wf = 0; }
-                if ( wf > 1 ) { wf = 1; }
-                this.avg = (1-wf)*this.avg + wf*val;
-                var err = Math.abs(val - this.avg);
-                this.std2 = (1-wf)*this.std2 + wf*err*err;
+            if ( typeof json.sensors.imu[0] !== 'undefined' ) {
+                var timestamp = parseFloat(json.sensors.imu[0].timestamp);
+                var dt = timestamp - this.last_time;
+                this.last_time = timestamp;
+                if (this.avg == null || isNaN(this.avg) ) {
+                    this.avg = val;
+                    this.std2 = 0;
+                } else if (dt > 0) {
+                    var wf = dt / this.time_factor;
+                    if ( wf < 0 ) { wf = 0; }
+                    if ( wf > 1 ) { wf = 1; }
+                    this.avg = (1-wf)*this.avg + wf*val;
+                    var err = Math.abs(val - this.avg);
+                    this.std2 = (1-wf)*this.std2 + wf*err*err;
+                }
             }
-        }        
+        }
         draw(x, y, w, h, px, val, text2) {
             if ( val < this.minv - 0.05*this.range ) {
                 val = this.minv - 0.05*this.range;
@@ -566,7 +568,7 @@ var panel = function() {
             context.save();
 
             context.shadowColor = "transparent";
-            
+
             context.strokeStyle = "white";
             context.lineWidth = Math.round(h*0.4);
             context.beginPath();
@@ -662,7 +664,7 @@ var panel = function() {
 	    context.shadowColor = "rgba(0, 0, 0, 0.9)";
             context.fill();
             context.restore();
-            
+
             context.font = px + "px Courier New, monospace";
 	    context.strokeStyle = "white";
             context.fillStyle = "white";
@@ -687,7 +689,7 @@ var panel = function() {
                             [[4.9,5.1]]);
     var imu_temp_bar = new MyBar("IMU Temp", 0, 60, 10,
                                  [[50,60]], [], [[0,40]]);
-  
+
     function draw_power2( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -710,9 +712,9 @@ var panel = function() {
         context.fillStyle = "white";
         context.textAlign = "center";
         context.fillText("POWER", cx, y + y1);
-        
+
         px =  Math.round(size * 0.05);
-        
+
         var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
         var battery_total = parseFloat(json.config.specs.battery_mah)
         var remaining = battery_total - mah
@@ -732,7 +734,7 @@ var panel = function() {
         var val_text = (cell_volts).toFixed(2) + "V";
         cell_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, cell_volts, val_text);
-        
+
         y1 += vspace;
         var watts = json.sensors.power.main_watts;
         var val_text = (watts).toFixed(0) + "W";
@@ -745,13 +747,15 @@ var panel = function() {
         var val_text = (vcc).toFixed(2) + "V";
         vcc_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, vcc, val_text);
-        
+
         y1 += vspace;
-        var imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        var imu_temp = 0;
+        if ( typeof json.sensors.imu[0] !== 'undefined' ) {
+            imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        }
         var val_text = (imu_temp).toFixed(0) + "C";
         imu_temp_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                           px, imu_temp, val_text);
-
     }
 
     var ail_bar = new MyBar("Aileron", -1, 1, 0.2,
@@ -786,43 +790,45 @@ var panel = function() {
         context.fillStyle = "white";
         context.textAlign = "center";
         context.fillText("FLIGHT CONTROLS", cx, y + y1);
-        
+
         px =  Math.round(size * 0.05);
-        
-        y1 = Math.round(size*0.17);
-        var ail = json.effectors.aileron;
-        if ( ail == null ) { ail = 0; }
-        var val_text = (ail).toFixed(2);
-        ail_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                     px, ail, val_text);
-        
-        y1 += vspace;
-        var ele = json.effectors.elevator;
-        if ( ele == null ) { ele = 0; }
-        var val_text = (ele).toFixed(2);
-        ele_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                     px, ele, val_text);
-        
-        y1 += vspace;
-        var rud = json.effectors.rudder;
-        if ( rud == null ) { rud = 0; }
-        var val_text = (rud).toFixed(2);
-        rud_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                     px, rud, val_text);
-        
-        y1 += vspace;
-        var thr = parseFloat(json.effectors.throttle)*100;
-        if ( thr == null ) { thr = 0; }
-        var val_text = (thr).toFixed(0) + "%";
-        thr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                     px, thr, val_text);
-        
-        y1 += vspace;
-        var flaps = json.effectors.flaps;
-        if ( flaps == null ) { flaps = 0; }
-        var val_text = (flaps).toFixed(2);
-        flaps_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                       px, flaps, val_text);
+
+        if ( typeof json.effectors !== 'undefined' ) {
+            y1 = Math.round(size*0.17);
+            var ail = json.effectors.aileron;
+            if ( ail == null ) { ail = 0; }
+            var val_text = (ail).toFixed(2);
+            ail_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                        px, ail, val_text);
+
+            y1 += vspace;
+            var ele = json.effectors.elevator;
+            if ( ele == null ) { ele = 0; }
+            var val_text = (ele).toFixed(2);
+            ele_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                        px, ele, val_text);
+
+            y1 += vspace;
+            var rud = json.effectors.rudder;
+            if ( rud == null ) { rud = 0; }
+            var val_text = (rud).toFixed(2);
+            rud_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                        px, rud, val_text);
+
+            y1 += vspace;
+            var thr = parseFloat(json.effectors.throttle)*100;
+            if ( thr == null ) { thr = 0; }
+            var val_text = (thr).toFixed(0) + "%";
+            thr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                        px, thr, val_text);
+
+            y1 += vspace;
+            var flaps = json.effectors.flaps;
+            if ( flaps == null ) { flaps = 0; }
+            var val_text = (flaps).toFixed(2);
+            flaps_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                        px, flaps, val_text);
+        }
     }
 
     var sats_bar = new MyBar("GPS Sats", 0, 25, 5,
@@ -861,23 +867,25 @@ var panel = function() {
         context.fillStyle = "white";
         context.textAlign = "center";
         context.fillText("INS/GNS", cx, y + y1);
-        
+
         px =  Math.round(size * 0.04);
-        
+
         y1 = Math.round(size*0.17);
-        var gps_sats = parseInt(json.sensors.gps[0].num_sats);
-        if ( gps_sats == null ) { gps_sats = 0; }
-        var val_text = gps_sats;
-        sats_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                      px, gps_sats, val_text);
-        
-        y1 += vspace;
-        var gps_hdop = parseFloat(json.sensors.gps[0].hdop);
-        if ( gps_hdop == null ) { gps_hdop = 0; }
-        var val_text = (gps_hdop).toFixed(2);
-        hdop_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                      px, gps_hdop, val_text);
-        
+        var gps_sats = 0;
+        var gps_hdop = 0;
+        if ( typeof json.sensors.gps !== 'undefined' ) {
+            gps_sats = parseInt(json.sensors.gps[0].num_sats);
+            var val_text = gps_sats;
+            sats_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                        px, gps_sats, val_text);
+
+            y1 += vspace;
+            gps_hdop = parseFloat(json.sensors.gps[0].hdop);
+            var val_text = (gps_hdop).toFixed(2);
+            hdop_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                        px, gps_hdop, val_text);
+        }
+
         y1 += vspace;
         var pp0 = parseFloat(json.filters.filter[0].Pp0);
         var pp1 = parseFloat(json.filters.filter[0].Pp1);
@@ -887,7 +895,7 @@ var panel = function() {
         var val_text = (pos_cov).toFixed(1) + " m";
         pos_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, pos_cov, val_text);
-        
+
         y1 += vspace;
         var pv0 = parseFloat(json.filters.filter[0].Pv0);
         var pv1 = parseFloat(json.filters.filter[0].Pv1);
@@ -897,7 +905,7 @@ var panel = function() {
         var val_text = (vel_cov).toFixed(2) + " m/s";
         vel_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, vel_cov, val_text);
-        
+
         y1 += vspace;
         var pa0 = parseFloat(json.filters.filter[0].Pa0);
         var pa1 = parseFloat(json.filters.filter[0].Pa1);
@@ -907,7 +915,7 @@ var panel = function() {
         var val_text = (att_cov).toFixed(2) + " deg";
         att_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, att_cov, val_text);
-        
+
         y1 += vspace;
         var ax_bias = Math.abs(parseFloat(json.filters.filter[0].ax_bias));
         var ay_bias = Math.abs(parseFloat(json.filters.filter[0].ay_bias));
@@ -919,7 +927,7 @@ var panel = function() {
         var val_text = (accel_bias).toFixed(2) + " mps2";
         accel_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                      px, accel_bias, val_text);
-        
+
         y1 += vspace;
         var p_bias = Math.abs(parseFloat(json.filters.filter[0].p_bias));
         var q_bias = Math.abs(parseFloat(json.filters.filter[0].q_bias));
@@ -941,7 +949,7 @@ var panel = function() {
 
         var watts = json.sensors.power.main_watts;
         var max_watts = 500;
-        
+
         // backplate
         context.drawImage(img_power, x, y, width=size, height=size);
 
@@ -972,11 +980,11 @@ var panel = function() {
         context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
         context.restore();
     }
-    
+
     var alerts = [];
     var warns = [];
     var oks = [];
-        
+
     function add_status_message( text, x, ok, warn, alert ) {
         if ( x >= alert ) {
             alerts.push(text);
@@ -986,7 +994,7 @@ var panel = function() {
             oks.push(text);
         }
     }
-    
+
     function add_status_message_inv( text, x, ok, warn, alert ) {
         if ( x < alert ) {
             alerts.push(text);
@@ -996,13 +1004,13 @@ var panel = function() {
             oks.push(text);
         }
     }
-    
+
     function draw_status( x, y, size ) {
         var px;
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
-        
+
         // background
         //context.drawImage(img_aura_asi1, x, y, width=size, height=size);
         var pad = Math.floor(size * 0.02);
@@ -1010,7 +1018,7 @@ var panel = function() {
         context.strokeStyle = '#202020';
         context.fillStyle = '#202020';
         myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
-        
+
         // 'status' label
         px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
@@ -1024,7 +1032,7 @@ var panel = function() {
         var text;
 
         // INS/GNS messages
-        
+
         var pos_cov = parseFloat(json.filters.filter[0].max_pos_cov)*3;
         if ( json.filters.filter[0].status < 2 ) {
             pos_cov = 0;
@@ -1042,7 +1050,7 @@ var panel = function() {
         var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
         if ( json.filters.filter[0].status < 2 ) {
             att_cov = 0;
-        }            
+        }
         text = "Att Acc: " + att_cov.toFixed(2) + " deg";
         add_status_message(text, att_cov, 0.1, 0.5, 1.0);
 
@@ -1052,7 +1060,7 @@ var panel = function() {
         var accel_bias = Math.sqrt(ax_bias*ax_bias + ay_bias*ay_bias + az_bias*az_bias);
         if ( json.filters.filter[0].status < 2 ) {
             accel_bias = 0;
-        }            
+        }
         text = "Accel Bias: " + accel_bias.toFixed(2) + " mps2";
         add_status_message(text, accel_bias, 0.1, 0.5, 1.0);
 
@@ -1066,12 +1074,15 @@ var panel = function() {
         text = "Gyro Bias: " + gyro_bias.toFixed(2) + " dps";
         add_status_message(text, gyro_bias, 0.1, 0.5, 1.0);
 
-        var imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        var imu_temp = 0;
+        if ( typeof json.sensors.imu[0] !== 'undefined' ) {
+            imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        }
         text = "IMU Temp: " + (imu_temp).toFixed(0) + "C";
         add_status_message(text, imu_temp, 30, 40, 50);
-        
+
         // Other system stuff
-        
+
         var load_avg = parseFloat(json.status.system_load_avg);
         text = "Load Avg: " + (load_avg).toFixed(2);
         add_status_message(text, load_avg, 0.01, 1.8, 2.0);
@@ -1085,22 +1096,24 @@ var panel = function() {
         add_status_message(text, air_err, 1, 10, 25);
 
         // GPS messages
-        
-        var gps_sats = parseInt(json.sensors.gps[0].satellites);
-        text = "GPS sats: " + gps_sats;
-        add_status_message_inv(text, gps_sats, 10, 7, 5);
-        
-        var gps_hdop = parseFloat(json.sensors.gps[0].hdop);
-        text = "GPS hdop: " + (gps_hdop).toFixed(2);
-        add_status_message(text, gps_hdop, 1.5, 3.0, 5.0);
+        var gps_sats = 0;
+        var gps_hdop = 0;
+        if ( typeof json.sensors.gps !== 'undefined' ) {
+            gps_sats = parseInt(json.sensors.gps[0].satellites);
+            text = "GPS sats: " + gps_sats;
+            add_status_message_inv(text, gps_sats, 10, 7, 5);
+
+            gps_hdop = parseFloat(json.sensors.gps[0].hdop);
+            text = "GPS hdop: " + (gps_hdop).toFixed(2);
+            add_status_message(text, gps_hdop, 1.5, 3.0, 5.0);
+        }
 
         // Power messages
-        
         var av_vcc = parseFloat(json.sensors.power.avionics_vcc);
         var av_error = Math.abs(5.0 - av_vcc);
         text = "Avionics: " + (av_vcc).toFixed(2) + " v";
         add_status_message(text, av_error, 0.025, 0.1, 0.2);
-        
+
         var cell_vcc = parseFloat(json.sensors.power.cell_vcc);
         text = "Batt Cell: " + (cell_vcc).toFixed(2) + " v";
         add_status_message_inv(text, cell_vcc, 3.7, 3.6, 3.5);
@@ -1112,7 +1125,7 @@ var panel = function() {
         }
 
         // Wind
-        
+
         if ( json.status.in_flight == "True" ) {
             var wind_kt = parseFloat(json.sensors.airdata.wind_speed_mps)*mps2kt;
             var target_airspeed_kt = parseFloat(json.autopilot.targets.airspeed_kt);
@@ -1125,7 +1138,7 @@ var panel = function() {
         }
 
         var pos = -0.25;
-        
+
         px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.textAlign = "left";
@@ -1133,21 +1146,21 @@ var panel = function() {
 	//context.shadowOffsetY = 2;
 	//context.shadowBlur = 3;
 	//context.shadowColor = "rgba(255, 255, 255, 0.5)";
-        
+
         // draw alerts
         context.fillStyle = "red";
         for ( var i = 0; i < alerts.length; i++ ) {
             context.fillText(alerts[i], cx - size * 0.35, cy + size*pos);
             pos += 0.07;
         }
-        
+
         // draw alerts
         context.fillStyle = "yellow";
         for ( var i = 0; i < warns.length; i++ ) {
             context.fillText(warns[i], cx - size * 0.35, cy + size*pos);
             pos += 0.07;
         }
-        
+
         // draw oks
         context.fillStyle = '#0C0';
         for ( var i = 0; i < oks.length; i++ ) {
@@ -1161,7 +1174,7 @@ var panel = function() {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
-        
+
         // channel
         context.save();
         var nw = Math.floor(img_tc1.width*scale)
@@ -1188,7 +1201,7 @@ var panel = function() {
 
         // face plate
         context.drawImage(img_tc3, x, y, width=size, height=size);
-        
+
         // plane (turn rate)
         r = 0.0;
         if ( json.sensors.imu[0] != null ) {
@@ -1218,7 +1231,7 @@ var panel = function() {
         }
         var ap_hdg = json.autopilot.targets.groundtrack_deg
         var wind_deg = json.sensors.airdata.wind_dir_deg;
-        
+
         var display_units = json.config.specs.display_units;
         var speed_scale = 1.0;
         if ( display_units == "mps" ) {
@@ -1229,7 +1242,7 @@ var panel = function() {
             // default to mps if not specified
             speed_scale = kt2mps;
         }
-            
+
         // rose
         context.save();
         var nw = Math.floor(img_hdg1.width*scale)
@@ -1259,7 +1272,7 @@ var panel = function() {
         context.lineTo(size*0.03*0.65, -size*0.42*0.65);
         context.stroke();
         context.restore();
-        
+
         // wind label
         var wind_kt = 0;
         if ( json.sensors.airdata.wind_speed_mps != null ) {
@@ -1270,7 +1283,7 @@ var panel = function() {
         context.fillStyle = "lightblue";
         context.textAlign = "center";
         context.fillText("WND:" + wind_kt, cx + size*0.14, cy - size*0.06);
- 
+
         // ground track
         context.save();
         context.strokeStyle = 'orange';
@@ -1291,7 +1304,7 @@ var panel = function() {
         context.lineTo(size*0.03*0.65, -size*0.42*0.65);
         context.stroke();
         context.restore();
-        
+
         // groundspeed label
         var track_mps = parseFloat(json.filters.filter[0].groundspeed_ms);
         var track_speed = (track_mps * mps2kt * speed_scale).toFixed(0);
@@ -1300,7 +1313,7 @@ var panel = function() {
         context.fillStyle = "orange";
         context.textAlign = "center";
         context.fillText("GS:" + track_speed, cx - size*0.14, cy - size*0.06);
-        
+
         // bug
         context.save();
         var nw = Math.floor(img_hdg2.width*scale)
@@ -1322,7 +1335,7 @@ var panel = function() {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
-        
+
         // face plate
         context.drawImage(img_vsi1, x, y, width=size, height=size);
 

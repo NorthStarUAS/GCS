@@ -19,7 +19,7 @@ var annunciator = function() {
     function init() {
         // pass for now
     }
-    
+
     function draw() {
         draw_sats();
         draw_ekf();
@@ -32,12 +32,12 @@ var annunciator = function() {
         draw_temp();
         draw_callsign();
     }
-    
+
     function draw_sats() {
         //var sats_div = $("#sats");
         var sats_div = $("#sats");
         var sats_inner = $("#sats #inner");
-        if ( sats_div != null && json.sensors.gps[0].num_sats != null ) {
+        if ( sats_div != null && typeof json.sensors.gps !== 'undefined' ) {
             sats = parseInt(json.sensors.gps[0].num_sats);
             if ( isNaN(sats) ) {
                 sats = 0;
@@ -106,7 +106,7 @@ var annunciator = function() {
             volts_inner.html( volts_per_cell + "v" );
         }
     };
-    
+
     function draw_battery() {
         var batt_div = $("#battery");
         var batt_inner = $("#battery #inner");
@@ -116,7 +116,7 @@ var annunciator = function() {
             var remaining = battery_total - mah
             // var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
             var battery_percent = (parseFloat(json.sensors.power.battery_perc) * 100).toFixed(0)
-            if ( isNaN(battery_percent) ){
+            if ( isNaN(battery_percent) ) {
                 battery_percent = 100;
             }
             if ( battery_percent < 0 ) {
@@ -132,7 +132,7 @@ var annunciator = function() {
             batt_inner.html(battery_percent + "% batt");
         }
     };
-    
+
     function draw_timer() {
         var timer_div = $("#timer");
         var timer_inner = $("#timer #inner");
@@ -142,6 +142,9 @@ var annunciator = function() {
                 secs = parseFloat(json.status.throttle_timer).toFixed(0);
             } else {
                 secs = parseFloat(json.sensors.airdata.flight_timer_millis)/1000.0;
+            }
+            if ( isNaN(secs) ) {
+                secs = 0;
             }
             timer_div.attr("class", "ok");
             var hours = Math.floor(secs / 3600);
@@ -157,7 +160,7 @@ var annunciator = function() {
             timer_inner.html(timer_str);
         }
     };
-    
+
     function draw_link_state() {
         var link_div = $("#link");
         var link_inner = $("#link #inner");
@@ -174,7 +177,7 @@ var annunciator = function() {
             }
         }
     }
-    
+
     function draw_auto() {
         var auto_div = $("#auto");
         var auto_inner = $("#auto #inner");
@@ -197,7 +200,7 @@ var annunciator = function() {
         if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
             return;
         }
-        if ( wind_div != null && json.filters.wind.wind_dir_deg != null ) {
+        if ( wind_div != null && typeof json.filters.wind !== 'undefined' ) {
             var display_units = "??";
             var speed_scale = 1.0;
             if ( json.config.specs.display_units == "mps" ) {
@@ -248,7 +251,7 @@ var annunciator = function() {
             temp_inner.html( temp + 'C');
         }
     }
-    
+
     function draw_callsign() {
         var callsign_div = $("#callsign");
         var callsign_inner = $("#callsign #inner");
@@ -261,7 +264,7 @@ var annunciator = function() {
             }
         }
     }
-    
+
     return {
         init: init,
         draw: draw,
