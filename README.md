@@ -1,4 +1,4 @@
-# RC UAS Ground Station Interface
+# NorthStarUAS Ground Station Interface
 
 Provides a web based operator interface to the RC UAS autopilot
 system.  The front end web pages work in conjunction with a backend
