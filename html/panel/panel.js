@@ -793,42 +793,48 @@ var panel = function() {
 
         px =  Math.round(size * 0.05);
 
+        var ail = 0;
+        var ele = 0;
+        var rud = 0;
+        var thr = 0;
+        var flaps = 0;
         if ( typeof json.effectors !== 'undefined' ) {
-            y1 = Math.round(size*0.17);
             var ail = json.effectors.aileron;
-            if ( ail == null ) { ail = 0; }
-            var val_text = (ail).toFixed(2);
-            ail_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                        px, ail, val_text);
-
-            y1 += vspace;
             var ele = json.effectors.elevator;
-            if ( ele == null ) { ele = 0; }
-            var val_text = (ele).toFixed(2);
-            ele_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                        px, ele, val_text);
-
-            y1 += vspace;
             var rud = json.effectors.rudder;
-            if ( rud == null ) { rud = 0; }
-            var val_text = (rud).toFixed(2);
-            rud_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                        px, rud, val_text);
-
-            y1 += vspace;
             var thr = parseFloat(json.effectors.throttle)*100;
-            if ( thr == null ) { thr = 0; }
-            var val_text = (thr).toFixed(0) + "%";
-            thr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                        px, thr, val_text);
-
-            y1 += vspace;
             var flaps = json.effectors.flaps;
-            if ( flaps == null ) { flaps = 0; }
-            var val_text = (flaps).toFixed(2);
-            flaps_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                        px, flaps, val_text);
         }
+
+        y1 = Math.round(size*0.17);
+        if ( ail == null ) { ail = 0; }
+        var val_text = (ail).toFixed(2);
+        ail_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                    px, ail, val_text);
+
+        y1 += vspace;
+        if ( ele == null ) { ele = 0; }
+        var val_text = (ele).toFixed(2);
+        ele_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                    px, ele, val_text);
+
+        y1 += vspace;
+        if ( rud == null ) { rud = 0; }
+        var val_text = (rud).toFixed(2);
+        rud_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                    px, rud, val_text);
+
+        y1 += vspace;
+        if ( thr == null ) { thr = 0; }
+        var val_text = (thr).toFixed(0) + "%";
+        thr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                    px, thr, val_text);
+
+        y1 += vspace;
+        if ( flaps == null ) { flaps = 0; }
+        var val_text = (flaps).toFixed(2);
+        flaps_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                    px, flaps, val_text);
     }
 
     var sats_bar = new MyBar("GPS Sats", 0, 25, 5,
@@ -1146,6 +1152,10 @@ var panel = function() {
 	//context.shadowOffsetY = 2;
 	//context.shadowBlur = 3;
 	//context.shadowColor = "rgba(255, 255, 255, 0.5)";
+
+        if ( alerts.length == 0 && warns.length == 0 && oks.length == 0 ) {
+            oks.push("Status: OK")
+        }
 
         // draw alerts
         context.fillStyle = "red";
