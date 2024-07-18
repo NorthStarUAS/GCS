@@ -14,7 +14,7 @@ class FMULink:
 
     def begin(self, device, baud, timeout):
         try:
-            self.ser = serial.Serial(device, baud, timeout=timeout, write_timeout=timeout)
+            self.ser = serial.Serial(device, baud, timeout=0, write_timeout=timeout)
         except:
             print("Cannot open:", device)
             ports = list(serial.tools.list_ports.comports())
@@ -24,11 +24,15 @@ class FMULink:
             quit()
 
     def receive(self):
-        pkt_id = self.parser.read(self.ser)
-        if pkt_id >= 0:
-            print("received:", pkt_id)
-            parse_msg(pkt_id, self.parser.payload)
-            self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
+        new_data = True
+        while new_data:
+            pkt_id = self.parser.read(self.ser)
+            if pkt_id >= 0:
+                print("received:", pkt_id)
+                parse_msg(pkt_id, self.parser.payload)
+                self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
+            else:
+                new_data = False
         remote_link_node.setInt("good_packet_count", self.parser.good_count)
         remote_link_node.setInt("bad_packet_count", self.parser.bad_count)
 

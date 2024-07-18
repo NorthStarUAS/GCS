@@ -9,11 +9,14 @@ class SimLink():
         self.sock_in.setblocking(0)
 
     def update(self):
-        try:
-            data, addr = self.sock_in.recvfrom(1024)
-            result = fmu_link.send_packet(data)
-            print("relaying a sim message", result)
-        except BlockingIOError:
-            print("nothing to receive")
+        new_data = True
+        while new_data:
+            try:
+                data, addr = self.sock_in.recvfrom(1024)
+                result = fmu_link.send_packet(data)
+                print("relaying a sim message", result)
+            except BlockingIOError:
+                new_data = False
+                print("nothing to receive")
 
 sim_link = SimLink(port_in=5051)
