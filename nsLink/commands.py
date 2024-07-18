@@ -1,13 +1,12 @@
 import time
 
 import ns_messages
+from fmu_link import fmu_link
 from props import remote_link_node
 from serial_link import wrap_packet
 
 class Commands():
     def __init__(self):
-        self.ser = None
-
         self.cmd_send_index = 1
         self.cmd_recv_index = 0
         self.prime_state = True
@@ -15,9 +14,6 @@ class Commands():
         self.cmd_queue =  []
         self.last_sent_time = 0.0
         self.last_received_time = 0.0
-
-    def set_serial(self, ser):
-        self.ser = ser
 
     # send current command until acknowledged
     def update(self):
@@ -49,7 +45,12 @@ class Commands():
                     self.cmd_queue.pop(0)
                 # send the command
                 command = self.cmd_queue[0]
-                result = serial_send(self.ser, self.cmd_send_index, command)
+                print('writing:', sequence_num, command)
+                cmd = ns_messages.command_v1()
+                cmd.sequence_num = self.cmd_send_index
+                cmd.message = command
+                buf = cmd.pack()
+                result = fmu_link.wrap_and_send(cmd.id, buf)
                 self.last_sent_time = current_time
                 return self.cmd_send_index
         else:
@@ -88,22 +89,20 @@ class Commands():
 
 commands = Commands()
 
-from serial import SerialTimeoutException
-
 # package and send the serial command, returns number of bytes written
-def serial_send(serial, sequence_num, command):
-    print('writing:', sequence_num, command, serial.out_waiting)
-    cmd = ns_messages.command_v1()
-    cmd.sequence_num = sequence_num
-    cmd.message = command
-    buf = cmd.pack()
-    packet = wrap_packet(cmd.id, buf)
-    try:
-        result = serial.write(packet)
-    except SerialTimeoutException:
-        result = 0
-        print("serial send buffer full!  Command not sent.")
-    if result != len(packet):
-        print("ERROR: wrote %d of %d bytes to serial port!\n" % (result, len(packet)))
-    return result
+# def serial_send(serial, sequence_num, command):
+#     print('writing:', sequence_num, command)
+#     cmd = ns_messages.command_v1()
+#     cmd.sequence_num = sequence_num
+#     cmd.message = command
+#     buf = cmd.pack()
+#     packet = wrap_packet(ns_messages.command_v1_id, buf)
+#     try:
+#         result = serial.write(packet)
+#     except SerialTimeoutException:
+#         result = 0
+#         print("serial send buffer full!  Command not sent.")
+#     if result != len(packet):
+#         print("ERROR: wrote %d of %d bytes to serial port!\n" % (result, len(packet)))
+#     return result
 

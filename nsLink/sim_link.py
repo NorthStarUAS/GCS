@@ -1,5 +1,7 @@
 import socket
 
+from fmu_link import fmu_link
+
 class SimLink():
     def __init__(self, port_in=5051):
         self.sock_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -9,7 +11,8 @@ class SimLink():
     def update(self):
         try:
             data, addr = self.sock_in.recvfrom(1024)
-            print("received a sim message")
+            result = fmu_link.send_packet(data)
+            print("relaying a sim message", result)
         except BlockingIOError:
             print("nothing to receive")
 

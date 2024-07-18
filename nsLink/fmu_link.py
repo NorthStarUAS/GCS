@@ -1,36 +1,69 @@
+import serial, serial.tools.list_ports
+
 from PropertyTree import PropertyNode
 
 import ns_messages
 from logger import Logger
-from props import airdata_node, imu_node, nav_node, pilot_node, power_node, remote_link_node, status_node, switches_node
-from serial_link import serial_link, checksum, START_OF_MSG0, START_OF_MSG1
+from props import airdata_node, imu_node, gps_node, nav_node, pilot_node, power_node, remote_link_node, status_node, switches_node
+from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
     def __init__(self):
         self.parser = serial_link()
         self.log = Logger()
 
-    def set_serial(self, ser):
-        self.ser = ser
+    def begin(self, device, baud, timeout):
+        try:
+            self.ser = serial.Serial(device, baud, timeout=timeout, write_timeout=timeout)
+        except:
+            print("Cannot open:", device)
+            ports = list(serial.tools.list_ports.comports())
+            print("Available ports:")
+            for p in ports:
+                print(p)
+            quit()
 
-    def update(self):
+    def receive(self):
         pkt_id = self.parser.read(self.ser)
         if pkt_id >= 0:
+            print("received:", pkt_id)
             parse_msg(pkt_id, self.parser.payload)
             self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
         remote_link_node.setInt("good_packet_count", self.parser.good_count)
         remote_link_node.setInt("bad_packet_count", self.parser.bad_count)
+
+    def wrap_and_send(self, id, buf):
+        print("write id:", id)
+        packet = wrap_packet(id, buf)
+        result = self.send_packet(packet)
+        return result
+
+    def send_packet(self, packet):
+        try:
+            result = self.ser.write(packet)
+        except serial.SerialTimeoutException:
+            result = 0
+            print("serial send buffer full!  Command not sent.")
+        if result != len(packet):
+            print("ERROR: wrote %d of %d bytes to serial port!\n" % (result, len(packet)))
+        return result
 
 fmu_link = FMULink()
 
 # working on eliminating "packer" and replacing it with auto-generated message code.
 def parse_msg(id, buf):
     if id == ns_messages.gps_v3_id:
-        index = packer.unpack_gps_v3(buf)
+        msg = ns_messages.gps_v3(buf)
+        msg.msg2props(gps_node)
+        index = msg.index
     elif id == ns_messages.gps_v4_id:
-        index = packer.unpack_gps_v4(buf)
+        msg = ns_messages.gps_v4(buf)
+        msg.msg2props(gps_node)
+        index = msg.index
     elif id == ns_messages.gps_v5_id:
-        index = packer.unpack_gps_v5(buf)
+        msg = ns_messages.gps_v5(buf)
+        msg.msg2props(gps_node)
+        index = msg.index
     elif id == ns_messages.imu_v4_id:
         msg = ns_messages.imu_v4(buf)
         msg.msg2props(imu_node)
@@ -125,6 +158,7 @@ def parse_msg(id, buf):
     elif id == ns_messages.ack_v1_id:
         msg = ns_messages.ack_v1(buf)
         if msg.result > 0:
+            print("ack:", msg.sequence_num)
             remote_link_node.setInt("sequence_num", msg.sequence_num)
         index = 0
     else:

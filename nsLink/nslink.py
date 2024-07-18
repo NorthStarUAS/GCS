@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import argparse
-import serial
 import sys
 
 # dnf install python3-pyqt6; pip install pyqt6
@@ -34,23 +33,12 @@ dt = 1.0 / float(args.hertz)
 telnet.init(args.telnet_port)
 httpserver.init(args.http_port, args.html_root)
 
-try:
-    ser = serial.Serial(args.serial, args.baud, timeout=dt, write_timeout=dt)
-except:
-    print("Cannot open:", args.serial)
-    import serial.tools.list_ports
-    ports = list(serial.tools.list_ports.comports())
-    print("Available ports:")
-    for p in ports:
-        print(p)
-    quit()
-
-commands.set_serial(ser)
-fmu_link.set_serial(ser)
+# commands.set_serial(ser)
+fmu_link.begin(args.serial, args.baud, timeout=dt)
 
 def main_loop():
     sim_link.update()
-    fmu_link.update()
+    fmu_link.receive()
     current.compute_derived_data()
     joystick.update()
     requests.gen_requests()
