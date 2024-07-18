@@ -51,7 +51,7 @@ var panel = function() {
         dg : {draw: draw_dg},
         vsi : {draw: draw_vsi},
         controls : {draw: draw_controls},
-        insgns : {draw: draw_insgns},
+        insgns : {draw: draw_insgnss},
     };
 
     var layout_config = {
@@ -309,7 +309,7 @@ var panel = function() {
         if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
             speed = json.sensors.airdata.airspeed_mps*mps2kt;
         } else {
-            speed = json.filters.filter[0].groundspeed_kt;
+            speed = json.filters.nav.groundspeed_kt;
         }
 
         var deg = my_interp( speed * speed_scale, asi_interpx, asi_interpy);
@@ -323,8 +323,8 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var roll = json.filters.filter[0].roll_deg;
-        var pitch = json.filters.filter[0].pitch_deg;
+        var roll = json.filters.nav.roll_deg;
+        var pitch = json.filters.nav.pitch_deg;
 
         // backplate
         context.save();
@@ -375,7 +375,7 @@ var panel = function() {
         var scale = size/512;
 
         //var alt_ft = json.position.altitude_true_m / 0.3048;
-        var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
+        var alt_ft = json.filters.nav.altitude_m / 0.3048;
         var ground_ft = json.position.altitude_ground_m / 0.3048;
         var target_ft = ground_ft + json.autopilot.targets.altitude_agl_ft;
 
@@ -536,8 +536,8 @@ var panel = function() {
 	    this.pointer_color = 'yellow';
 	}
         update_stats(val) {
-            if ( typeof json.sensors.imu[0] !== 'undefined' ) {
-                var timestamp = parseFloat(json.sensors.imu[0].timestamp);
+            if ( typeof json.sensors.imu !== 'undefined' ) {
+                var timestamp = parseFloat(json.sensors.imu.millis) / 1000.0;
                 var dt = timestamp - this.last_time;
                 this.last_time = timestamp;
                 if (this.avg == null || isNaN(this.avg) ) {
@@ -750,8 +750,8 @@ var panel = function() {
 
         y1 += vspace;
         var imu_temp = 0;
-        if ( typeof json.sensors.imu[0] !== 'undefined' ) {
-            imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        if ( typeof json.sensors.imu !== 'undefined' ) {
+            imu_temp = parseFloat(json.sensors.imu.temp_C);
         }
         var val_text = (imu_temp).toFixed(0) + "C";
         imu_temp_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
@@ -851,7 +851,7 @@ var panel = function() {
                               [[1,2]], [], [[0,0.5]]);
     var gyro_bar = new MyBar("Gyro Bias", 0, 2, 0.4,
                              [[1,2]], [], [[0,0.5]]);
-    function draw_insgns( x, y, size ) {
+    function draw_insgnss( x, y, size ) {
         var cx = x + size*0.5;
         var cy = y + size*0.5;
         var scale = size/512;
@@ -880,22 +880,22 @@ var panel = function() {
         var gps_sats = 0;
         var gps_hdop = 0;
         if ( typeof json.sensors.gps !== 'undefined' ) {
-            gps_sats = parseInt(json.sensors.gps[0].num_sats);
+            gps_sats = parseInt(json.sensors.gps.num_sats);
             var val_text = gps_sats;
             sats_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                         px, gps_sats, val_text);
 
             y1 += vspace;
-            gps_hdop = parseFloat(json.sensors.gps[0].hdop);
+            gps_hdop = parseFloat(json.sensors.gps.hdop);
             var val_text = (gps_hdop).toFixed(2);
             hdop_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                         px, gps_hdop, val_text);
         }
 
         y1 += vspace;
-        var pp0 = parseFloat(json.filters.filter[0].Pp0);
-        var pp1 = parseFloat(json.filters.filter[0].Pp1);
-        var pp2 = parseFloat(json.filters.filter[0].Pp2);
+        var pp0 = parseFloat(json.filters.nav.Pp0);
+        var pp1 = parseFloat(json.filters.nav.Pp1);
+        var pp2 = parseFloat(json.filters.nav.Pp2);
         var pos_cov = Math.sqrt(pp0*pp0 + pp1*pp1 + pp2*pp2);
         if ( isNaN(pos_cov) ) { pos_cov = 0; }
         var val_text = (pos_cov).toFixed(1) + " m";
@@ -903,9 +903,9 @@ var panel = function() {
                       px, pos_cov, val_text);
 
         y1 += vspace;
-        var pv0 = parseFloat(json.filters.filter[0].Pv0);
-        var pv1 = parseFloat(json.filters.filter[0].Pv1);
-        var pv2 = parseFloat(json.filters.filter[0].Pv2);
+        var pv0 = parseFloat(json.filters.nav.Pv0);
+        var pv1 = parseFloat(json.filters.nav.Pv1);
+        var pv2 = parseFloat(json.filters.nav.Pv2);
         var vel_cov = Math.sqrt(pv0*pv0 + pv1*pv1 + pv2*pv2);
         if ( isNaN(vel_cov) ) { vel_cov = 0; }
         var val_text = (vel_cov).toFixed(2) + " m/s";
@@ -913,9 +913,9 @@ var panel = function() {
                       px, vel_cov, val_text);
 
         y1 += vspace;
-        var pa0 = parseFloat(json.filters.filter[0].Pa0);
-        var pa1 = parseFloat(json.filters.filter[0].Pa1);
-        var pa2 = parseFloat(json.filters.filter[0].Pa2);
+        var pa0 = parseFloat(json.filters.nav.Pa0);
+        var pa1 = parseFloat(json.filters.nav.Pa1);
+        var pa2 = parseFloat(json.filters.nav.Pa2);
         var att_cov = Math.sqrt(pa0*pa0 + pa1*pa1 + pa2*pa2);
         if ( isNaN(att_cov) ) { att_cov = 0; }
         var val_text = (att_cov).toFixed(2) + " deg";
@@ -923,11 +923,11 @@ var panel = function() {
                      px, att_cov, val_text);
 
         y1 += vspace;
-        var ax_bias = Math.abs(parseFloat(json.filters.filter[0].ax_bias));
-        var ay_bias = Math.abs(parseFloat(json.filters.filter[0].ay_bias));
-        var az_bias = Math.abs(parseFloat(json.filters.filter[0].az_bias));
+        var ax_bias = Math.abs(parseFloat(json.filters.nav.ax_bias));
+        var ay_bias = Math.abs(parseFloat(json.filters.nav.ay_bias));
+        var az_bias = Math.abs(parseFloat(json.filters.nav.az_bias));
         var accel_bias = Math.sqrt(ax_bias*ax_bias + ay_bias*ay_bias + az_bias*az_bias);
-        if ( json.filters.filter[0].status < 2 ) {
+        if ( json.filters.nav.status < 2 ) {
             accel_bias = 0.0;
         }
         var val_text = (accel_bias).toFixed(2) + " mps2";
@@ -935,12 +935,12 @@ var panel = function() {
                      px, accel_bias, val_text);
 
         y1 += vspace;
-        var p_bias = Math.abs(parseFloat(json.filters.filter[0].p_bias));
-        var q_bias = Math.abs(parseFloat(json.filters.filter[0].q_bias));
-        var r_bias = Math.abs(parseFloat(json.filters.filter[0].r_bias));
+        var p_bias = Math.abs(parseFloat(json.filters.nav.p_bias));
+        var q_bias = Math.abs(parseFloat(json.filters.nav.q_bias));
+        var r_bias = Math.abs(parseFloat(json.filters.nav.r_bias));
         var gyro_bias = Math.sqrt(p_bias*p_bias + q_bias*q_bias + r_bias*r_bias);
         var gyro_bias_deg = gyro_bias * r2d;
-        if ( json.filters.filter[0].status < 2 ) {
+        if ( json.filters.nav.status < 2 ) {
             gyro_bias_deg = 0;
         }
         var val_text = (gyro_bias_deg).toFixed(2) + " dps";
@@ -1039,50 +1039,50 @@ var panel = function() {
 
         // INS/GNS messages
 
-        var pos_cov = parseFloat(json.filters.filter[0].max_pos_cov)*3;
-        if ( json.filters.filter[0].status < 2 ) {
+        var pos_cov = parseFloat(json.filters.nav.max_pos_cov)*3;
+        if ( json.filters.nav.status < 2 ) {
             pos_cov = 0;
         }
         text = "Pos Acc: " + pos_cov.toFixed(2) + " m";
         add_status_message(text, pos_cov, 4.0, 5, 6.0)
 
-        var vel_cov = parseFloat(json.filters.filter[0].max_vel_cov)*3;
-        if ( json.filters.filter[0].status < 2 ) {
+        var vel_cov = parseFloat(json.filters.nav.max_vel_cov)*3;
+        if ( json.filters.nav.status < 2 ) {
             vel_cov = 0;
         }
         text = "Vel Acc: " + vel_cov.toFixed(2) + " m/s";
         add_status_message(text, vel_cov, 0.1, 0.2, 0.30);
 
-        var att_cov = parseFloat(json.filters.filter[0].max_att_cov)*3 * 180.0 / Math.PI;
-        if ( json.filters.filter[0].status < 2 ) {
+        var att_cov = parseFloat(json.filters.nav.max_att_cov)*3 * 180.0 / Math.PI;
+        if ( json.filters.nav.status < 2 ) {
             att_cov = 0;
         }
         text = "Att Acc: " + att_cov.toFixed(2) + " deg";
         add_status_message(text, att_cov, 0.1, 0.5, 1.0);
 
-        var ax_bias = parseFloat(json.filters.filter[0].ax_bias);
-        var ay_bias = parseFloat(json.filters.filter[0].ay_bias);
-        var az_bias = parseFloat(json.filters.filter[0].az_bias);
+        var ax_bias = parseFloat(json.filters.nav.ax_bias);
+        var ay_bias = parseFloat(json.filters.nav.ay_bias);
+        var az_bias = parseFloat(json.filters.nav.az_bias);
         var accel_bias = Math.sqrt(ax_bias*ax_bias + ay_bias*ay_bias + az_bias*az_bias);
-        if ( json.filters.filter[0].status < 2 ) {
+        if ( json.filters.nav.status < 2 ) {
             accel_bias = 0;
         }
         text = "Accel Bias: " + accel_bias.toFixed(2) + " mps2";
         add_status_message(text, accel_bias, 0.1, 0.5, 1.0);
 
-        var p_bias = parseFloat(json.filters.filter[0].p_bias) * r2d;
-        var q_bias = parseFloat(json.filters.filter[0].q_bias) * r2d;
-        var r_bias = parseFloat(json.filters.filter[0].r_bias) * r2d;
+        var p_bias = parseFloat(json.filters.nav.p_bias) * r2d;
+        var q_bias = parseFloat(json.filters.nav.q_bias) * r2d;
+        var r_bias = parseFloat(json.filters.nav.r_bias) * r2d;
         var gyro_bias = Math.sqrt(p_bias*p_bias + q_bias*q_bias + r_bias*r_bias);
-        if ( json.filters.filter[0].status < 2 ) {
+        if ( json.filters.nav.status < 2 ) {
             gyro_bias = 0;
         }
         text = "Gyro Bias: " + gyro_bias.toFixed(2) + " dps";
         add_status_message(text, gyro_bias, 0.1, 0.5, 1.0);
 
         var imu_temp = 0;
-        if ( typeof json.sensors.imu[0] !== 'undefined' ) {
-            imu_temp = parseFloat(json.sensors.imu[0].temp_C);
+        if ( typeof json.sensors.imu !== 'undefined' ) {
+            imu_temp = parseFloat(json.sensors.imu.temp_C);
         }
         text = "IMU Temp: " + (imu_temp).toFixed(0) + "C";
         add_status_message(text, imu_temp, 30, 40, 50);
@@ -1105,11 +1105,11 @@ var panel = function() {
         var gps_sats = 0;
         var gps_hdop = 0;
         if ( typeof json.sensors.gps !== 'undefined' ) {
-            gps_sats = parseInt(json.sensors.gps[0].satellites);
+            gps_sats = parseInt(json.sensors.gps.num_sats);
             text = "GPS sats: " + gps_sats;
             add_status_message_inv(text, gps_sats, 10, 7, 5);
 
-            gps_hdop = parseFloat(json.sensors.gps[0].hdop);
+            gps_hdop = parseFloat(json.sensors.gps.hdop);
             text = "GPS hdop: " + (gps_hdop).toFixed(2);
             add_status_message(text, gps_hdop, 1.5, 3.0, 5.0);
         }
@@ -1195,9 +1195,9 @@ var panel = function() {
 
         // ball
         var tc = 0.0;
-        if ( json.sensors.imu[0] != null ) {
-            var ay = json.sensors.imu[0].ay_mps_sec;
-            var az = json.sensors.imu[0].az_mps_sec;
+        if ( json.sensors.imu != null ) {
+            var ay = json.sensors.imu.ay_mps_sec;
+            var az = json.sensors.imu.az_mps_sec;
             var tc = ay / az;
             tc_filt = 0.8 * tc_filt + 0.2 * tc;
         }
@@ -1214,8 +1214,8 @@ var panel = function() {
 
         // plane (turn rate)
         r = 0.0;
-        if ( json.sensors.imu[0] != null ) {
-            r = json.sensors.imu[0].r_rad_sec * r2d;
+        if ( json.sensors.imu != null ) {
+            r = json.sensors.imu.r_rad_sec * r2d;
         }
         if ( r < -4 ) { r = -4; }
         if ( r > 4 ) { r = 4; }
@@ -1234,10 +1234,10 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        var heading = json.filters.filter[0].yaw_deg;
-        var groundspeed_ms = parseFloat(json.filters.filter[0].groundspeed_ms);
+        var heading = json.filters.nav.yaw_deg;
+        var groundspeed_ms = parseFloat(json.filters.nav.groundspeed_ms);
         if ( groundspeed_ms > 0.25 ) {
-            groundtrack_deg = json.filters.filter[0].groundtrack_deg;
+            groundtrack_deg = json.filters.nav.groundtrack_deg;
         }
         var ap_hdg = json.autopilot.targets.groundtrack_deg
         var wind_deg = json.sensors.airdata.wind_dir_deg;
@@ -1316,7 +1316,7 @@ var panel = function() {
         context.restore();
 
         // groundspeed label
-        var track_mps = parseFloat(json.filters.filter[0].groundspeed_ms);
+        var track_mps = parseFloat(json.filters.nav.groundspeed_ms);
         var track_speed = (track_mps * mps2kt * speed_scale).toFixed(0);
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";

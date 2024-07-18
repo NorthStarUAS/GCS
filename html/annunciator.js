@@ -38,7 +38,7 @@ var annunciator = function() {
         var sats_div = $("#sats");
         var sats_inner = $("#sats #inner");
         if ( sats_div != null && typeof json.sensors.gps !== 'undefined' ) {
-            sats = parseInt(json.sensors.gps[0].num_sats);
+            sats = parseInt(json.sensors.gps.num_sats);
             if ( isNaN(sats) ) {
                 sats = 0;
             }
@@ -56,20 +56,20 @@ var annunciator = function() {
     function draw_ekf() {
         var ekf_div = $("#ekf");
         var ekf_inner = $("#ekf #inner");
-        if ( ekf_div != null && json.filters.filter[0].timestamp != null ) {
+        if ( ekf_div != null && json.filters.nav.millis != null ) {
             var gyro_warn = 0.5 * Math.PI / 180.0;
             var gyro_error = 1.0 * Math.PI / 180.0;
             var accel_warn = 0.5;
             var accel_error = 1.0;
-            var p_bias = parseFloat(json.filters.filter[0].p_bias);
-            var q_bias = parseFloat(json.filters.filter[0].q_bias);
-            var r_bias = parseFloat(json.filters.filter[0].r_bias);
-            var ax_bias = parseFloat(json.filters.filter[0].ax_bias);
-            var ay_bias = parseFloat(json.filters.filter[0].ay_bias);
-            var az_bias = parseFloat(json.filters.filter[0].az_bias);
-            var imu_time = parseFloat(json.sensors.imu[0].timestamp);
-            var filter_time = parseFloat(json.filters.filter[0].timestamp);
-            if ( json.filters.filter[0].status == 0 ||
+            var p_bias = parseFloat(json.filters.nav.p_bias);
+            var q_bias = parseFloat(json.filters.nav.q_bias);
+            var r_bias = parseFloat(json.filters.nav.r_bias);
+            var ax_bias = parseFloat(json.filters.nav.ax_bias);
+            var ay_bias = parseFloat(json.filters.nav.ay_bias);
+            var az_bias = parseFloat(json.filters.nav.az_bias);
+            var imu_time = parseFloat(json.sensors.imu.millis);
+            var filter_time = parseFloat(json.filters.nav.millis);
+            if ( json.filters.nav.status == 0 ||
                  Math.abs(p_bias) >= gyro_error ||
                  Math.abs(q_bias) >= gyro_error ||
                  Math.abs(r_bias) >= gyro_error ||
@@ -77,7 +77,7 @@ var annunciator = function() {
                  Math.abs(ay_bias) >= accel_error ||
                  Math.abs(az_bias) >= accel_error ) {
                 ekf_div.attr("class", "error");
-            } else if ( json.filters.filter[0].status == 1 ||
+            } else if ( json.filters.nav.status == 1 ||
                         Math.abs(p_bias) >= gyro_warn ||
                         Math.abs(q_bias) >= gyro_warn ||
                         Math.abs(r_bias) >= gyro_warn ||

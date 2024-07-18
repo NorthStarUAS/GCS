@@ -60,10 +60,10 @@ function map_init() {
 	    'Imagery © <a href="http://mapbox.com">Mapbox</a>',
         id: 'mapbox.streets'
     }).addTo(mymap);
-    
-    // API key for bing. Please get your own at: http://bingmapsportal.com/ 
+
+    // API key for bing. Please get your own at: http://bingmapsportal.com/
     var apiKey = "AmT3B1o5RmNfyBsZ634rbefWuNbsHJsgTcyGWILtBrU74iDpQwikazUVu9TT8ZTL";
-    
+
     var baselayer = {
         "OpenStreetMap": new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             minZoom: 0,
@@ -93,7 +93,7 @@ function map_init() {
             maxZoom: 18,
             attribution: 'Map data &copy; <a target="_blank" href="http://openstreetmap.org">OpenStreetMap</a> contributors'
         }),
-        
+
         "OpenAIP":  new L.TileLayer("http://{s}.tile.maps.openaip.net/geowebcache/service/tms/1.0.0/openaip_basemap@EPSG%3A900913@png/{z}/{x}/{y}.png", {
             maxZoom: 14,
             minZoom: 5,
@@ -129,7 +129,7 @@ function map_init() {
 
     // Initialise the FeatureGroup to store editable layers
     mymap.addLayer(drawnItems);
-    
+
     var drawPluginOptions = {
         position: 'topleft',
         draw: {
@@ -163,16 +163,16 @@ function map_init() {
             //remove: false
         }
     };
-    
+
     // Initialise the draw control and pass it the FeatureGroup of
     // editable layers
     var drawControl = new L.Control.Draw(drawPluginOptions);
     mymap.addControl(drawControl);
-    
+
     mymap.on(L.Draw.Event.CREATED, function (e) {
         var type = e.layerType;
         var layer = e.layer;
-    
+
         if ( type == 'marker' ) {
             var msg = prompt('Enter a brief note:');
             layer.bindPopup(msg);
@@ -241,7 +241,7 @@ function map_init() {
             }
         });
     });
-    
+
     home = L.circleMarker(startLatLng, {
         color: 'black',
         radius: 14,
@@ -261,7 +261,7 @@ function map_init() {
         opacity: 0.5,
     });
     active_route.addTo(mymap);
-    
+
     active_wpt = L.circleMarker(startLatLng, {
         color: 'blue',
         opacity: 0.5,
@@ -284,32 +284,32 @@ function map_init() {
 
 
 map_update = function() {
-    if ( json.filters.filter[0].latitude_deg != null ) {
-        var newLatLng = new L.LatLng(json.filters.filter[0].latitude_deg,
-                                     json.filters.filter[0].longitude_deg);
+    if ( json.filters.nav.latitude_deg != null ) {
+        var newLatLng = new L.LatLng(json.filters.nav.latitude_deg,
+                                     json.filters.nav.longitude_deg);
         ownship.setLatLng(newLatLng);
         if (L.DomUtil.TRANSFORM) {
             ownship._icon.style[L.DomUtil.TRANSFORM] += ' rotate('
-                + json.filters.filter[0].yaw_deg + 'deg)';
+                + json.filters.nav.yaw_deg + 'deg)';
             ownship._icon.style["transform-origin"] = "50% 50%";
         }
         ownship_label.setLatLng(newLatLng);
 
-        var alt_ft = json.filters.filter[0].altitude_m / 0.3048;
+        var alt_ft = json.filters.nav.altitude_m / 0.3048;
         var alt_disp = Math.round(alt_ft/10) * 10;
         var vel = 0.0;
         var vel_disp = 0.0;
         if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
             vel = json.velocity.airspeed_smoothed_kt;
         } else {
-            vel = json.filters.filter[0].groundspeed_kt;
+            vel = json.filters.nav.groundspeed_kt;
         }
         if ( vel < 10.0 ) {
             vel_disp = parseFloat(vel).toFixed(1);
         } else {
             vel_disp = parseFloat(vel).toFixed(0);
         }
-        
+
         var html = '<div>' + json.config.identity.call_sign + '</div>'
             + '<div>' + alt_disp + ' ft</div>'
             + '<div>' + vel_disp + ' kts</div>';
@@ -318,7 +318,7 @@ map_update = function() {
         if ( !visible && autopan ) {
             mymap.panTo(ownship.getLatLng());
         }
-    
+
         track.addLatLng(newLatLng);
         var points = track.getLatLngs();
         var track_history = (1000/update_rate) * track_sec;
@@ -340,7 +340,7 @@ map_update = function() {
             }
             circle.setStyle( { color: 'blue', opacity: 0.5 } );
         }
-    
+
         if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
             active_wpt.setLatLng( [json.task.circle.active.latitude_deg,
                                    json.task.circle.active.longitude_deg] );
@@ -352,7 +352,7 @@ map_update = function() {
             }
         }
     }
-    
+
     var route_size = json.task.route.active.route_size;
     if ( route_size > 0 ) {
         var wpts = [];
@@ -640,7 +640,7 @@ function updateProjects() {
             html += '<p>';
             html += "<button type=\"button\" id=\"select-project-button\" onclick=\"selectProject('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Select <b>" + key + "</b></button>"
             html += " ";
-            html += "<button type=\"button\" id=\"delete-project-button\" onclick=\"deleteProject('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Delete <b>" + key + "</b></button>" 
+            html += "<button type=\"button\" id=\"delete-project-button\" onclick=\"deleteProject('" + key + "');\" style=\"font-size:100%; padding: 5px 20px;\">Delete <b>" + key + "</b></button>"
             html += ' (' + areas.length + ' area';
             if ( areas.length != 1 ) {
                 html += 's';
