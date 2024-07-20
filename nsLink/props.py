@@ -19,3 +19,8 @@ nav_node = PropertyNode("/filters/nav")
 # Status and Comms
 remote_link_node = PropertyNode("/comms/remote_link")
 status_node = PropertyNode("/status")
+
+# Autopilot
+targets_node = PropertyNode("/autopilot/targets")
+tecs_node = PropertyNode("/autopilot/tecs")
+tecs_config_node = PropertyNode("/config/autopilot/TECS")
