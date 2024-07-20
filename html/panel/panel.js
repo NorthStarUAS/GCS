@@ -283,7 +283,7 @@ var panel = function() {
         context.lineWidth = 5;
         context.translate(cx, cy);
         var ps = json.sensors.airdata.pitot_scale_factor;
-        var true_kt = json.sensors.airdata.airspeed_mps*mps2kt*speed_scale * ps;
+        var true_kt = json.sensors.airdata.airspeed_filt_mps*mps2kt*speed_scale * ps;
         var deg = my_interp( true_kt, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.beginPath();
@@ -307,7 +307,7 @@ var panel = function() {
         context.translate(cx, cy);
         var speed = 0.0;
         if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
-            speed = json.sensors.airdata.airspeed_mps*mps2kt;
+            speed = json.sensors.airdata.airspeed_filt_mps*mps2kt;
         } else {
             speed = json.filters.nav.groundspeed_kt;
         }
@@ -376,7 +376,7 @@ var panel = function() {
 
         //var alt_ft = json.position.altitude_true_m / 0.3048;
         var alt_ft = json.filters.nav.altitude_m / 0.3048;
-        var ground_ft = json.position.altitude_ground_m / 0.3048;
+        var ground_ft = json.sensors.airdata.altitude_ground_m / 0.3048;
         var target_ft = ground_ft + json.autopilot.targets.altitude_agl_ft;
 
         // kollsman
