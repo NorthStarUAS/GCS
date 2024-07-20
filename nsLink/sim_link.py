@@ -17,6 +17,6 @@ class SimLink():
                 print("relaying a sim message", result)
             except BlockingIOError:
                 new_data = False
-                print("nothing to receive")
+                # print("nothing to receive")
 
 sim_link = SimLink(port_in=5051)
