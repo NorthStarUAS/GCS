@@ -23,7 +23,7 @@ if have_pygame:
         print("Detected a joystick")
     else:
         print("no joysticks found")
-        
+
 if have_joystick:
     j = pygame.joystick.Joystick(0)
     j.init()
@@ -44,7 +44,7 @@ def update():
         buttons[i] = j.get_button(i)
     for i in range(num_hats):
         hats[i] = j.get_hat(i)
-    print(axes, buttons, hats)
+    # print(axes, buttons, hats)
     return axes
 
-    
+
