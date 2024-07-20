@@ -9,7 +9,7 @@ tecs_config_node = PropertyNode('/config/autopilot/TECS')
 airdata_node = PropertyNode("/sensors/airdata")
 imu_node = PropertyNode("/sensors/imu")
 gps_node = PropertyNode("/sensors/gps")
-pilot_node = PropertyNode("/pilot")
+pilot_node = PropertyNode("/sensors/pilot")
 power_node = PropertyNode("/sensors/power")
 switches_node = PropertyNode("/switches")
 
