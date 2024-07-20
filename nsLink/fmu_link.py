@@ -28,7 +28,7 @@ class FMULink:
         while new_data:
             pkt_id = self.parser.read(self.ser)
             if pkt_id >= 0:
-                print("received:", pkt_id)
+                # print("received:", pkt_id)
                 parse_msg(pkt_id, self.parser.payload)
                 self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
             else:
