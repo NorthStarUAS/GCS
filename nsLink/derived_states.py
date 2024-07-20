@@ -1,13 +1,7 @@
 import math
 
-from props import airdata_node, nav_node, pilot_node, status_node
+from props import airdata_node, nav_node, pilot_node, power_node, status_node, switches_node, targets_node, tecs_config_node, tecs_node
 
-vel_node = PropertyNode("/velocity")
-targets_node = PropertyNode("/autopilot/targets")
-tecs_node = PropertyNode("/autopilot/tecs")
-power_node = PropertyNode("/sensors/power")
-tecs_config_node = PropertyNode("/config/autopilot/TECS")
-switches_node = PropertyNode("/switches")
 
 r2d = 180.0 / math.pi
 mps2kt = 1.9438444924406046432
@@ -33,12 +27,18 @@ class DerivedStates:
         self.ap_timer = 0.0
         self.throttle_timer = 0.0
         self.odometer = 0.0
+        self.airspeed_filt = 0.0
 
     def update(self):
         self.compute_derived_states()
         self.compute_tecs()
 
-    def compute_derived_states():
+    def compute_derived_states(self):
+        # filtered airspeed
+        airspeed_mps = airdata_node.getDouble("airspeed_mps")
+        self.airspeed_filt = 0.95 * self.airspeed_filt + 0.05 * airspeed_mps
+        airdata_node.setDouble("airspeed_filt_mps", self.airspeed_filt)
+
         # compute ground track heading/speed
         vn = nav_node.getDouble("vn_mps")
         ve = nav_node.getDouble("ve_mps")
@@ -93,7 +93,7 @@ class DerivedStates:
             filt_perc = 0.9995 * filt_perc + 0.0005 * batt_perc
         power_node.setDouble("battery_perc", filt_perc)
 
-    def compute_tecs():
+    def compute_tecs(self):
         if nav_node.getDouble('timestamp') < 0.01:
             # do nothing if filter not inited
             return
@@ -108,7 +108,7 @@ class DerivedStates:
         # fixme:
         wb = 0.0
         alt_m = nav_node.getDouble("altitude_m")
-        vel_mps = vel_node.getDouble("airspeed_smoothed_kt") * kt2mps
+        vel_mps = airdata_node.getDouble("airspeed_filt_mps") * kt2mps
         target_alt_m = targets_node.getDouble("altitude_msl_ft") * ft2m
         target_vel_mps = targets_node.getDouble("airspeed_kt") * kt2mps
 
@@ -129,3 +129,4 @@ class DerivedStates:
         tecs_node.setDouble("error_total", error_total)
         tecs_node.setDouble("error_diff", error_bal)
 
+derived_states = DerivedStates()

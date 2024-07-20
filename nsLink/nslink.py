@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QLabel, QPushButton
 from PyQt6.QtCore import QTimer
 
 from commands import commands
-import nsLink.derived_states as derived_states
+from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
@@ -39,7 +39,7 @@ fmu_link.begin(args.serial, args.baud, timeout=dt)
 def main_loop():
     sim_link.update()
     fmu_link.receive()
-    derived_states.compute_derived_data()
+    derived_states.update()
     joystick.update()
     requests.gen_requests()
     commands.update()
