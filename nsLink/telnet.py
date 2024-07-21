@@ -228,7 +228,7 @@ class ChatHandler(asynchat.async_chat):
                 newcmd = "fcs-update," + tokens[1]
                 commands.add(newcmd)
                 if self.prompt:
-                    self.my_push('command will be related to vehicle.\n')
+                    self.my_push('command will be relayed to vehicle.\n')
         else:
             self.usage()
 

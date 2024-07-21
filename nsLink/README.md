@@ -1,10 +1,12 @@
-auralink is a reimplmentation of the original uglink written entirely
-in python.  uglink was/is a jack of all trades data handler that could
-read data live from the UAS and serve it out to the ground station,
-and also replay flights and do various other data processing tasks.
-uglink evolved since the very earliest days of this project so it is
-extremely messy and convoluted, trying to do way too many things at
-once.  auralink is a fresh start, all in python.
+# nsLink
+
+nsLink is an updated version of auralink which was a python reimplmentation of
+the original c++ uglink. uglink was/is a jack of all trades data handler that
+could read data live from the UAS and serve it out to the ground station, and
+also replay flights and do various other data processing tasks. uglink evolved
+since the very earliest days of this project so it is extremely messy and
+convoluted, trying to do way too many things at once. auralink is a fresh start,
+all in python.
 
 Some notable improvements:
 
