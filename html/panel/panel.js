@@ -40,7 +40,7 @@ var panel = function() {
 
     var instrument_config = {
         vcc : {draw: draw_vcc},
-        asi : {draw: draw_asi},
+        asi : {draw: draw_asi2},
         ati : {draw: draw_ati},
         alt : {draw: draw_alt},
         amp : {draw: draw_amp},
@@ -258,6 +258,183 @@ var panel = function() {
         context.fillStyle = "white";
         context.textAlign = "center";
         context.fillText(display_units.toUpperCase(), cx, cy + size*0.13);
+
+        // 'true' label
+        var px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "orange";
+        context.textAlign = "center";
+        context.fillText("(TRUE)", cx, cy + size*0.21);
+
+        // bug
+        context.save();
+        var nw = Math.floor(img_hdg2.width*scale)
+        var nh = Math.floor(img_hdg2.height*scale)
+        context.translate(cx, cy);
+        var deg = my_interp( json.autopilot.targets.airspeed_kt*speed_scale,
+                             asi_interpx, asi_interpy);
+        context.rotate(deg*d2r);
+        context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.95, width=nw, height=nh);
+        context.restore();
+
+        // true airspeed needle
+        context.save();
+        context.strokeStyle = 'orange';
+        context.lineWidth = 5;
+        context.translate(cx, cy);
+        var ps = json.sensors.airdata.pitot_scale_factor;
+        var true_kt = json.sensors.airdata.airspeed_filt_mps*mps2kt*speed_scale * ps;
+        var deg = my_interp( true_kt, asi_interpx, asi_interpy);
+        context.rotate(deg*d2r);
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.lineTo(0, -size*0.45*0.85);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.45*0.85);
+        context.lineTo(-size*0.03*0.85, -size*0.37*0.85);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, -size*0.45*0.85);
+        context.lineTo(size*0.03*0.85, -size*0.37*0.85);
+        context.stroke();
+        context.restore();
+
+        // airspeed needle
+        context.save();
+        var nw = Math.floor(img_asi3.width*scale)
+        var nh = Math.floor(img_asi3.height*scale)
+        context.translate(cx, cy);
+        var speed = 0.0;
+        if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
+            speed = json.sensors.airdata.airspeed_filt_mps*mps2kt;
+        } else {
+            speed = json.filters.nav.groundspeed_kt;
+        }
+
+        var deg = my_interp( speed * speed_scale, asi_interpx, asi_interpy);
+        context.rotate(deg*d2r);
+        context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
+        context.restore();
+    }
+
+    function draw_asi2( x, y, size ) {
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+
+        var display_units = json.config.specs.display_units;
+        var speed_scale = 1.0;
+        if ( display_units == "mps" ) {
+            speed_scale = kt2mps;
+        } else if ( display_units == "kts" ) {
+            speed_scale = 1.0;
+        } else {
+            // default to mps if not specified
+            speed_scale = kt2mps;
+            display_units = "mps";
+        }
+
+        var min_kt = parseFloat(json.config.autopilot.TECS.min_kt);
+        var max_kt = parseFloat(json.config.autopilot.TECS.max_kt);
+        var cruise_kt = parseFloat(json.config.specs.cruise_kt);
+        var range_kt = max_kt - min_kt;
+        var caution_kt = min_kt + 0.8 * range_kt;
+        var die_kt = max_kt + 10.0;
+
+        var max_display = Math.ceil( die_kt / 10 ) * 10
+        max_display = 220;
+        var asi_interpx = [ 0, max_display, 2*max_display ];
+        var asi_interpy = [ 0, 340, 360 ];
+
+        var min_deg = my_interp(min_kt*speed_scale, asi_interpx, asi_interpy);
+        var max_deg = my_interp(max_kt*speed_scale, asi_interpx, asi_interpy);
+        var cruise_deg = my_interp(cruise_kt*speed_scale, asi_interpx, asi_interpy);
+        var caution_deg = my_interp(caution_kt*speed_scale, asi_interpx, asi_interpy);
+        var die_deg = my_interp(die_kt*speed_scale, asi_interpx, asi_interpy);
+
+        var min_rad = (min_deg - 90) * d2r;
+        var max_rad = (max_deg - 90) * d2r;
+        var caution_rad = (caution_deg - 90) * d2r;
+        var die_rad = (die_deg - 90) * d2r;
+
+        // background
+        context.drawImage(img_aura_asi1, x, y, width=size, height=size);
+
+        // green arc
+        context.beginPath();
+        context.arc(cx, cy, size*0.414, min_rad, caution_rad);
+        context.strokeStyle = '#0C0';
+        context.lineWidth = 20;
+        context.stroke();
+
+        // yellow arc
+        context.beginPath();
+        context.arc(cx, cy, size*0.422, caution_rad, max_rad);
+        context.strokeStyle = 'yellow';
+        context.lineWidth = 15;
+        context.stroke();
+
+        // red arc
+        context.beginPath();
+        context.arc(cx, cy, size*0.430, max_rad, die_rad);
+        context.strokeStyle = '#e03030';
+        context.lineWidth = 10;
+        context.stroke();
+
+        // tics
+        var px = Math.round(size * 0.07);
+        context.font = px + "px Arial";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        dstic = 0;
+        if ( max_display <= 50 ) {
+            dtic = 5;
+            dstic = 1;
+        } else if ( max_display <= 100 ) {
+            dtic = 10;
+            dstic = 5;
+        } else {
+            dtic = 20;
+            dstic = 10;
+        }
+        for ( var i = dtic; i <= max_display; i += dtic ) {
+            context.beginPath();
+            var tic_rad = my_interp(i*speed_scale, asi_interpx, asi_interpy) * d2r ;
+            console.log(i, speed_scale, tic_rad);
+            context.arc(cx, cy, size*0.398, tic_rad-0.5*Math.PI-0.015, tic_rad-0.5*Math.PI+0.015);
+            context.strokeStyle = '#ffffff';
+            context.lineWidth = 30;
+            context.stroke();
+            var tx = cx + Math.sin(tic_rad) * size*0.29;
+            var ty = cy - Math.cos(tic_rad) * size*0.3 + size*0.03;
+            context.fillText(i.toString(), tx, ty);
+        }
+        if ( dstic > 0 ) {
+            for ( var i = dstic; i <= max_display; i += dstic ) {
+                context.beginPath();
+                var tic_rad = my_interp(i*speed_scale, asi_interpx, asi_interpy) * d2r ;
+                console.log(i, speed_scale, tic_rad);
+                context.arc(cx, cy, size*0.414, tic_rad-0.5*Math.PI-0.01, tic_rad-0.5*Math.PI+0.01);
+                context.strokeStyle = '#ffffff';
+                context.lineWidth = 20;
+                context.stroke();
+            }
+        }
+
+        var speed = 0.0;
+        if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
+            speed = json.sensors.airdata.airspeed_filt_mps*mps2kt;
+        } else {
+            speed = json.filters.nav.groundspeed_kt;
+        }
+
+        // units label
+        var px = Math.round(size * 0.07);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        context.fillText(speed.toFixed(0) + " " + display_units.toUpperCase(), cx, cy + size*0.13);
 
         // 'true' label
         var px = Math.round(size * 0.06);
