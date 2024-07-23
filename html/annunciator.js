@@ -113,6 +113,7 @@ var annunciator = function() {
         if ( batt_div != null && json.sensors.power.total_mah != null ) {
             var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
             var battery_total = parseFloat(json.config.specs.battery_mah)
+            var volts_per_cell = parseFloat(json.sensors.power.cell_vcc).toFixed(2);
             var remaining = battery_total - mah
             // var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
             var battery_percent = (parseFloat(json.sensors.power.battery_perc) * 100).toFixed(0)
@@ -122,14 +123,14 @@ var annunciator = function() {
             if ( battery_percent < 0 ) {
                 battery_percent = 0;
             }
-            if ( battery_percent < 15 ) {
+            if ( volts_per_cell < 3.20 ) {
                 batt_div.attr("class", "error");
-            } else if ( battery_percent < 25 ) {
+            } else if ( volts_per_cell < 3.30 ) {
                 batt_div.attr("class", "warn");
             } else {
                 batt_div.attr("class", "ok");
             }
-            batt_inner.html(battery_percent + "% batt");
+            batt_inner.html("Batt " + battery_percent + "% " + volts_per_cell + "v");
         }
     };
 
@@ -151,11 +152,11 @@ var annunciator = function() {
             var rem = secs - (hours * 3600);
             var mins = Math.floor(rem / 60);
             var rem = rem.toFixed(0) - (mins * 60);
-            var timer_str = "";
+            var timer_str = "Flt ";
             if ( secs < 3600 ) {
-                timer_str = mins + ":" + pad2(rem);
+                timer_str += mins + ":" + pad2(rem);
             } else {
-                timer_str = hours + ":" + pad2(mins) + ":" + pad2(rem);
+                timer_str += hours + ":" + pad2(mins) + ":" + pad2(rem);
             }
             timer_inner.html(timer_str);
         }
