@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget
 from PyQt6.QtWidgets import QLabel, QPushButton
 from PyQt6.QtCore import QTimer
 
+from alerts import alert_mgr
 from commands import commands
 from derived_states import derived_states
 from fmu_link import fmu_link
@@ -40,6 +41,7 @@ def main_loop():
     sim_link.update()
     fmu_link.receive()
     derived_states.update()
+    alert_mgr.update()
     joystick.update()
     requests.gen_requests()
     commands.update()

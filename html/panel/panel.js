@@ -47,7 +47,7 @@ var panel = function() {
         power : {draw: draw_power},
         power2 : {draw: draw_power2},
         tc : {draw: draw_tc},
-        status : {draw: draw_status},
+        status : {draw: draw_status2},
         dg : {draw: draw_dg},
         vsi : {draw: draw_vsi},
         controls : {draw: draw_controls},
@@ -401,7 +401,7 @@ var panel = function() {
         for ( var i = dtic; i <= max_display; i += dtic ) {
             context.beginPath();
             var tic_rad = my_interp(i*speed_scale, asi_interpx, asi_interpy) * d2r ;
-            console.log(i, speed_scale, tic_rad);
+            // console.log(i, speed_scale, tic_rad);
             context.arc(cx, cy, size*0.398, tic_rad-0.5*Math.PI-0.015, tic_rad-0.5*Math.PI+0.015);
             context.strokeStyle = '#ffffff';
             context.lineWidth = 30;
@@ -414,7 +414,7 @@ var panel = function() {
             for ( var i = dstic; i <= max_display; i += dstic ) {
                 context.beginPath();
                 var tic_rad = my_interp(i*speed_scale, asi_interpx, asi_interpy) * d2r ;
-                console.log(i, speed_scale, tic_rad);
+                // console.log(i, speed_scale, tic_rad);
                 context.arc(cx, cy, size*0.414, tic_rad-0.5*Math.PI-0.01, tic_rad-0.5*Math.PI+0.01);
                 context.strokeStyle = '#ffffff';
                 context.lineWidth = 20;
@@ -1188,7 +1188,7 @@ var panel = function() {
         }
     }
 
-    function draw_status( x, y, size ) {
+    function draw_status_old( x, y, size ) {
         var px;
         var cx = x + size*0.5;
         var cy = y + size*0.5;
@@ -1353,6 +1353,79 @@ var panel = function() {
         for ( var i = 0; i < oks.length; i++ ) {
             context.fillText(oks[i], cx - size * 0.4, cy + size*pos);
             pos += 0.07;
+        }
+    }
+
+    function draw_status2( x, y, size ) {
+        var px;
+        var cx = x + size*0.5;
+        var cy = y + size*0.5;
+        var scale = size/512;
+
+        // background
+        var pad = Math.floor(size * 0.02);
+        var r = Math.floor(size * 0.3);
+        context.strokeStyle = '#202020';
+        context.fillStyle = '#202020';
+        myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
+
+        // 'status' label
+        px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.fillStyle = "white";
+        context.textAlign = "center";
+        context.fillText("STATUS", cx, cy - size*0.35);
+
+        var pos = -0.25;
+
+        px = Math.round(size * 0.06);
+        context.font = px + "px Courier New, monospace";
+        context.textAlign = "left";
+
+        if ( json.alerts.alerts != null ) {
+            alerts = json.alerts.alerts;
+        } else{
+            alerts = [""];
+        }
+        if ( json.alerts.warns != null ) {
+            warns = json.alerts.warns;
+        } else{
+            warns = [""];
+        }
+        if ( json.alerts.oks != null ) {
+            oks = json.alerts.oks;
+        } else{
+            oks = [""];
+        }
+        if ( alerts[0] == "" && warns[0] == "" && oks[0] == "" ) {
+            oks.push("Status: OK")
+        }
+
+        // draw alerts
+        context.fillStyle = "red";
+        for ( var i = 0; i < alerts.length; i++ ) {
+            if ( alerts[i] != "" ) {
+                context.fillText(alerts[i], cx - size * 0.4, cy + size*pos);
+                pos += 0.07;
+            }
+        }
+
+        // draw warns
+        context.fillStyle = "yellow";
+        for ( var i = 0; i < warns.length; i++ ) {
+            if ( warns[i] != "" ) {
+                context.fillText(warns[i], cx - size * 0.4, cy + size*pos);
+                pos += 0.07;
+            }
+        }
+
+        // draw oks
+        context.fillStyle = '#0C0';
+        for ( var i = 0; i < oks.length; i++ ) {
+            if ( oks[i] != "" ) {
+                context.fillText(oks[i], cx - size * 0.4, cy + size*pos);
+                pos += 0.07;
+            }
         }
     }
 

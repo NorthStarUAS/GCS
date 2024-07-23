@@ -17,6 +17,7 @@ switches_node = PropertyNode("/switches")
 nav_node = PropertyNode("/filters/nav")
 
 # Status and Comms
+alerts_node = PropertyNode("/alerts")
 remote_link_node = PropertyNode("/comms/remote_link")
 status_node = PropertyNode("/status")
 

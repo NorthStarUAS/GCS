@@ -8,6 +8,7 @@ import re
 
 from PropertyTree import PropertyNode
 
+from alerts import alert_mgr
 from commands import commands
 
 class ChatHandler(asynchat.async_chat):
@@ -62,6 +63,9 @@ class ChatHandler(asynchat.async_chat):
         self.push(str.encode(msg))
 
     def process_command(self, msg):
+        if msg != "" and msg != "\r":
+            alert_mgr.add_message("CMD: " + msg, timeout_sec=15)
+
         tokens = msg.split()
         if len(tokens) == 0:
             self.usage()
