@@ -2,7 +2,6 @@
 # of the communication link so I have separated it out as it's own
 # class.
 
-import string
 import time
 
 START_OF_MSG0 = 147
