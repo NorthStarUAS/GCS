@@ -64,7 +64,7 @@ class Alerts():
 
         # EKF messages
         self.pos_msg = Entry(msg="Pos Acc: %.2f m", ok=2.0, warn=3.0, alert=4.0)
-        self.vel_msg = Entry(msg="Vel Acc: %.2f m/s", ok=0.04, warn=0.06, alert=0.1)
+        self.vel_msg = Entry(msg="Vel Acc: %.2f m/s", ok=0.1, warn=0.2, alert=0.3)
         self.att_msg = Entry(msg="Att Acc: %.2f deg", ok=0.05, warn=0.2, alert=0.4)
         self.acc_bias_msg = Entry(msg="Accel Bias: %.2f mps2", ok=0.1, warn=0.5, alert=1.0)
         self.gyro_bias_msg = Entry(msg="Gyro Bias: %.2f dps", ok=0.1, warn=0.5, alert=1.0)
