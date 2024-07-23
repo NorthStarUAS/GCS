@@ -384,7 +384,7 @@ var panel = function() {
 
         // tics
         var px = Math.round(size * 0.07);
-        context.font = px + "px Arial";
+        context.font = "bold " + px + "px Arial";
         context.fillStyle = "white";
         context.textAlign = "center";
         dstic = 0;
@@ -874,7 +874,7 @@ var panel = function() {
 
         var pad = Math.round(size * 0.025);
         var ipad = pad * 6;
-        var r = Math.round(size * 0.5);
+        var r = Math.round(size * 0.3);
         var h = Math.round(size * 0.04);
         var vspace = Math.round(size * 0.15);
 
@@ -952,7 +952,7 @@ var panel = function() {
 
         var pad = Math.round(size * 0.025);
         var ipad = pad * 6;
-        var r = Math.round(size * 0.5);
+        var r = Math.round(size * 0.3);
         var h = Math.round(size * 0.04);
         var vspace = Math.round(size * 0.15);
 
@@ -1035,7 +1035,7 @@ var panel = function() {
 
         var pad = Math.round(size * 0.025);
         var ipad = pad * 6;
-        var r = Math.round(size * 0.5);
+        var r = Math.round(size * 0.3);
         var h = Math.round(size * 0.03);
         var vspace = Math.round(size * 0.10);
 
@@ -1049,7 +1049,7 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText("INS/GNS", cx, y + y1);
+        context.fillText("INS/GNSS", cx, y + y1);
 
         px =  Math.round(size * 0.04);
 
@@ -1197,7 +1197,7 @@ var panel = function() {
         // background
         //context.drawImage(img_aura_asi1, x, y, width=size, height=size);
         var pad = Math.floor(size * 0.02);
-        var r = Math.floor(size * 0.5);
+        var r = Math.floor(size * 0.3);
         context.strokeStyle = '#202020';
         context.fillStyle = '#202020';
         myroundRect2(x+pad, y+pad, size-2*pad, size-2*pad, r);
@@ -1325,10 +1325,10 @@ var panel = function() {
         px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.textAlign = "left";
-	//context.shadowOffsetX = 2;
-	//context.shadowOffsetY = 2;
-	//context.shadowBlur = 3;
-	//context.shadowColor = "rgba(255, 255, 255, 0.5)";
+        //context.shadowOffsetX = 2;
+        //context.shadowOffsetY = 2;
+        //context.shadowBlur = 3;
+        //context.shadowColor = "rgba(255, 255, 255, 0.5)";
 
         if ( alerts.length == 0 && warns.length == 0 && oks.length == 0 ) {
             oks.push("Status: OK")
@@ -1337,21 +1337,21 @@ var panel = function() {
         // draw alerts
         context.fillStyle = "red";
         for ( var i = 0; i < alerts.length; i++ ) {
-            context.fillText(alerts[i], cx - size * 0.35, cy + size*pos);
+            context.fillText(alerts[i], cx - size * 0.4, cy + size*pos);
             pos += 0.07;
         }
 
         // draw alerts
         context.fillStyle = "yellow";
         for ( var i = 0; i < warns.length; i++ ) {
-            context.fillText(warns[i], cx - size * 0.35, cy + size*pos);
+            context.fillText(warns[i], cx - size * 0.4, cy + size*pos);
             pos += 0.07;
         }
 
         // draw oks
         context.fillStyle = '#0C0';
         for ( var i = 0; i < oks.length; i++ ) {
-            context.fillText(oks[i], cx - size * 0.35, cy + size*pos);
+            context.fillText(oks[i], cx - size * 0.4, cy + size*pos);
             pos += 0.07;
         }
     }
