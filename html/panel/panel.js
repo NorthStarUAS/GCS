@@ -434,14 +434,15 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "white";
         context.textAlign = "center";
-        context.fillText(speed.toFixed(0) + " " + display_units.toUpperCase(), cx, cy + size*0.13);
+        context.fillText(speed.toFixed(0) + " " + display_units.toUpperCase(), cx, cy - size*0.08);
 
-        // 'true' label
+        // ground speed label
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "orange";
         context.textAlign = "center";
-        context.fillText("(TRUE)", cx, cy + size*0.21);
+        gs = json.filters.nav.groundspeed_kt;
+        context.fillText("GS: " + gs.toFixed(0), cx, cy + size*0.16);
 
         // bug
         context.save();
@@ -454,25 +455,24 @@ var panel = function() {
         context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.95, width=nw, height=nh);
         context.restore();
 
-        // true airspeed needle
+        // gs needle
         context.save();
         context.strokeStyle = 'orange';
-        context.lineWidth = 5;
+        context.lineWidth = 4;
         context.translate(cx, cy);
-        var ps = json.sensors.airdata.pitot_scale_factor;
-        var true_kt = json.sensors.airdata.airspeed_filt_mps*mps2kt*speed_scale * ps;
-        var deg = my_interp( true_kt, asi_interpx, asi_interpy);
+        var gs_kt = json.filters.nav.groundspeed_kt*speed_scale;
+        var deg = my_interp( gs_kt, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.beginPath();
         context.moveTo(0, 0);
-        context.lineTo(0, -size*0.45*0.85);
+        context.lineTo(0, -size*0.44*0.85);
         context.stroke();
         context.beginPath();
-        context.moveTo(0, -size*0.45*0.85);
+        context.moveTo(0, -size*0.44*0.85);
         context.lineTo(-size*0.03*0.85, -size*0.37*0.85);
         context.stroke();
         context.beginPath();
-        context.moveTo(0, -size*0.45*0.85);
+        context.moveTo(0, -size*0.44*0.85);
         context.lineTo(size*0.03*0.85, -size*0.37*0.85);
         context.stroke();
         context.restore();
