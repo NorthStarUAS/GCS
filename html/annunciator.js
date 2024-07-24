@@ -107,92 +107,56 @@ var annunciator = function() {
     function draw_link_state() {
         var link_div = $("#link");
         var link_inner = $("#link #inner");
-        if ( link_div != null ) {
-            var state = json.comms.remote_link.link_state;
-            if ( state == "ok" ) {
+        if ( link_div != null && json.annunciators.link != null ) {
+            if ( json.annunciators.link.level == 1 ) {
                 link_div.attr("class", "ok");
-                link_inner.html("Link");
-                ann_lost_link = 0;
             } else {
                 link_div.attr("class", "error");
-                link_inner.html("Lost Link");
-                ann_lost_link = 1;
             }
+            link_inner.html(json.annunciators.link.msg);
         }
     }
 
     function draw_auto() {
         var auto_div = $("#auto");
         var auto_inner = $("#auto #inner");
-        if ( auto_div != null && json.switches.master_switch != null ) {
-            var auto_switch = json.switches.master_switch;
-            if ( auto_switch ) {
+        if ( auto_div != null && json.annunciators.auto != null ) {
+            if ( json.annunciators.auto.level == 1 ) {
                 auto_div.attr("class", "ok");
-                auto_inner.html("Auto");
             } else {
                 auto_div.attr("class", "warn");
-                auto_inner.html("Manual");
             }
+            auto_inner.html(json.annunciators.auto.msg);
         }
     }
 
     function draw_wind() {
-        var kt2mps = 0.514444;
-        var mps2kt = 1.0 / kt2mps;
         var wind_div = $("#wind");
         var wind_inner = $("#wind #inner");
-        if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
-            return;
-        }
-        if ( wind_div != null && typeof json.sensors.airdata !== 'undefined' ) {
-            var display_units = "??";
-            var speed_scale = 1.0;
-            if ( json.config.specs.display_units == "mps" ) {
-                speed_scale = kt2mps;
-                display_units = "ms";
-            } else if ( json.config.specs.display_units == "kts" ) {
-                speed_scale = 1.0;
-                display_units = "kt";
-            } else {
-                // default to mps if not specified
-                speed_scale = kt2mps;
-                display_units = "ms";
-            }
-            var wind_deg = parseFloat(json.sensors.airdata.wind_dir_deg);
-            var dir = Math.round(parseFloat(wind_deg * 0.1).toFixed(0) * 10.0);
-            var speed = parseFloat(json.sensors.airdata.wind_speed_mps*mps2kt*speed_scale);
-            var target_airspeed_kt = parseFloat(json.autopilot.targets.airspeed_kt);
-            var ratio = 0.0;
-            if ( target_airspeed_kt > 0.1 ) {
-                ratio = speed / target_airspeed_kt;
-            }
-            if ( ratio < 0.5 ) {
-                wind_div.attr("class", "ok");
-            } else if ( ratio < 0.7 ) {
+        if ( wind_div != null && json.annunciators.wind != null ) {
+            if ( json.annunciators.wind.level == 3 ) {
+                wind_div.attr("class", "error");
+            } else if ( json.annunciators.wind.level == 2 ) {
                 wind_div.attr("class", "warn");
             } else {
-                wind_div.attr("class", "error");
+                wind_div.attr("class", "ok");
             }
-            wind_inner.html(pad3(dir) + '@' + speed.toFixed(0) + display_units);
+            wind_inner.html(json.annunciators.wind.msg)
         }
     }
 
     function draw_temp() {
         var temp_div = $("#temp");
         var temp_inner = $("#temp #inner");
-        if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
-            return;
-        }
-        if ( temp_div != null && json.sensors.airdata.air_temp_C != null ) {
-            var temp = parseFloat(json.sensors.airdata.air_temp_C).toFixed(0);
-            if ( temp < -30 || temp > 50 ) {
+        if ( temp_div != null && json.annunciators.temp != null ) {
+            if ( json.annunciators.temp.level == 3 ) {
                 temp_div.attr("class", "error");
-            } else if ( temp < -10 || temp > 35 ) {
+            } else if ( json.annunciators.temp.level == 2 ) {
                 temp_div.attr("class", "warn");
             } else {
                 temp_div.attr("class", "ok");
             }
-            temp_inner.html( temp + 'C');
+            temp_inner.html( json.annunciators.temp.msg );
         }
     }
 

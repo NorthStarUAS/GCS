@@ -1,12 +1,17 @@
 from math import floor, pi, sqrt
 from time import time
 
-from props import PropertyNode, airdata_node, alerts_node, gps_node, imu_node, nav_node, power_node, status_node
+from props import PropertyNode
+from props import airdata_node, alerts_node, gps_node, imu_node, nav_node, power_node, remote_link_node, specs_node, status_node, switches_node, targets_node
 
 ann_gps_node = PropertyNode("/annunciators/gps")
 ann_ekf_node = PropertyNode("/annunciators/ekf")
 ann_batt_node = PropertyNode("/annunciators/battery")
 ann_timer_node = PropertyNode("/annunciators/timer")
+ann_link_node = PropertyNode("/annunciators/link")
+ann_auto_node = PropertyNode("/annunciators/auto")
+ann_wind_node = PropertyNode("/annunciators/wind")
+ann_temp_node = PropertyNode("/annunciators/temp")
 
 r2d = 180 / pi
 kt2mps = 0.5144444444444444444
@@ -215,11 +220,6 @@ class Alerts():
             elif e.level == 1:
                 self.oks.append(e.gen_message())
 
-        # print/debug
-        # print("alerts:", self.alerts)
-        # print("warns:", self.warns)
-        # print("oks:", self.oks)
-
         for i, message in enumerate(self.oks):
             alerts_node.setString("oks", message, i)
         for i in range(len(self.oks), alerts_node.getLen("oks")):
@@ -259,5 +259,56 @@ class Alerts():
         else:
             msg += "%d:%02d:%02d" % (hours, mins, rem)
         ann_timer_node.setString("msg", msg)
+
+        link_state = remote_link_node.getString("link_state") == "ok"
+        if link_state:
+            ann_link_node.setUInt("level", 1)
+            ann_link_node.setString("msg", "Link")
+        else:
+            ann_link_node.setUInt("level", 3)
+            ann_link_node.setString("msg", "Lost Link")
+
+        auto = switches_node.getBool("master_switch")
+        if auto:
+            ann_auto_node.setUInt("level", 1)
+            ann_auto_node.setString("msg", "Auto")
+        else:
+            ann_auto_node.setUInt("level", 2)
+            ann_auto_node.setString("msg", "Manual")
+
+        display_units = "??"
+        speed_scale = 1.0
+        if specs_node.getString("display_units") == "mps":
+            speed_scale = kt2mps
+            display_units = "ms"
+        elif specs_node.getString("display_units") == "kts":
+            speed_scale = 1.0
+            display_units = "kt"
+        else:
+            # default to mps if not specified
+            speed_scale = kt2mps
+            display_units = "ms"
+        wind_dir = int(round(airdata_node.getDouble("wind_dir_deg") * 0.1) * 10)
+        wind_speed = airdata_node.getDouble("wind_speed_mps")*mps2kt*speed_scale
+        ann_wind_node.setString("msg", "%03d@%.0f" % (wind_dir, wind_speed) + display_units)
+        target_airspeed = targets_node.getDouble("airspeed_kt")*speed_scale
+        ratio = 0.0
+        if target_airspeed > 0.1:
+            ratio = wind_speed / target_airspeed
+        if ratio < 0.5:
+            ann_wind_node.setUInt("level", 1)
+        elif ratio < 0.7:
+            ann_wind_node.setUInt("level", 2)
+        else:
+            ann_wind_node.setUInt("level", 3)
+
+        temp = airdata_node.getDouble("air_temp_C")
+        if temp < -30 or temp > 50:
+            ann_temp_node.setUInt("level", 3)
+        elif temp < -10 or temp > 35:
+            ann_temp_node.setUInt("level", 2)
+        else:
+            ann_temp_node.setUInt("level", 1)
+        ann_temp_node.setString("msg", "%dC" % temp)
 
 alert_mgr = Alerts()
