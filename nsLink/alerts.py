@@ -63,11 +63,11 @@ class Alerts():
         self.msg_list = []
 
         # EKF messages
-        self.pos_msg = Entry(msg="Pos Acc: %.2f m", ok=2.0, warn=3.0, alert=4.0)
-        self.vel_msg = Entry(msg="Vel Acc: %.2f m/s", ok=0.1, warn=0.2, alert=0.3)
-        self.att_msg = Entry(msg="Att Acc: %.2f deg", ok=0.05, warn=0.2, alert=0.4)
-        self.acc_bias_msg = Entry(msg="Accel Bias: %.2f mps2", ok=0.1, warn=0.5, alert=1.0)
-        self.gyro_bias_msg = Entry(msg="Gyro Bias: %.2f dps", ok=0.1, warn=0.5, alert=1.0)
+        self.pos_msg = Entry(msg="Pos Acc: %.2f m", ok=2.0, warn=4.0, alert=6.0)
+        self.vel_msg = Entry(msg="Vel Acc: %.2f m/s", ok=0.1, warn=0.2, alert=0.4)
+        self.att_msg = Entry(msg="Att Acc: %.2f deg", ok=0.25, warn=0.5, alert=1.0)
+        self.acc_bias_msg = Entry(msg="Accel Bias: %.2f mps2", ok=0.25, warn=0.5, alert=1.0)
+        self.gyro_bias_msg = Entry(msg="Gyro Bias: %.2f dps", ok=0.25, warn=0.5, alert=1.0)
         self.imu_temp_msg = Entry(msg="IMU Temp: %.0fC", ok=30, warn=40, alert=50)
         self.msg_list += [self.pos_msg, self.vel_msg, self.att_msg, self.acc_bias_msg, self.gyro_bias_msg, self.imu_temp_msg]
 
@@ -82,12 +82,12 @@ class Alerts():
         # GPS
         self.gps_status_msg = Entry(msg="GPS status: %d", ok=3, warn=2, alert=1, inverse=True)
         self.gps_sats_msg = Entry(msg="GPS sats: %d", ok=10, warn=7, alert=5, inverse=True)
-        self.gps_hdop_msg = Entry(msg="GPS hdop: %.2f", ok=1.5, warn=3.0, alert=5.0)
+        self.gps_hdop_msg = Entry(msg="GPS hdop: %.2f", ok=2, warn=3.5, alert=5.0)
         self.msg_list += [self.gps_status_msg, self.gps_sats_msg, self.gps_hdop_msg]
 
         # Power
-        self.av_vcc_msg = Entry(msg="Avionics: %.2f v", ok=0.025, warn=0.1, alert=0.2)
-        self.cell_vcc_msg = Entry(msg="Batt Cell: %.2f v", ok=3.7, warn=3.6, alert=3.5, inverse=True)
+        self.av_vcc_msg = Entry(msg="Avionics: %.2f v", ok=0.05, warn=0.1, alert=0.2)
+        self.cell_vcc_msg = Entry(msg="Batt Cell: %.2f v", ok=3.7, warn=3.5, alert=3.3, inverse=True)
         self.thr_msg = Entry(msg="Throttle: %.0f%", ok=0.6, warn=0.75, alert=0.9)
         self.msg_list += [self.av_vcc_msg, self.cell_vcc_msg, self.thr_msg]
 
@@ -214,9 +214,9 @@ class Alerts():
                 self.oks.append(e.gen_message())
 
         # print/debug
-        print("alerts:", self.alerts)
-        print("warns:", self.warns)
-        print("oks:", self.oks)
+        # print("alerts:", self.alerts)
+        # print("warns:", self.warns)
+        # print("oks:", self.oks)
 
         for i, message in enumerate(self.oks):
             alerts_node.setString("oks", message, i)
@@ -230,7 +230,6 @@ class Alerts():
 
         for i, message in enumerate(self.alerts):
             alerts_node.setString("alerts", message, i)
-        print(len(self.alerts), alerts_node.getLen("alerts"))
         for i in range(len(self.alerts), alerts_node.getLen("alerts")):
             alerts_node.setString("alerts", "", i)
 
