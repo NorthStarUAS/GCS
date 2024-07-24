@@ -1093,7 +1093,7 @@ var panel = function() {
         var pa0 = parseFloat(json.filters.nav.Pa0);
         var pa1 = parseFloat(json.filters.nav.Pa1);
         var pa2 = parseFloat(json.filters.nav.Pa2);
-        var att_cov = Math.sqrt(pa0*pa0 + pa1*pa1 + pa2*pa2);
+        var att_cov = Math.sqrt(pa0*pa0 + pa1*pa1 + pa2*pa2) * r2d;
         if ( isNaN(att_cov) ) { att_cov = 0; }
         var val_text = (att_cov).toFixed(2) + " deg";
         att_bar.draw(x + ipad, y + y1, size - 2*ipad, h,

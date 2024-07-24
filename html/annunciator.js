@@ -21,7 +21,7 @@ var annunciator = function() {
     }
 
     function draw() {
-        draw_sats();
+        draw_gps();
         draw_ekf();
         draw_volts();
         draw_battery();
@@ -33,61 +33,34 @@ var annunciator = function() {
         draw_callsign();
     }
 
-    function draw_sats() {
+    function draw_gps() {
         //var sats_div = $("#sats");
         var sats_div = $("#sats");
         var sats_inner = $("#sats #inner");
-        if ( sats_div != null && typeof json.sensors.gps !== 'undefined' ) {
-            sats = parseInt(json.sensors.gps.num_sats);
-            if ( isNaN(sats) ) {
-                sats = 0;
-            }
-            if ( sats < 5 ) {
+        if ( sats_div != null && json.annunciators.gps != null ) {
+            if ( json.annunciators.gps.level == 3 ) {
                 sats_div.attr("class", "error");
-            } else if ( sats < 7 ) {
+            } else if ( json.annunciators.gps.level == 2 ) {
                 sats_div.attr("class", "warn");
             } else {
                 sats_div.attr("class", "ok");
             }
-            sats_inner.html(sats + " sats");
+            sats_inner.html(json.annunciators.gps.msg)
         }
     };
 
     function draw_ekf() {
         var ekf_div = $("#ekf");
         var ekf_inner = $("#ekf #inner");
-        if ( ekf_div != null && json.filters.nav.millis != null ) {
-            var gyro_warn = 0.5 * Math.PI / 180.0;
-            var gyro_error = 1.0 * Math.PI / 180.0;
-            var accel_warn = 0.5;
-            var accel_error = 1.0;
-            var p_bias = parseFloat(json.filters.nav.p_bias);
-            var q_bias = parseFloat(json.filters.nav.q_bias);
-            var r_bias = parseFloat(json.filters.nav.r_bias);
-            var ax_bias = parseFloat(json.filters.nav.ax_bias);
-            var ay_bias = parseFloat(json.filters.nav.ay_bias);
-            var az_bias = parseFloat(json.filters.nav.az_bias);
-            var imu_time = parseFloat(json.sensors.imu.millis);
-            var filter_time = parseFloat(json.filters.nav.millis);
-            if ( json.filters.nav.status == 0 ||
-                 Math.abs(p_bias) >= gyro_error ||
-                 Math.abs(q_bias) >= gyro_error ||
-                 Math.abs(r_bias) >= gyro_error ||
-                 Math.abs(ax_bias) >= accel_error ||
-                 Math.abs(ay_bias) >= accel_error ||
-                 Math.abs(az_bias) >= accel_error ) {
+        if ( ekf_div != null && json.annunciators.ekf != null ) {
+            if ( json.annunciators.ekf.level == 3 ) {
                 ekf_div.attr("class", "error");
-            } else if ( json.filters.nav.status == 1 ||
-                        Math.abs(p_bias) >= gyro_warn ||
-                        Math.abs(q_bias) >= gyro_warn ||
-                        Math.abs(r_bias) >= gyro_warn ||
-                        Math.abs(ax_bias) >= accel_warn ||
-                        Math.abs(ay_bias) >= accel_warn ||
-                        Math.abs(az_bias) >= accel_warn ) {
+            } else if ( json.annunciators.ekf.level == 2 ) {
                 ekf_div.attr("class", "warn");
             } else {
                 ekf_div.attr("class", "ok");
             }
+            ekf_inner.html(json.annunciators.ekf.msg)
         }
     };
 
@@ -110,55 +83,24 @@ var annunciator = function() {
     function draw_battery() {
         var batt_div = $("#battery");
         var batt_inner = $("#battery #inner");
-        if ( batt_div != null && json.sensors.power.total_mah != null ) {
-            var mah = parseFloat(json.sensors.power.total_mah).toFixed(0);
-            var battery_total = parseFloat(json.config.specs.battery_mah)
-            var volts_per_cell = parseFloat(json.sensors.power.cell_vcc).toFixed(2);
-            var remaining = battery_total - mah
-            // var battery_percent = ((remaining / battery_total) * 100).toFixed(0)
-            var battery_percent = (parseFloat(json.sensors.power.battery_perc) * 100).toFixed(0)
-            if ( isNaN(battery_percent) ) {
-                battery_percent = 100;
-            }
-            if ( battery_percent < 0 ) {
-                battery_percent = 0;
-            }
-            if ( volts_per_cell < 3.20 ) {
+        if ( batt_div != null && json.annunciators.battery != null ) {
+            if ( json.annunciators.battery.level == 3 ) {
                 batt_div.attr("class", "error");
-            } else if ( volts_per_cell < 3.30 ) {
+            } else if ( json.annunciators.battery.level == 2 ) {
                 batt_div.attr("class", "warn");
             } else {
                 batt_div.attr("class", "ok");
             }
-            batt_inner.html("Batt " + battery_percent + "% " + volts_per_cell + "v");
+            batt_inner.html(json.annunciators.battery.msg)
         }
     };
 
     function draw_timer() {
         var timer_div = $("#timer");
         var timer_inner = $("#timer #inner");
-        if ( timer_div != null ) {
-            var secs = 0.0;
-            if ( json.config.specs.vehicle_class == null || json.config.specs.vehicle_class == "surface" ) {
-                secs = parseFloat(json.status.throttle_timer).toFixed(0);
-            } else {
-                secs = parseFloat(json.sensors.airdata.flight_timer_millis)/1000.0;
-            }
-            if ( isNaN(secs) ) {
-                secs = 0;
-            }
+        if ( timer_div != null && json.annunciators.timer != null ) {
             timer_div.attr("class", "ok");
-            var hours = Math.floor(secs / 3600);
-            var rem = secs - (hours * 3600);
-            var mins = Math.floor(rem / 60);
-            var rem = rem.toFixed(0) - (mins * 60);
-            var timer_str = "Flt ";
-            if ( secs < 3600 ) {
-                timer_str += mins + ":" + pad2(rem);
-            } else {
-                timer_str += hours + ":" + pad2(mins) + ":" + pad2(rem);
-            }
-            timer_inner.html(timer_str);
+            timer_inner.html(json.annunciators.timer.msg)
         }
     };
 

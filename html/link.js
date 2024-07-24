@@ -12,7 +12,7 @@ function link_init() {
             console.debug('Connection successfully opened (readyState ' + this.readyState+')');
         };
         ws.onmessage = function(msg) {
-            //console.log(msg.data);
+            console.log(msg.data);
             tmp_json = JSON.parse( msg.data );
             if ( tmp_json.main_magic != null ) {
                 json = tmp_json;

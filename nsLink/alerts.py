@@ -1,7 +1,12 @@
-from math import pi, sqrt
+from math import floor, pi, sqrt
 from time import time
 
-from props import airdata_node, alerts_node, gps_node, imu_node, nav_node, power_node, status_node
+from props import PropertyNode, airdata_node, alerts_node, gps_node, imu_node, nav_node, power_node, status_node
+
+ann_gps_node = PropertyNode("/annunciators/gps")
+ann_ekf_node = PropertyNode("/annunciators/ekf")
+ann_batt_node = PropertyNode("/annunciators/battery")
+ann_timer_node = PropertyNode("/annunciators/timer")
 
 r2d = 180 / pi
 kt2mps = 0.5144444444444444444
@@ -40,11 +45,11 @@ class Entry():
             else:
                 self.level = 0
         else:
-            if val < self.alert:
+            if val <= self.alert:
                 self.level = 3
-            elif val < self.warn:
+            elif val <= self.warn:
                 self.level = 2
-            elif val < self.ok:
+            elif val <= self.ok:
                 self.level = 1
             else:
                 self.level = 0
@@ -103,6 +108,7 @@ class Alerts():
     def update(self):
         self.update_values()
         self.update_props()
+        self.update_annunciators()
 
     def update_values(self):
         ekf_status = nav_node.getUInt("status")
@@ -162,12 +168,8 @@ class Alerts():
         # GPS messages
         gps_status = gps_node.getUInt("status")
         self.gps_status_msg.update(gps_status)
-        if gps_status > 0:
-            self.gps_sats_msg.update(gps_node.getUInt("num_sats"))
-            self.gps_hdop_msg.update(gps_node.getDouble("hdop"))
-        else:
-            self.gps_sats_msg.update(gps_node.getUInt("num_sats"), force_level=0)
-            self.gps_hdop_msg.update(gps_node.getDouble("hdop"), force_level=0)
+        self.gps_sats_msg.update(gps_node.getUInt("num_sats"))
+        self.gps_hdop_msg.update(gps_node.getDouble("hdop"))
 
         # Power messages
         av_vcc = power_node.getDouble("avionics_vcc")
@@ -232,5 +234,30 @@ class Alerts():
             alerts_node.setString("alerts", message, i)
         for i in range(len(self.alerts), alerts_node.getLen("alerts")):
             alerts_node.setString("alerts", "", i)
+
+    def update_annunciators(self):
+        gps_level = max([self.gps_status_msg.level, self.gps_sats_msg.level, self.gps_hdop_msg.level])
+        ann_gps_node.setUInt("level", gps_level)
+        ann_gps_node.setString("msg", "%d Sats" % self.gps_sats_msg.val)
+
+        ekf_level = max([self.pos_msg.level, self.vel_msg.level, self.att_msg.level, self.acc_bias_msg.level, self.gyro_bias_msg.level, self.imu_temp_msg.level])
+        ann_ekf_node.setUInt("level", ekf_level)
+        ann_ekf_node.setString("msg", "EKF")
+
+        ann_batt_node.setUInt("level", self.cell_vcc_msg.level)
+        ann_batt_node.setString("msg", "Batt %.0f%% %.2fv" % (power_node.getDouble("battery_perc")*100, self.cell_vcc_msg.val))
+
+        ann_timer_node.setUInt("level", 1)
+        secs = airdata_node.getUInt("flight_timer_millis")/1000.0
+        hours = floor(secs / 3600)
+        rem = secs - (hours * 3600)
+        mins = floor(rem / 60)
+        rem = rem - (mins * 60)
+        msg = "Flt "
+        if secs < 3600:
+            msg += "%d:%02d" % (mins, rem)
+        else:
+            msg += "%d:%02d:%02d" % (hours, mins, rem)
+        ann_timer_node.setString("msg", msg)
 
 alert_mgr = Alerts()
