@@ -2,16 +2,16 @@ from math import floor, pi, sqrt
 from time import time
 
 from props import PropertyNode
-from props import airdata_node, alerts_node, gps_node, imu_node, nav_node, power_node, remote_link_node, specs_node, status_node, switches_node, targets_node
+from props import airdata_node, alerts_node, ann_node, gps_node, imu_node, nav_node, power_node, remote_link_node, specs_node, status_node, switches_node, targets_node
 
-ann_gps_node = PropertyNode("/annunciators/gps")
-ann_ekf_node = PropertyNode("/annunciators/ekf")
-ann_batt_node = PropertyNode("/annunciators/battery")
-ann_timer_node = PropertyNode("/annunciators/timer")
-ann_link_node = PropertyNode("/annunciators/link")
-ann_auto_node = PropertyNode("/annunciators/auto")
-ann_wind_node = PropertyNode("/annunciators/wind")
-ann_temp_node = PropertyNode("/annunciators/temp")
+# ann_gps_node = PropertyNode("/annunciators/gps")
+# ann_ekf_node = PropertyNode("/annunciators/ekf")
+# ann_batt_node = PropertyNode("/annunciators/battery")
+# ann_timer_node = PropertyNode("/annunciators/timer")
+# ann_link_node = PropertyNode("/annunciators/link")
+# ann_auto_node = PropertyNode("/annunciators/auto")
+# ann_wind_node = PropertyNode("/annunciators/wind")
+# ann_temp_node = PropertyNode("/annunciators/temp")
 
 r2d = 180 / pi
 kt2mps = 0.5144444444444444444
@@ -237,17 +237,13 @@ class Alerts():
 
     def update_annunciators(self):
         gps_level = max([self.gps_status_msg.level, self.gps_sats_msg.level, self.gps_hdop_msg.level])
-        ann_gps_node.setUInt("level", gps_level)
-        ann_gps_node.setString("msg", "%d Sats" % self.gps_sats_msg.val)
+        ann_node.setString("gps", "%d;%d Sats" % (gps_level, self.gps_sats_msg.val))
 
         ekf_level = max([self.pos_msg.level, self.vel_msg.level, self.att_msg.level, self.acc_bias_msg.level, self.gyro_bias_msg.level, self.imu_temp_msg.level])
-        ann_ekf_node.setUInt("level", ekf_level)
-        ann_ekf_node.setString("msg", "EKF")
+        ann_node.setString("ekf", "%d;EKF" % ekf_level)
 
-        ann_batt_node.setUInt("level", self.cell_vcc_msg.level)
-        ann_batt_node.setString("msg", "Batt %.0f%% %.2fv" % (power_node.getDouble("battery_perc")*100, self.cell_vcc_msg.val))
+        ann_node.setString("battery", "%d;Batt %.0f%% %.2fv" % (self.cell_vcc_msg.level, power_node.getDouble("battery_perc")*100, self.cell_vcc_msg.val))
 
-        ann_timer_node.setUInt("level", 1)
         secs = airdata_node.getUInt("flight_timer_millis")/1000.0
         hours = floor(secs / 3600)
         rem = secs - (hours * 3600)
@@ -258,23 +254,19 @@ class Alerts():
             msg += "%d:%02d" % (mins, rem)
         else:
             msg += "%d:%02d:%02d" % (hours, mins, rem)
-        ann_timer_node.setString("msg", msg)
+        ann_node.setString("timer", "1;%s" % msg)
 
         link_state = remote_link_node.getString("link_state") == "ok"
         if link_state:
-            ann_link_node.setUInt("level", 1)
-            ann_link_node.setString("msg", "Link")
+            ann_node.setString("link", "1;Link")
         else:
-            ann_link_node.setUInt("level", 3)
-            ann_link_node.setString("msg", "Lost Link")
+            ann_node.setString("link", "3;Lost Link")
 
         auto = switches_node.getBool("master_switch")
         if auto:
-            ann_auto_node.setUInt("level", 1)
-            ann_auto_node.setString("msg", "Auto")
+            ann_node.setString("auto", "1;Auto")
         else:
-            ann_auto_node.setUInt("level", 2)
-            ann_auto_node.setString("msg", "Manual")
+            ann_node.setString("auto", "2;Manual")
 
         display_units = "??"
         speed_scale = 1.0
@@ -290,25 +282,25 @@ class Alerts():
             display_units = "ms"
         wind_dir = int(round(airdata_node.getDouble("wind_dir_deg") * 0.1) * 10)
         wind_speed = airdata_node.getDouble("wind_speed_mps")*mps2kt*speed_scale
-        ann_wind_node.setString("msg", "%03d@%.0f" % (wind_dir, wind_speed) + display_units)
         target_airspeed = targets_node.getDouble("airspeed_kt")*speed_scale
         ratio = 0.0
         if target_airspeed > 0.1:
             ratio = wind_speed / target_airspeed
         if ratio < 0.5:
-            ann_wind_node.setUInt("level", 1)
+            wind_level = 1
         elif ratio < 0.7:
-            ann_wind_node.setUInt("level", 2)
+            wind_level = 2
         else:
-            ann_wind_node.setUInt("level", 3)
+            wind_level = 3
+        ann_node.setString("wind", "%d;%03d@%.0f" % (wind_level, wind_dir, wind_speed) + display_units)
 
         temp = airdata_node.getDouble("air_temp_C")
         if temp < -30 or temp > 50:
-            ann_temp_node.setUInt("level", 3)
+            temp_level = 3
         elif temp < -10 or temp > 35:
-            ann_temp_node.setUInt("level", 2)
+            temp_level = 2
         else:
-            ann_temp_node.setUInt("level", 1)
-        ann_temp_node.setString("msg", "%dC" % temp)
+            temp_level = 1
+        ann_node.setString("temp", "%d;%dC" % (temp_level, temp))
 
 alert_mgr = Alerts()

@@ -23,7 +23,7 @@ var annunciator = function() {
     function draw() {
         draw_gps();
         draw_ekf();
-        draw_volts();
+        // draw_volts();
         draw_battery();
         draw_timer();
         draw_link_state();
@@ -38,14 +38,16 @@ var annunciator = function() {
         var sats_div = $("#sats");
         var sats_inner = $("#sats #inner");
         if ( sats_div != null && json.annunciators.gps != null ) {
-            if ( json.annunciators.gps.level == 3 ) {
+            var level = parseInt(json.annunciators.gps.substring(0, 1));
+            var msg = json.annunciators.gps.substring(2);
+            if ( level == 3 ) {
                 sats_div.attr("class", "error");
-            } else if ( json.annunciators.gps.level == 2 ) {
+            } else if ( level == 2 ) {
                 sats_div.attr("class", "warn");
             } else {
                 sats_div.attr("class", "ok");
             }
-            sats_inner.html(json.annunciators.gps.msg)
+            sats_inner.html(msg)
         }
     };
 
@@ -53,30 +55,33 @@ var annunciator = function() {
         var ekf_div = $("#ekf");
         var ekf_inner = $("#ekf #inner");
         if ( ekf_div != null && json.annunciators.ekf != null ) {
-            if ( json.annunciators.ekf.level == 3 ) {
+            var level = parseInt(json.annunciators.ekf.substring(0, 1));
+            var msg = json.annunciators.ekf.substring(2);
+            if ( level == 3 ) {
                 ekf_div.attr("class", "error");
-            } else if ( json.annunciators.ekf.level == 2 ) {
+            } else if ( level == 2 ) {
                 ekf_div.attr("class", "warn");
             } else {
                 ekf_div.attr("class", "ok");
             }
-            ekf_inner.html(json.annunciators.ekf.msg)
+            ekf_inner.html(msg)
         }
     };
 
-    function draw_volts() {
+    function draw_volts_old() {
         var volts_div = $("#volts");
         var volts_inner = $("#volts #inner");
         if ( volts_div != null && json.sensors.power.main_vcc != null ) {
-            var volts_per_cell = parseFloat(json.sensors.power.cell_vcc).toFixed(2);
-            if ( volts_per_cell < 3.20 ) {
+            var level = parseInt(json.annunciators.power.substring(0, 1));
+            var msg = json.annunciators.power.substring(2);
+            if ( level == 3 ) {
                 volts_div.attr("class", "error");
-            } else if ( volts_per_cell < 3.30 ) {
+            } else if ( level == 2 ) {
                 volts_div.attr("class", "warn");
             } else {
                 volts_div.attr("class", "ok");
             }
-            volts_inner.html( volts_per_cell + "v" );
+            volts_inner.html(msg);
         }
     };
 
@@ -84,14 +89,16 @@ var annunciator = function() {
         var batt_div = $("#battery");
         var batt_inner = $("#battery #inner");
         if ( batt_div != null && json.annunciators.battery != null ) {
-            if ( json.annunciators.battery.level == 3 ) {
+            var level = parseInt(json.annunciators.battery.substring(0, 1));
+            var msg = json.annunciators.battery.substring(2);
+            if ( level == 3 ) {
                 batt_div.attr("class", "error");
-            } else if ( json.annunciators.battery.level == 2 ) {
+            } else if ( level == 2 ) {
                 batt_div.attr("class", "warn");
             } else {
                 batt_div.attr("class", "ok");
             }
-            batt_inner.html(json.annunciators.battery.msg)
+            batt_inner.html(msg)
         }
     };
 
@@ -99,8 +106,9 @@ var annunciator = function() {
         var timer_div = $("#timer");
         var timer_inner = $("#timer #inner");
         if ( timer_div != null && json.annunciators.timer != null ) {
+            var msg = json.annunciators.timer.substring(2);
             timer_div.attr("class", "ok");
-            timer_inner.html(json.annunciators.timer.msg)
+            timer_inner.html(msg)
         }
     };
 
@@ -108,12 +116,14 @@ var annunciator = function() {
         var link_div = $("#link");
         var link_inner = $("#link #inner");
         if ( link_div != null && json.annunciators.link != null ) {
-            if ( json.annunciators.link.level == 1 ) {
+            var level = parseInt(json.annunciators.link.substring(0, 1));
+            var msg = json.annunciators.link.substring(2);
+            if ( level == 1 ) {
                 link_div.attr("class", "ok");
             } else {
                 link_div.attr("class", "error");
             }
-            link_inner.html(json.annunciators.link.msg);
+            link_inner.html(msg);
         }
     }
 
@@ -121,12 +131,14 @@ var annunciator = function() {
         var auto_div = $("#auto");
         var auto_inner = $("#auto #inner");
         if ( auto_div != null && json.annunciators.auto != null ) {
-            if ( json.annunciators.auto.level == 1 ) {
+            var level = parseInt(json.annunciators.auto.substring(0, 1));
+            var msg = json.annunciators.auto.substring(2);
+            if ( level == 1 ) {
                 auto_div.attr("class", "ok");
             } else {
                 auto_div.attr("class", "warn");
             }
-            auto_inner.html(json.annunciators.auto.msg);
+            auto_inner.html(msg);
         }
     }
 
@@ -134,14 +146,16 @@ var annunciator = function() {
         var wind_div = $("#wind");
         var wind_inner = $("#wind #inner");
         if ( wind_div != null && json.annunciators.wind != null ) {
-            if ( json.annunciators.wind.level == 3 ) {
+            var level = parseInt(json.annunciators.wind.substring(0, 1));
+            var msg = json.annunciators.wind.substring(2);
+            if ( level == 3 ) {
                 wind_div.attr("class", "error");
-            } else if ( json.annunciators.wind.level == 2 ) {
+            } else if ( level == 2 ) {
                 wind_div.attr("class", "warn");
             } else {
                 wind_div.attr("class", "ok");
             }
-            wind_inner.html(json.annunciators.wind.msg)
+            wind_inner.html(msg)
         }
     }
 
@@ -149,14 +163,16 @@ var annunciator = function() {
         var temp_div = $("#temp");
         var temp_inner = $("#temp #inner");
         if ( temp_div != null && json.annunciators.temp != null ) {
-            if ( json.annunciators.temp.level == 3 ) {
+            var level = parseInt(json.annunciators.temp.substring(0, 1));
+            var msg = json.annunciators.temp.substring(2);
+            if ( level == 3 ) {
                 temp_div.attr("class", "error");
-            } else if ( json.annunciators.temp.level == 2 ) {
+            } else if ( level == 2 ) {
                 temp_div.attr("class", "warn");
             } else {
                 temp_div.attr("class", "ok");
             }
-            temp_inner.html( json.annunciators.temp.msg );
+            temp_inner.html(msg);
         }
     }
 
