@@ -1,6 +1,5 @@
 # tornado based websocket server
 
-import json
 import tornado             # dnf install python3-tornado; pip install tornado
 import tornado.httpserver
 import tornado.websocket
