@@ -8,11 +8,8 @@ tecs_config_node = PropertyNode('/config/autopilot/TECS')
 # Sensors
 airdata_node = PropertyNode("/sensors/airdata")
 imu_node = PropertyNode("/sensors/imu")
-inceptor_node = PropertyNode("/sensors/inceptors")
 gps_node = PropertyNode("/sensors/gps")
-pilot_node = PropertyNode("/sensors/pilot")
 power_node = PropertyNode("/sensors/power")
-switches_node = PropertyNode("/switches")
 
 # INS/GNSS
 nav_node = PropertyNode("/filters/nav")
@@ -24,6 +21,8 @@ remote_link_node = PropertyNode("/comms/remote_link")
 status_node = PropertyNode("/status")
 
 # Autopilot
+inceptors_node = PropertyNode("/fcs/inceptors")
+
 targets_node = PropertyNode("/autopilot/targets")
 tecs_node = PropertyNode("/autopilot/tecs")
 tecs_config_node = PropertyNode("/config/autopilot/TECS")

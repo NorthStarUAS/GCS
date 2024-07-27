@@ -4,7 +4,7 @@ from PropertyTree import PropertyNode
 
 import ns_messages
 from logger import Logger
-from props import airdata_node, imu_node, inceptor_node, gps_node, nav_node, pilot_node, power_node, remote_link_node, status_node, switches_node
+from props import airdata_node, imu_node, inceptors_node, gps_node, nav_node, power_node, remote_link_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
@@ -96,15 +96,9 @@ def parse_msg(id, buf):
         index = msg.index
     elif id == ns_messages.actuator_v3_id:
         index = packer.unpack_act_v3(buf)
-    elif id == ns_messages.pilot_v4_id:
-        msg = ns_messages.pilot_v4(buf)
-        msg.msg2props(pilot_node)
-        index = msg.index
-        switches_node.setBool("master_switch", msg.master_switch)
-        switches_node.setBool("throttle_safety", msg.throttle_safety)
     elif id == ns_messages.inceptors_v2_id:
         msg = ns_messages.inceptors_v2(buf)
-        msg.msg2props(inceptor_node)
+        msg.msg2props(inceptors_node)
         index = 0
     elif id == ns_messages.power_v1_id:
         msg = ns_messages.power_v1(buf)

@@ -2,7 +2,7 @@ from math import floor, pi, sqrt
 from time import time
 
 from props import PropertyNode
-from props import airdata_node, alerts_node, ann_node, gps_node, imu_node, nav_node, power_node, remote_link_node, specs_node, status_node, switches_node, targets_node
+from props import airdata_node, alerts_node, ann_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, targets_node
 
 # ann_gps_node = PropertyNode("/annunciators/gps")
 # ann_ekf_node = PropertyNode("/annunciators/ekf")
@@ -262,7 +262,7 @@ class Alerts():
         else:
             ann_node.setString("link", "3;Lost Link")
 
-        auto = switches_node.getBool("master_switch")
+        auto = inceptors_node.getBool("master_switch")
         if auto:
             ann_node.setString("auto", "1;Auto")
         else:

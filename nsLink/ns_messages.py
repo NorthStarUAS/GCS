@@ -1283,7 +1283,7 @@ class pilot_v4():
 # Id: 63
 class inceptors_v2():
     id = 63
-    _pack_string = "<LhhhHHBhh"
+    _pack_string = "<LhhhHHBhhBB"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
@@ -1297,6 +1297,8 @@ class inceptors_v2():
         self.gear = 0
         self.aux1 = 0.0
         self.aux2 = 0.0
+        self.master_switch = 0
+        self.throttle_safety = 0
         # unpack if requested
         if msg: self.unpack(msg)
 
@@ -1310,7 +1312,9 @@ class inceptors_v2():
                   int(round(self.flaps * 60000.0)),
                   self.gear,
                   int(round(self.aux1 * 30000.0)),
-                  int(round(self.aux2 * 30000.0)))
+                  int(round(self.aux2 * 30000.0)),
+                  self.master_switch,
+                  self.throttle_safety)
         return msg
 
     def unpack(self, msg):
@@ -1322,7 +1326,9 @@ class inceptors_v2():
          self.flaps,
          self.gear,
          self.aux1,
-         self.aux2) = self._struct.unpack(msg)
+         self.aux2,
+         self.master_switch,
+         self.throttle_safety) = self._struct.unpack(msg)
         self.roll /= 30000.0
         self.pitch /= 30000.0
         self.yaw /= 30000.0
@@ -1341,6 +1347,8 @@ class inceptors_v2():
         node.setUInt("gear", self.gear)
         node.setDouble("aux1", self.aux1)
         node.setDouble("aux2", self.aux2)
+        node.setUInt("master_switch", self.master_switch)
+        node.setUInt("throttle_safety", self.throttle_safety)
 
     def props2msg(self, node):
         self.millis = node.getUInt("millis")
@@ -1352,6 +1360,8 @@ class inceptors_v2():
         self.gear = node.getUInt("gear")
         self.aux1 = node.getDouble("aux1")
         self.aux2 = node.getDouble("aux2")
+        self.master_switch = node.getUInt("master_switch")
+        self.throttle_safety = node.getUInt("throttle_safety")
 
 # Message: power_v1
 # Id: 55
