@@ -1382,18 +1382,18 @@ var panel = function() {
         context.font = px + "px Courier New, monospace";
         context.textAlign = "left";
 
-        if ( json.alerts.alerts != null ) {
-            alerts = json.alerts.alerts;
+        if ( json.status.alerts != null ) {
+            alerts = json.status.alerts;
         } else{
             alerts = [""];
         }
-        if ( json.alerts.warns != null ) {
-            warns = json.alerts.warns;
+        if ( json.status.warns != null ) {
+            warns = json.status.warns;
         } else{
             warns = [""];
         }
-        if ( json.alerts.oks != null ) {
-            oks = json.alerts.oks;
+        if ( json.status.oks != null ) {
+            oks = json.status.oks;
         } else{
             oks = [""];
         }
@@ -1566,13 +1566,13 @@ var panel = function() {
         context.restore();
 
         // groundspeed label
-        var track_mps = parseFloat(json.filters.nav.groundspeed_ms);
-        var track_speed = (track_mps * mps2kt * speed_scale).toFixed(0);
+        // var track_mps = parseFloat(json.filters.nav.groundspeed_ms);
+        // var track_speed = (track_mps * mps2kt * speed_scale).toFixed(0);
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
         context.fillStyle = "orange";
         context.textAlign = "center";
-        context.fillText("GS:" + track_speed, cx - size*0.14, cy - size*0.06);
+        context.fillText("CRS", cx - size*0.14, cy - size*0.06);
 
         // bug
         context.save();

@@ -2,7 +2,7 @@ from math import floor, pi, sqrt
 from time import time
 
 from props import PropertyNode
-from props import airdata_node, alerts_node, ann_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, targets_node
+from props import airdata_node, ann_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, targets_node
 
 # ann_gps_node = PropertyNode("/annunciators/gps")
 # ann_ekf_node = PropertyNode("/annunciators/ekf")
@@ -221,19 +221,19 @@ class Alerts():
                 self.oks.append(e.gen_message())
 
         for i, message in enumerate(self.oks):
-            alerts_node.setString("oks", message, i)
-        for i in range(len(self.oks), alerts_node.getLen("oks")):
-            alerts_node.setString("oks", "", i)
+            status_node.setString("oks", message, i)
+        for i in range(len(self.oks), status_node.getLen("oks")):
+            status_node.setString("oks", "", i)
 
         for i, message in enumerate(self.warns):
-            alerts_node.setString("warns", message, i)
-        for i in range(len(self.warns), alerts_node.getLen("warns")):
-            alerts_node.setString("warns", "", i)
+            status_node.setString("warns", message, i)
+        for i in range(len(self.warns), status_node.getLen("warns")):
+            status_node.setString("warns", "", i)
 
         for i, message in enumerate(self.alerts):
-            alerts_node.setString("alerts", message, i)
-        for i in range(len(self.alerts), alerts_node.getLen("alerts")):
-            alerts_node.setString("alerts", "", i)
+            status_node.setString("alerts", message, i)
+        for i in range(len(self.alerts), status_node.getLen("alerts")):
+            status_node.setString("alerts", "", i)
 
     def update_annunciators(self):
         gps_level = max([self.gps_status_msg.level, self.gps_sats_msg.level, self.gps_hdop_msg.level])

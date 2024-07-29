@@ -37,9 +37,9 @@ var annunciator = function() {
         //var sats_div = $("#sats");
         var sats_div = $("#sats");
         var sats_inner = $("#sats #inner");
-        if ( sats_div != null && json.annunciators.gps != null ) {
-            var level = parseInt(json.annunciators.gps.substring(0, 1));
-            var msg = json.annunciators.gps.substring(2);
+        if ( sats_div != null && json.status.annunciators.gps != null ) {
+            var level = parseInt(json.status.annunciators.gps.substring(0, 1));
+            var msg = json.status.annunciators.gps.substring(2);
             if ( level == 3 ) {
                 sats_div.attr("class", "error");
             } else if ( level == 2 ) {
@@ -54,9 +54,9 @@ var annunciator = function() {
     function draw_ekf() {
         var ekf_div = $("#ekf");
         var ekf_inner = $("#ekf #inner");
-        if ( ekf_div != null && json.annunciators.ekf != null ) {
-            var level = parseInt(json.annunciators.ekf.substring(0, 1));
-            var msg = json.annunciators.ekf.substring(2);
+        if ( ekf_div != null && json.status.annunciators.ekf != null ) {
+            var level = parseInt(json.status.annunciators.ekf.substring(0, 1));
+            var msg = json.status.annunciators.ekf.substring(2);
             if ( level == 3 ) {
                 ekf_div.attr("class", "error");
             } else if ( level == 2 ) {
@@ -72,8 +72,8 @@ var annunciator = function() {
         var volts_div = $("#volts");
         var volts_inner = $("#volts #inner");
         if ( volts_div != null && json.sensors.power.main_vcc != null ) {
-            var level = parseInt(json.annunciators.power.substring(0, 1));
-            var msg = json.annunciators.power.substring(2);
+            var level = parseInt(json.status.annunciators.power.substring(0, 1));
+            var msg = json.status.annunciators.power.substring(2);
             if ( level == 3 ) {
                 volts_div.attr("class", "error");
             } else if ( level == 2 ) {
@@ -88,9 +88,9 @@ var annunciator = function() {
     function draw_battery() {
         var batt_div = $("#battery");
         var batt_inner = $("#battery #inner");
-        if ( batt_div != null && json.annunciators.battery != null ) {
-            var level = parseInt(json.annunciators.battery.substring(0, 1));
-            var msg = json.annunciators.battery.substring(2);
+        if ( batt_div != null && json.status.annunciators.battery != null ) {
+            var level = parseInt(json.status.annunciators.battery.substring(0, 1));
+            var msg = json.status.annunciators.battery.substring(2);
             if ( level == 3 ) {
                 batt_div.attr("class", "error");
             } else if ( level == 2 ) {
@@ -105,8 +105,8 @@ var annunciator = function() {
     function draw_timer() {
         var timer_div = $("#timer");
         var timer_inner = $("#timer #inner");
-        if ( timer_div != null && json.annunciators.timer != null ) {
-            var msg = json.annunciators.timer.substring(2);
+        if ( timer_div != null && json.status.annunciators.timer != null ) {
+            var msg = json.status.annunciators.timer.substring(2);
             timer_div.attr("class", "ok");
             timer_inner.html(msg)
         }
@@ -115,9 +115,9 @@ var annunciator = function() {
     function draw_link_state() {
         var link_div = $("#link");
         var link_inner = $("#link #inner");
-        if ( link_div != null && json.annunciators.link != null ) {
-            var level = parseInt(json.annunciators.link.substring(0, 1));
-            var msg = json.annunciators.link.substring(2);
+        if ( link_div != null && json.status.annunciators.link != null ) {
+            var level = parseInt(json.status.annunciators.link.substring(0, 1));
+            var msg = json.status.annunciators.link.substring(2);
             if ( level == 1 ) {
                 link_div.attr("class", "ok");
             } else {
@@ -130,9 +130,9 @@ var annunciator = function() {
     function draw_auto() {
         var auto_div = $("#auto");
         var auto_inner = $("#auto #inner");
-        if ( auto_div != null && json.annunciators.auto != null ) {
-            var level = parseInt(json.annunciators.auto.substring(0, 1));
-            var msg = json.annunciators.auto.substring(2);
+        if ( auto_div != null && json.status.annunciators.auto != null ) {
+            var level = parseInt(json.status.annunciators.auto.substring(0, 1));
+            var msg = json.status.annunciators.auto.substring(2);
             if ( level == 1 ) {
                 auto_div.attr("class", "ok");
             } else {
@@ -145,9 +145,9 @@ var annunciator = function() {
     function draw_wind() {
         var wind_div = $("#wind");
         var wind_inner = $("#wind #inner");
-        if ( wind_div != null && json.annunciators.wind != null ) {
-            var level = parseInt(json.annunciators.wind.substring(0, 1));
-            var msg = json.annunciators.wind.substring(2);
+        if ( wind_div != null && json.status.annunciators.wind != null ) {
+            var level = parseInt(json.status.annunciators.wind.substring(0, 1));
+            var msg = json.status.annunciators.wind.substring(2);
             if ( level == 3 ) {
                 wind_div.attr("class", "error");
             } else if ( level == 2 ) {
@@ -162,9 +162,9 @@ var annunciator = function() {
     function draw_temp() {
         var temp_div = $("#temp");
         var temp_inner = $("#temp #inner");
-        if ( temp_div != null && json.annunciators.temp != null ) {
-            var level = parseInt(json.annunciators.temp.substring(0, 1));
-            var msg = json.annunciators.temp.substring(2);
+        if ( temp_div != null && json.status.annunciators.temp != null ) {
+            var level = parseInt(json.status.annunciators.temp.substring(0, 1));
+            var msg = json.status.annunciators.temp.substring(2);
             if ( level == 3 ) {
                 temp_div.attr("class", "error");
             } else if ( level == 2 ) {
