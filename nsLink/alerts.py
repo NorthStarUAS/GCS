@@ -90,10 +90,10 @@ class Alerts():
         self.msg_list += [self.air_err_msg]
 
         # GPS
-        self.gps_status_msg = Entry(msg="GPS status: %d", ok=3, warn=2, alert=1, inverse=True)
+        self.last_gps_status = -1
         self.gps_sats_msg = Entry(msg="GPS sats: %d", ok=10, warn=7, alert=5, inverse=True)
         self.gps_hdop_msg = Entry(msg="GPS hdop: %.2f", ok=2, warn=3.5, alert=5.0)
-        self.msg_list += [self.gps_status_msg, self.gps_sats_msg, self.gps_hdop_msg]
+        self.msg_list += [self.gps_sats_msg, self.gps_hdop_msg]
 
         # Power
         self.av_vcc_msg = Entry(msg="Avionics: %.2f v", ok=0.05, warn=0.1, alert=0.2)
@@ -172,7 +172,15 @@ class Alerts():
 
         # GPS messages
         gps_status = gps_node.getUInt("status")
-        self.gps_status_msg.update(gps_status)
+        if gps_status != self.last_gps_status:
+            if gps_status == 3:
+                lev = 1
+            elif gps_status == 2:
+                lev = 2
+            else:
+                lev = 3
+            self.add_message("GPS status: %d" % gps_status, level=lev, timeout_sec=10)
+        self.last_gps_status = gps_status
         self.gps_sats_msg.update(gps_node.getUInt("num_sats"))
         self.gps_hdop_msg.update(gps_node.getDouble("hdop"))
 
@@ -236,7 +244,7 @@ class Alerts():
             status_node.setString("alerts", "", i)
 
     def update_annunciators(self):
-        gps_level = max([self.gps_status_msg.level, self.gps_sats_msg.level, self.gps_hdop_msg.level])
+        gps_level = max([3-self.last_gps_status, self.gps_sats_msg.level, self.gps_hdop_msg.level])
         ann_node.setString("gps", "%d;%d Sats" % (gps_level, self.gps_sats_msg.val))
 
         ekf_level = max([self.pos_msg.level, self.vel_msg.level, self.att_msg.level, self.acc_bias_msg.level, self.gyro_bias_msg.level, self.imu_temp_msg.level])
