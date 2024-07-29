@@ -3,6 +3,7 @@ import serial, serial.tools.list_ports
 from PropertyTree import PropertyNode
 
 import ns_messages
+from alerts import alert_mgr
 from logger import Logger
 from props import airdata_node, imu_node, inceptors_node, gps_node, nav_node, power_node, remote_link_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
@@ -116,8 +117,10 @@ def parse_msg(id, buf):
         msg = ns_messages.status_v7(buf)
         msg.msg2props(status_node)
         index = msg.index
-    elif id == ns_messages.event_v2_id:
-        index = packer.unpack_event_v2(buf)
+    elif id == ns_messages.event_v3_id:
+        msg = ns_messages.event_v3(buf)
+        alert_mgr.add_message(msg.message, 2, 5)
+        index = 0
     elif id == ns_messages.command_v1_id:
         command = ns_messages.command_v1(buf)
         pos1 = command.message.find(" ")

@@ -22,6 +22,7 @@ mission_v1_id = 60
 system_health_v6_id = 46
 status_v7_id = 56
 event_v2_id = 44
+event_v3_id = 64
 command_v1_id = 28
 ack_v1_id = 57
 
@@ -1871,6 +1872,44 @@ class event_v2():
     def props2msg(self, node):
         self.timestamp_sec = node.getDouble("timestamp_sec")
         self.sequence_num = node.getUInt("sequence_num")
+        self.message = node.getString("message")
+
+# Message: event_v3
+# Id: 64
+class event_v3():
+    id = 64
+    _pack_string = "<LH"
+    _struct = struct.Struct(_pack_string)
+
+    def __init__(self, msg=None):
+        # public fields
+        self.millis = 0
+        self.message = ""
+        # unpack if requested
+        if msg: self.unpack(msg)
+
+    def pack(self):
+        msg = self._struct.pack(
+                  self.millis,
+                  len(self.message))
+        msg += str.encode(self.message)
+        return msg
+
+    def unpack(self, msg):
+        base_len = struct.calcsize(self._pack_string)
+        extra = msg[base_len:]
+        msg = msg[:base_len]
+        (self.millis,
+         self.message_len) = self._struct.unpack(msg)
+        self.message = extra[:self.message_len].decode()
+        extra = extra[self.message_len:]
+
+    def msg2props(self, node):
+        node.setUInt("millis", self.millis)
+        node.setString("message", self.message)
+
+    def props2msg(self, node):
+        self.millis = node.getUInt("millis")
         self.message = node.getString("message")
 
 # Message: command_v1
