@@ -44,9 +44,9 @@ class DerivedStates:
         ve = nav_node.getDouble("ve_mps")
         vd = nav_node.getDouble("vd_mps")
         hdg = (math.pi * 0.5 - math.atan2(vn, ve)) * r2d
-        vel_ms = math.sqrt( vn*vn + ve*ve + vd*vd )
+        vel_ms = math.sqrt( vn*vn + ve*ve )
         nav_node.setDouble("groundtrack_deg", hdg)
-        nav_node.setDouble("groundspeed_ms", vel_ms)
+        nav_node.setDouble("groundspeed_mps", vel_ms)
         nav_node.setDouble("groundspeed_kt", vel_ms * mps2kt)
 
         # compute frame dt
