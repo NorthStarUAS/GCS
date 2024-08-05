@@ -1485,8 +1485,8 @@ var panel = function() {
         var scale = size/512;
 
         var heading = json.filters.nav.yaw_deg;
-        var groundspeed_ms = parseFloat(json.filters.nav.groundspeed_ms);
-        if ( groundspeed_ms > 0.25 ) {
+        var groundspeed_mps = parseFloat(json.filters.nav.groundspeed_mps);
+        if ( groundspeed_mps > 0.25 ) {
             groundtrack_deg = json.filters.nav.groundtrack_deg;
         }
         var ap_hdg = json.autopilot.targets.groundtrack_deg
@@ -1566,7 +1566,7 @@ var panel = function() {
         context.restore();
 
         // groundspeed label
-        // var track_mps = parseFloat(json.filters.nav.groundspeed_ms);
+        // var track_mps = parseFloat(json.filters.nav.groundspeed_mps);
         // var track_speed = (track_mps * mps2kt * speed_scale).toFixed(0);
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
