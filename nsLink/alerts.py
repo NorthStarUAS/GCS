@@ -2,7 +2,7 @@ from math import floor, pi, sqrt
 from time import time
 
 from props import PropertyNode
-from props import airdata_node, ann_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, targets_node
+from props import airdata_node, ann_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
 
 # ann_gps_node = PropertyNode("/annunciators/gps")
 # ann_ekf_node = PropertyNode("/annunciators/ekf")
@@ -201,7 +201,7 @@ class Alerts():
         if airdata_node.getBool("is_airborne"):
             if False: #fixme
                 wind_kt = airdata_node.getDouble("wind_speed_mps") * mps2kt
-                target_airspeed_kt = targets_node.getDouble("airspeed_kt")
+                target_airspeed_kt = refs_node.getDouble("airspeed_kt")
                 ratio = 0.0
                 if target_airspeed_kt > 0.1:
                     ratio = wind_kt / target_airspeed_kt
@@ -290,7 +290,7 @@ class Alerts():
             display_units = "ms"
         wind_dir = int(round(airdata_node.getDouble("wind_dir_deg") * 0.1) * 10)
         wind_speed = airdata_node.getDouble("wind_speed_mps")*mps2kt*speed_scale
-        target_airspeed = targets_node.getDouble("airspeed_kt")*speed_scale
+        target_airspeed = refs_node.getDouble("airspeed_kt")*speed_scale
         ratio = 0.0
         if target_airspeed > 0.1:
             ratio = wind_speed / target_airspeed

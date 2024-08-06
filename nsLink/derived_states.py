@@ -1,6 +1,6 @@
 import math
 
-from props import airdata_node, inceptors_node, nav_node, power_node, status_node, targets_node, tecs_config_node, tecs_node
+from props import airdata_node, inceptors_node, nav_node, power_node, status_node, refs_node, tecs_config_node, tecs_node
 
 
 r2d = 180.0 / math.pi
@@ -74,7 +74,7 @@ class DerivedStates:
         status_node.setDouble("odometer_m", self.odometer)
 
         # autopilot error metrics
-        roll_error = targets_node.getDouble('roll_deg') - nav_node.getDouble('roll_deg')
+        roll_error = refs_node.getDouble('roll_deg') - nav_node.getDouble('roll_deg')
         #print 'error %.4f,%.1f' % (nav_node.getDouble('timestamp'), roll_error)
 
         volts = power_node.getDouble("main_vcc")
@@ -109,8 +109,8 @@ class DerivedStates:
         wb = 0.0
         alt_m = nav_node.getDouble("altitude_m")
         vel_mps = airdata_node.getDouble("airspeed_filt_mps") * kt2mps
-        target_alt_m = targets_node.getDouble("altitude_msl_ft") * ft2m
-        target_vel_mps = targets_node.getDouble("airspeed_kt") * kt2mps
+        target_alt_m = refs_node.getDouble("altitude_msl_ft") * ft2m
+        target_vel_mps = refs_node.getDouble("airspeed_kt") * kt2mps
 
         energy_pot = mass_kg * g * alt_m
         energy_kin = 0.5 * mass_kg * vel_mps * vel_mps
