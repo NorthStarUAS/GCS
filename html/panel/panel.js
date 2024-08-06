@@ -271,7 +271,7 @@ var panel = function() {
         var nw = Math.floor(img_hdg2.width*scale)
         var nh = Math.floor(img_hdg2.height*scale)
         context.translate(cx, cy);
-        var deg = my_interp( json.autopilot.targets.airspeed_kt*speed_scale,
+        var deg = my_interp( json.fcs.refs.airspeed_kt*speed_scale,
                              asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.95, width=nw, height=nh);
@@ -449,7 +449,7 @@ var panel = function() {
         var nw = Math.floor(img_hdg2.width*scale)
         var nh = Math.floor(img_hdg2.height*scale)
         context.translate(cx, cy);
-        var deg = my_interp( json.autopilot.targets.airspeed_kt*speed_scale,
+        var deg = my_interp( json.fcs.refs.airspeed_kt*speed_scale,
                              asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
         context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.95, width=nw, height=nh);
@@ -554,7 +554,7 @@ var panel = function() {
         //var alt_ft = json.position.altitude_true_m / 0.3048;
         var alt_ft = json.filters.nav.altitude_m / 0.3048;
         var ground_ft = json.sensors.airdata.altitude_ground_m / 0.3048;
-        var target_ft = ground_ft + json.autopilot.targets.altitude_agl_ft;
+        var target_ft = ground_ft + json.fcs.refs.altitude_agl_ft;
 
         // kollsman
         context.save();
@@ -1311,7 +1311,7 @@ var panel = function() {
 
         if ( json.status.in_flight == "True" ) {
             var wind_kt = parseFloat(json.sensors.airdata.wind_speed_mps)*mps2kt;
-            var target_airspeed_kt = parseFloat(json.autopilot.targets.airspeed_kt);
+            var target_airspeed_kt = parseFloat(json.fcs.refs.airspeed_kt);
             text = "Wind: " + wind_kt.toFixed(0) + " kt";
             var ratio = 0.0;
             if ( target_airspeed_kt > 0.1 ) {
@@ -1489,7 +1489,7 @@ var panel = function() {
         if ( groundspeed_mps > 0.25 ) {
             groundtrack_deg = json.filters.nav.groundtrack_deg;
         }
-        var ap_hdg = json.autopilot.targets.groundtrack_deg
+        var ap_hdg = json.fcs.refs.groundtrack_deg
         var wind_deg = json.sensors.airdata.wind_dir_deg;
 
         var display_units = json.config.specs.display_units;
