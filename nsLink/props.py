@@ -22,6 +22,7 @@ ann_node = PropertyNode("/status/annunciators")
 remote_link_node = PropertyNode("/comms/remote_link")
 
 # FCS
-targets_node = PropertyNode("/autopilot/targets")
-tecs_node = PropertyNode("/autopilot/tecs")
+refs_node = PropertyNode("/fcs/refs")
+tecs_node = PropertyNode("/fcs/tecs")
 tecs_config_node = PropertyNode("/config/autopilot/TECS")
+effectors_node = PropertyNode("/fcs/effectors")

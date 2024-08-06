@@ -5,7 +5,7 @@ from PropertyTree import PropertyNode
 import ns_messages
 from alerts import alert_mgr
 from logger import Logger
-from props import airdata_node, imu_node, inceptors_node, gps_node, nav_node, power_node, remote_link_node, status_node
+from props import airdata_node, effectors_node, imu_node, inceptors_node, gps_node, nav_node, power_node, remote_link_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
@@ -82,7 +82,9 @@ def parse_msg(id, buf):
         msg.msg2props(airdata_node)
         index = msg.index
     elif id == ns_messages.effectors_v1_id:
-        index = packer.unpack_effectors_v1(buf)
+        msg = ns_messages.effectors_v1(buf)
+        msg.msg2props(effectors_node)
+        index = msg.index
     elif id == ns_messages.filter_v5_id:
         msg = ns_messages.nav_v5(buf)
         msg.msg2props(nav_node)
@@ -108,7 +110,9 @@ def parse_msg(id, buf):
     elif id == ns_messages.ap_status_v7_id:
         index = packer.unpack_ap_status_v7(buf)
     elif id == ns_messages.ap_targets_v1_id:
-        index = packer.unpack_ap_targets_v1(buf)
+        print("fixme: need to parse an ap_targets_v1 message.")
+        index = 0
+        # index = packer.unpack_ap_targets_v1(buf)
     elif id == ns_messages.mission_v1_id:
         index = packer.unpack_mission_v1(buf)
     elif id == ns_messages.system_health_v6_id:
