@@ -10,7 +10,7 @@ from PropertyTree import PropertyNode
 
 from alerts import alert_mgr
 from commands import commands
-from props import airdata_node, imu_node, nav_node, refs_node
+from props import airdata_node, effectors_node, imu_node, nav_node, refs_node
 
 mps2kt = 1.9438444924406046432
 m2ft = 1.0 / 0.3048
@@ -23,7 +23,6 @@ class ChatHandler(asynchat.async_chat):
         self.path = '/'
         self.prompt = True
 
-        self.act_node = PropertyNode("/actuators/actuator")
         self.pos_comb_node = PropertyNode("/position/combined")
 
     def collect_incoming_data(self, data):
@@ -41,7 +40,7 @@ class ChatHandler(asynchat.async_chat):
                    refs_node.getDouble('roll_deg'),
                    nav_node.getDouble('heading_deg'),
                    nav_node.getDouble('roll_deg'),
-                   self.act_node.getDouble('channel', 0) ]
+                   effectors_node.getDouble('channel', 0) ]
         return ','.join(map(str, result))
 
     def gen_fcs_speed_string(self):
@@ -49,13 +48,13 @@ class ChatHandler(asynchat.async_chat):
                    refs_node.getDouble('pitch_deg'),
                    airdata_node.getDouble('airspeed_filt_mps') * mps2kt,
                    nav_node.getDouble('pitch_deg'),
-                   self.act_node.getDouble('channel', 1) ]
+                   effectors_node.getDouble('channel', 1) ]
         return ','.join(map(str, result))
 
     def gen_fcs_altitude_string(self):
         result = [ refs_node.getDouble('altitude_msl_ft'),
                    self.pos_comb_node.getDouble('altitude_true_m') * m2ft,
-                   self.act_node.getDouble('channel', 2) ]
+                   effectors_node.getDouble('channel', 2) ]
         return ','.join(map(str, result))
 
     def my_push(self, msg):
