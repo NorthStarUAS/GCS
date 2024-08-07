@@ -92,6 +92,8 @@ def parse_msg(id, buf):
     elif id == ns_messages.nav_v6_id:
         msg = ns_messages.nav_v6(buf)
         msg.msg2props(nav_node)
+        nav_node.setDouble("latitude_deg", nav_node.getInt("latitude_raw") / 10000000.0)
+        nav_node.setDouble("longitude_deg", nav_node.getInt("longitude_raw") / 10000000.0)
         index = msg.index
     elif id == ns_messages.nav_metrics_v6_id:
         msg = ns_messages.nav_metrics_v6(buf)
