@@ -29,6 +29,7 @@ var ft2m = 0.3048;
 var m2ft = 1.0 / ft2m;
 var msq2acre = 0.000247105;
 var msq2hect = 0.0001;
+var mps2kt = 1.9438444924406046432;
 
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
@@ -300,7 +301,7 @@ map_update = function() {
         var vel = 0.0;
         var vel_disp = 0.0;
         if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
-            vel = json.velocity.airspeed_smoothed_kt;
+            vel = json.sensors.airdata.airspeed_filt_mps*mps2kt;
         } else {
             vel = json.filters.nav.groundspeed_kt;
         }
