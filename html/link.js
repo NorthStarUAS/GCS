@@ -7,7 +7,7 @@ function link_init() {
     try {
         link_url = "ws://" + window.location.host + "/ws";
         console.log("Connecting to link_url : " + link_url);
-	ws = new WebSocket(link_url);
+	    ws = new WebSocket(link_url);
         ws.onopen = function(msg) {
             console.debug('Connection successfully opened (readyState ' + this.readyState+')');
         };
@@ -48,7 +48,7 @@ function link_init() {
         };
         ws.onerror = function(event) {
             //terminal.innerHTML = '<li style="color: red;">'+event.data+'</li>'+terminal.innerHTML;
-	    //alert( event );
+	        //alert( event );
         };
     }
     catch(exception) {
@@ -58,13 +58,13 @@ function link_init() {
 
 function link_update() {
     try {
-	if ( ws.readyState == 1 ) {
-	    ws.send("get full_json\r\n");
-	} else if ( ws.readyState == 3 ) {
-	    // link closed or lost or couldn't originally be opened
-	    // alert( 'ready state = ' + ws.readyState );
-	    link_init(link_url);
-	}
+        if ( ws.readyState == 1 ) {
+            ws.send("get full_json\r\n");
+        } else if ( ws.readyState == 3 ) {
+            // link closed or lost or couldn't originally be opened
+            // alert( 'ready state = ' + ws.readyState );
+            link_init(link_url);
+        }
     }
     catch(exception) {
 	alert(exception);
