@@ -975,12 +975,12 @@ var panel = function() {
         var rud = 0;
         var thr = 0;
         var flaps = 0;
-        if ( typeof json.effectors !== 'undefined' ) {
-            var ail = json.effectors.aileron;
-            var ele = json.effectors.elevator;
-            var rud = json.effectors.rudder;
-            var thr = parseFloat(json.effectors.throttle)*100;
-            var flaps = json.effectors.flaps;
+        if ( typeof json.fcs.effectors !== 'undefined' ) {
+            var ail = json.fcs.effectors.channel[1];
+            var ele = json.fcs.effectors.channel[2];
+            var rud = json.fcs.effectors.channel[3];
+            var thr = parseFloat(json.fcs.effectors.channel[4])*100;
+            // var flaps = json.effectors.flaps;
         }
 
         y1 = Math.round(size*0.17);
