@@ -979,7 +979,7 @@ var panel = function() {
             var ail = json.fcs.effectors.channel[1];
             var ele = json.fcs.effectors.channel[2];
             var rud = json.fcs.effectors.channel[3];
-            var thr = parseFloat(json.fcs.effectors.channel[4])*100;
+            var thr = parseFloat(json.fcs.effectors.channel[0])*100;
             // var flaps = json.effectors.flaps;
         }
 
