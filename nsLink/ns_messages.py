@@ -11,9 +11,7 @@ airdata_v8_id = 54
 filter_v5_id = 47
 nav_v6_id = 52
 nav_metrics_v6_id = 53
-actuator_v3_id = 37
 effectors_v1_id = 61
-pilot_v4_id = 51
 inceptors_v2_id = 63
 power_v1_id = 55
 fcs_refs_v1_id = 65
@@ -131,12 +129,11 @@ class gps_v4():
 # Id: 49
 class gps_v5():
     id = 49
-    _pack_string = "<BLQBBllfhhhhhhh"
+    _pack_string = "<LQBBllfhhhhhhh"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.millis = 0
         self.unix_usec = 0
         self.num_sats = 0
@@ -156,7 +153,6 @@ class gps_v5():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.millis,
                   self.unix_usec,
                   self.num_sats,
@@ -174,8 +170,7 @@ class gps_v5():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.millis,
+        (self.millis,
          self.unix_usec,
          self.num_sats,
          self.status,
@@ -198,7 +193,6 @@ class gps_v5():
         self.vdop /= 100.0
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("millis", self.millis)
         node.setUInt64("unix_usec", self.unix_usec)
         node.setUInt("num_sats", self.num_sats)
@@ -215,7 +209,6 @@ class gps_v5():
         node.setDouble("vdop", self.vdop)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.millis = node.getUInt("millis")
         self.unix_usec = node.getUInt64("unix_usec")
         self.num_sats = node.getUInt("num_sats")
@@ -353,12 +346,11 @@ class imu_v5():
 # Id: 50
 class imu_v6():
     id = 50
-    _pack_string = "<BLhhhhhhhhhhhhhhhh"
+    _pack_string = "<Lhhhhhhhhhhhhhhhh"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.millis = 0
         self.ax_raw = 0.0
         self.ay_raw = 0.0
@@ -381,7 +373,6 @@ class imu_v6():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.millis,
                   int(round(self.ax_raw * 835.296217)),
                   int(round(self.ay_raw * 835.296217)),
@@ -402,8 +393,7 @@ class imu_v6():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.millis,
+        (self.millis,
          self.ax_raw,
          self.ay_raw,
          self.az_raw,
@@ -438,7 +428,6 @@ class imu_v6():
         self.temp_C /= 250.0
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("millis", self.millis)
         node.setDouble("ax_raw", self.ax_raw)
         node.setDouble("ay_raw", self.ay_raw)
@@ -458,7 +447,6 @@ class imu_v6():
         node.setDouble("temp_C", self.temp_C)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.millis = node.getUInt("millis")
         self.ax_raw = node.getDouble("ax_raw")
         self.ay_raw = node.getDouble("ay_raw")
@@ -575,12 +563,11 @@ class airdata_v7():
 # Id: 54
 class airdata_v8():
     id = 54
-    _pack_string = "<BLHHhhfffBLHBBH"
+    _pack_string = "<LHHhhfffBLHBBH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.millis = 0
         self.baro_press_pa = 0.0
         self.diff_press_pa = 0.0
@@ -600,7 +587,6 @@ class airdata_v8():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.millis,
                   int(round(self.baro_press_pa * 0.5)),
                   int(round(self.diff_press_pa * 10.0)),
@@ -618,8 +604,7 @@ class airdata_v8():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.millis,
+        (self.millis,
          self.baro_press_pa,
          self.diff_press_pa,
          self.air_temp_C,
@@ -642,7 +627,6 @@ class airdata_v8():
         self.pitot_scale_factor /= 100.0
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("millis", self.millis)
         node.setDouble("baro_press_pa", self.baro_press_pa)
         node.setDouble("diff_press_pa", self.diff_press_pa)
@@ -659,7 +643,6 @@ class airdata_v8():
         node.setUInt("error_count", self.error_count)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.millis = node.getUInt("millis")
         self.baro_press_pa = node.getDouble("baro_press_pa")
         self.diff_press_pa = node.getDouble("diff_press_pa")
@@ -826,12 +809,11 @@ class filter_v5():
 # Id: 52
 class nav_v6():
     id = 52
-    _pack_string = "<BLllfhhhhhhBB"
+    _pack_string = "<LllfhhhhhhBB"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.millis = 0
         self.latitude_raw = 0
         self.longitude_raw = 0
@@ -849,7 +831,6 @@ class nav_v6():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.millis,
                   self.latitude_raw,
                   self.longitude_raw,
@@ -865,8 +846,7 @@ class nav_v6():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.millis,
+        (self.millis,
          self.latitude_raw,
          self.longitude_raw,
          self.altitude_m,
@@ -886,7 +866,6 @@ class nav_v6():
         self.yaw_deg /= 50.0
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("millis", self.millis)
         node.setInt("latitude_raw", self.latitude_raw)
         node.setInt("longitude_raw", self.longitude_raw)
@@ -901,7 +880,6 @@ class nav_v6():
         node.setUInt("status", self.status)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.millis = node.getUInt("millis")
         self.latitude_raw = node.getInt("latitude_raw")
         self.longitude_raw = node.getInt("longitude_raw")
@@ -919,12 +897,11 @@ class nav_v6():
 # Id: 53
 class nav_metrics_v6():
     id = 53
-    _pack_string = "<BLhhhhhhHHHHHHHHH"
+    _pack_string = "<LhhhhhhHHHHHHHHH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.metrics_millis = 0
         self.p_bias = 0.0
         self.q_bias = 0.0
@@ -946,7 +923,6 @@ class nav_metrics_v6():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.metrics_millis,
                   int(round(self.p_bias * 10000.0)),
                   int(round(self.q_bias * 10000.0)),
@@ -966,8 +942,7 @@ class nav_metrics_v6():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.metrics_millis,
+        (self.metrics_millis,
          self.p_bias,
          self.q_bias,
          self.r_bias,
@@ -1000,7 +975,6 @@ class nav_metrics_v6():
         self.Pa2 /= 10000.0
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("metrics_millis", self.metrics_millis)
         node.setDouble("p_bias", self.p_bias)
         node.setDouble("q_bias", self.q_bias)
@@ -1019,7 +993,6 @@ class nav_metrics_v6():
         node.setDouble("Pa2", self.Pa2)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.metrics_millis = node.getUInt("metrics_millis")
         self.p_bias = node.getDouble("p_bias")
         self.q_bias = node.getDouble("q_bias")
@@ -1037,101 +1010,15 @@ class nav_metrics_v6():
         self.Pa1 = node.getDouble("Pa1")
         self.Pa2 = node.getDouble("Pa2")
 
-# Message: actuator_v3
-# Id: 37
-class actuator_v3():
-    id = 37
-    _pack_string = "<BfhhHhhhhhB"
-    _struct = struct.Struct(_pack_string)
-
-    def __init__(self, msg=None):
-        # public fields
-        self.index = 0
-        self.timestamp_sec = 0.0
-        self.aileron = 0.0
-        self.elevator = 0.0
-        self.throttle = 0.0
-        self.rudder = 0.0
-        self.channel5 = 0.0
-        self.flaps = 0.0
-        self.channel7 = 0.0
-        self.channel8 = 0.0
-        self.status = 0
-        # unpack if requested
-        if msg: self.unpack(msg)
-
-    def pack(self):
-        msg = self._struct.pack(
-                  self.index,
-                  self.timestamp_sec,
-                  int(round(self.aileron * 20000.0)),
-                  int(round(self.elevator * 20000.0)),
-                  int(round(self.throttle * 60000.0)),
-                  int(round(self.rudder * 20000.0)),
-                  int(round(self.channel5 * 20000.0)),
-                  int(round(self.flaps * 20000.0)),
-                  int(round(self.channel7 * 20000.0)),
-                  int(round(self.channel8 * 20000.0)),
-                  self.status)
-        return msg
-
-    def unpack(self, msg):
-        (self.index,
-         self.timestamp_sec,
-         self.aileron,
-         self.elevator,
-         self.throttle,
-         self.rudder,
-         self.channel5,
-         self.flaps,
-         self.channel7,
-         self.channel8,
-         self.status) = self._struct.unpack(msg)
-        self.aileron /= 20000.0
-        self.elevator /= 20000.0
-        self.throttle /= 60000.0
-        self.rudder /= 20000.0
-        self.channel5 /= 20000.0
-        self.flaps /= 20000.0
-        self.channel7 /= 20000.0
-        self.channel8 /= 20000.0
-
-    def msg2props(self, node):
-        node.setUInt("index", self.index)
-        node.setDouble("timestamp_sec", self.timestamp_sec)
-        node.setDouble("aileron", self.aileron)
-        node.setDouble("elevator", self.elevator)
-        node.setDouble("throttle", self.throttle)
-        node.setDouble("rudder", self.rudder)
-        node.setDouble("channel5", self.channel5)
-        node.setDouble("flaps", self.flaps)
-        node.setDouble("channel7", self.channel7)
-        node.setDouble("channel8", self.channel8)
-        node.setUInt("status", self.status)
-
-    def props2msg(self, node):
-        self.index = node.getUInt("index")
-        self.timestamp_sec = node.getDouble("timestamp_sec")
-        self.aileron = node.getDouble("aileron")
-        self.elevator = node.getDouble("elevator")
-        self.throttle = node.getDouble("throttle")
-        self.rudder = node.getDouble("rudder")
-        self.channel5 = node.getDouble("channel5")
-        self.flaps = node.getDouble("flaps")
-        self.channel7 = node.getDouble("channel7")
-        self.channel8 = node.getDouble("channel8")
-        self.status = node.getUInt("status")
-
 # Message: effectors_v1
 # Id: 61
 class effectors_v1():
     id = 61
-    _pack_string = "<BLhhhhhhhh"
+    _pack_string = "<Lhhhhhhhh"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.millis = 0
         self.channel = [0.0] * 8
         # unpack if requested
@@ -1139,7 +1026,6 @@ class effectors_v1():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.millis,
                   int(round(self.channel[0] * 20000.0)),
                   int(round(self.channel[1] * 20000.0)),
@@ -1152,8 +1038,7 @@ class effectors_v1():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.millis,
+        (self.millis,
          self.channel[0],
          self.channel[1],
          self.channel[2],
@@ -1172,112 +1057,12 @@ class effectors_v1():
         self.channel[7] /= 20000.0
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("millis", self.millis)
         for _i in range(8): node.setDouble("channel", self.channel[_i], _i)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.millis = node.getUInt("millis")
         for _i in range(8): self.channel[_i] = node.getDouble("channel", _i)
-
-# Message: pilot_v4
-# Id: 51
-class pilot_v4():
-    id = 51
-    _pack_string = "<BLhhhhhhhhhhhhhhhhBBB"
-    _struct = struct.Struct(_pack_string)
-
-    def __init__(self, msg=None):
-        # public fields
-        self.index = 0
-        self.millis = 0
-        self.channel = [0.0] * sbus_channels
-        self.failsafe = 0
-        self.master_switch = 0
-        self.throttle_safety = 0
-        # unpack if requested
-        if msg: self.unpack(msg)
-
-    def pack(self):
-        msg = self._struct.pack(
-                  self.index,
-                  self.millis,
-                  int(round(self.channel[0] * 20000.0)),
-                  int(round(self.channel[1] * 20000.0)),
-                  int(round(self.channel[2] * 20000.0)),
-                  int(round(self.channel[3] * 20000.0)),
-                  int(round(self.channel[4] * 20000.0)),
-                  int(round(self.channel[5] * 20000.0)),
-                  int(round(self.channel[6] * 20000.0)),
-                  int(round(self.channel[7] * 20000.0)),
-                  int(round(self.channel[8] * 20000.0)),
-                  int(round(self.channel[9] * 20000.0)),
-                  int(round(self.channel[10] * 20000.0)),
-                  int(round(self.channel[11] * 20000.0)),
-                  int(round(self.channel[12] * 20000.0)),
-                  int(round(self.channel[13] * 20000.0)),
-                  int(round(self.channel[14] * 20000.0)),
-                  int(round(self.channel[15] * 20000.0)),
-                  self.failsafe,
-                  self.master_switch,
-                  self.throttle_safety)
-        return msg
-
-    def unpack(self, msg):
-        (self.index,
-         self.millis,
-         self.channel[0],
-         self.channel[1],
-         self.channel[2],
-         self.channel[3],
-         self.channel[4],
-         self.channel[5],
-         self.channel[6],
-         self.channel[7],
-         self.channel[8],
-         self.channel[9],
-         self.channel[10],
-         self.channel[11],
-         self.channel[12],
-         self.channel[13],
-         self.channel[14],
-         self.channel[15],
-         self.failsafe,
-         self.master_switch,
-         self.throttle_safety) = self._struct.unpack(msg)
-        self.channel[0] /= 20000.0
-        self.channel[1] /= 20000.0
-        self.channel[2] /= 20000.0
-        self.channel[3] /= 20000.0
-        self.channel[4] /= 20000.0
-        self.channel[5] /= 20000.0
-        self.channel[6] /= 20000.0
-        self.channel[7] /= 20000.0
-        self.channel[8] /= 20000.0
-        self.channel[9] /= 20000.0
-        self.channel[10] /= 20000.0
-        self.channel[11] /= 20000.0
-        self.channel[12] /= 20000.0
-        self.channel[13] /= 20000.0
-        self.channel[14] /= 20000.0
-        self.channel[15] /= 20000.0
-
-    def msg2props(self, node):
-        node.setUInt("index", self.index)
-        node.setUInt("millis", self.millis)
-        for _i in range(sbus_channels): node.setDouble("channel", self.channel[_i], _i)
-        node.setUInt("failsafe", self.failsafe)
-        node.setUInt("master_switch", self.master_switch)
-        node.setUInt("throttle_safety", self.throttle_safety)
-
-    def props2msg(self, node):
-        self.index = node.getUInt("index")
-        self.millis = node.getUInt("millis")
-        for _i in range(sbus_channels): self.channel[_i] = node.getDouble("channel", _i)
-        self.failsafe = node.getUInt("failsafe")
-        self.master_switch = node.getUInt("master_switch")
-        self.throttle_safety = node.getUInt("throttle_safety")
 
 # Message: inceptors_v2
 # Id: 63
@@ -1367,12 +1152,11 @@ class inceptors_v2():
 # Id: 55
 class power_v1():
     id = 55
-    _pack_string = "<BLHHHHH"
+    _pack_string = "<LHHHHH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.millis = 0
         self.avionics_vcc = 0.0
         self.main_vcc = 0.0
@@ -1384,7 +1168,6 @@ class power_v1():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.millis,
                   int(round(self.avionics_vcc * 1000.0)),
                   int(round(self.main_vcc * 1000.0)),
@@ -1394,8 +1177,7 @@ class power_v1():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.millis,
+        (self.millis,
          self.avionics_vcc,
          self.main_vcc,
          self.cell_vcc,
@@ -1408,7 +1190,6 @@ class power_v1():
         self.total_mah /= 0.5
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("millis", self.millis)
         node.setDouble("avionics_vcc", self.avionics_vcc)
         node.setDouble("main_vcc", self.main_vcc)
@@ -1417,7 +1198,6 @@ class power_v1():
         node.setDouble("total_mah", self.total_mah)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.millis = node.getUInt("millis")
         self.avionics_vcc = node.getDouble("avionics_vcc")
         self.main_vcc = node.getDouble("main_vcc")
@@ -1565,12 +1345,11 @@ class mission_v1():
 # Id: 46
 class system_health_v6():
     id = 46
-    _pack_string = "<BfHHHHHHH"
+    _pack_string = "<fHHHHHHH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.timestamp_sec = 0.0
         self.system_load_avg = 0.0
         self.fmu_timer_misses = 0
@@ -1584,7 +1363,6 @@ class system_health_v6():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.timestamp_sec,
                   int(round(self.system_load_avg * 100.0)),
                   self.fmu_timer_misses,
@@ -1596,8 +1374,7 @@ class system_health_v6():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.timestamp_sec,
+        (self.timestamp_sec,
          self.system_load_avg,
          self.fmu_timer_misses,
          self.avionics_vcc,
@@ -1613,7 +1390,6 @@ class system_health_v6():
         self.total_mah /= 0.1
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setDouble("timestamp_sec", self.timestamp_sec)
         node.setDouble("system_load_avg", self.system_load_avg)
         node.setUInt("fmu_timer_misses", self.fmu_timer_misses)
@@ -1624,7 +1400,6 @@ class system_health_v6():
         node.setDouble("total_mah", self.total_mah)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.timestamp_sec = node.getDouble("timestamp_sec")
         self.system_load_avg = node.getDouble("system_load_avg")
         self.fmu_timer_misses = node.getUInt("fmu_timer_misses")
@@ -1638,12 +1413,11 @@ class system_health_v6():
 # Id: 56
 class status_v7():
     id = 56
-    _pack_string = "<BLHHBLLHH"
+    _pack_string = "<LHHBLLHH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
-        self.index = 0
         self.millis = 0
         self.serial_number = 0
         self.firmware_rev = 0
@@ -1657,7 +1431,6 @@ class status_v7():
 
     def pack(self):
         msg = self._struct.pack(
-                  self.index,
                   self.millis,
                   self.serial_number,
                   self.firmware_rev,
@@ -1669,8 +1442,7 @@ class status_v7():
         return msg
 
     def unpack(self, msg):
-        (self.index,
-         self.millis,
+        (self.millis,
          self.serial_number,
          self.firmware_rev,
          self.master_hz,
@@ -1680,7 +1452,6 @@ class status_v7():
          self.main_loop_timer_misses) = self._struct.unpack(msg)
 
     def msg2props(self, node):
-        node.setUInt("index", self.index)
         node.setUInt("millis", self.millis)
         node.setUInt("serial_number", self.serial_number)
         node.setUInt("firmware_rev", self.firmware_rev)
@@ -1691,7 +1462,6 @@ class status_v7():
         node.setUInt("main_loop_timer_misses", self.main_loop_timer_misses)
 
     def props2msg(self, node):
-        self.index = node.getUInt("index")
         self.millis = node.getUInt("millis")
         self.serial_number = node.getUInt("serial_number")
         self.firmware_rev = node.getUInt("firmware_rev")
