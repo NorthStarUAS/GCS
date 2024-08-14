@@ -669,49 +669,49 @@ var panel = function() {
             this.avg = null;
             this.std2 = null;
             this.last_time = 0;
-	    this.pointer_color = 'white';
-	    this.start = 0;
-	    this.state = 0;
+            this.pointer_color = 'white';
+            this.start = 0;
+            this.state = 0;
             this.verbose = false;
         }
-	set_pointer_color(val) {
+        set_pointer_color(val) {
             for ( var i = 0; i < this.greens.length; i++ ) {
-		if ( val >= this.greens[i][0] && val <= this.greens[i][1] ) {
-		    this.pointer_color = 'white';
-		    return;
-		}
-	    }
+                if ( val >= this.greens[i][0] && val <= this.greens[i][1] ) {
+                    this.pointer_color = 'white';
+                    return;
+                }
+            }
             for ( var i = 0; i < this.reds.length; i++ ) {
-		var alert = 0;
-		if ( val >= this.reds[i][0] && val <= this.reds[i][1] ) {
-		    alert = 1;
-		} else if ( val < this.minv ) {
-		    alert = 1;
-		} else if ( val > this.maxv ) {
-		    alert = 1;
-		}
-		if ( alert ) {
-		    if ( this.state == 0 ) {
-			if ( Date.now() > this.start+300 ) {
-			    this.state = 1;
-			    this.start = Date.now();
-			}
-		    } else if ( this.state == 1 ) {
-			if ( Date.now() > this.start+1000 ) {
-			    this.state = 0;
-			    this.start = Date.now();
-			}
-		    }
-		    if ( this.state == 1 ) {
-			this.pointer_color = 'red';
-		    } else {
-			this.pointer_color = 'white';
-		    }
-		    return;
-		}
-	    }
-	    this.pointer_color = 'yellow';
-	}
+                var alert = 0;
+                if ( val >= this.reds[i][0] && val <= this.reds[i][1] ) {
+                    alert = 1;
+                } else if ( val < this.minv ) {
+                    alert = 1;
+                } else if ( val > this.maxv ) {
+                    alert = 1;
+                }
+                if ( alert ) {
+                    if ( this.state == 0 ) {
+                        if ( Date.now() > this.start+300 ) {
+                            this.state = 1;
+                            this.start = Date.now();
+                        }
+                    } else if ( this.state == 1 ) {
+                        if ( Date.now() > this.start+1000 ) {
+                            this.state = 0;
+                            this.start = Date.now();
+                        }
+                    }
+                    if ( this.state == 1 ) {
+                    this.pointer_color = 'red';
+                    } else {
+                    this.pointer_color = 'white';
+                    }
+                    return;
+                }
+            }
+            this.pointer_color = 'yellow';
+        }
         update_stats(val) {
             if ( typeof json.sensors.imu !== 'undefined' ) {
                 var timestamp = parseFloat(json.sensors.imu.millis) / 1000.0;
@@ -741,7 +741,7 @@ var panel = function() {
                 console.log(val);
             }
             this.update_stats(val);
-	    this.set_pointer_color(val);
+	       this.set_pointer_color(val);
             context.save();
 
             context.shadowColor = "transparent";
@@ -786,17 +786,17 @@ var panel = function() {
                 context.lineWidth = Math.round(w*0.02);
                 var x1 = ((this.reds[i][0] - this.minv) / this.range) * w;
                 var x2 = ((this.reds[i][1] - this.minv) / this.range) * w;
-		if ( x1 > 1 && x1 < w-1 ) {
-                    context.beginPath();
-                    context.moveTo(x+x1, y);
-                    context.lineTo(x+x1, y + h);
-                    context.stroke();
-                }
-		if ( x2 > 1 && x2 < w-1 ) {
-                    context.beginPath();
-                    context.moveTo(x+x2, y);
-                    context.lineTo(x+x2, y + h);
-                    context.stroke();
+                if ( x1 > 1 && x1 < w-1 ) {
+                            context.beginPath();
+                            context.moveTo(x+x1, y);
+                            context.lineTo(x+x1, y + h);
+                            context.stroke();
+                        }
+                if ( x2 > 1 && x2 < w-1 ) {
+                            context.beginPath();
+                            context.moveTo(x+x2, y);
+                            context.lineTo(x+x2, y + h);
+                            context.stroke();
                 }
             }
             context.strokeStyle = "cyan";
@@ -835,15 +835,15 @@ var panel = function() {
             context.lineTo(x+x1+y1, y+y1-y1*Math.sqrt(3));
             context.lineTo(x+x1, y+y1);
             context.stroke();
-	    context.shadowOffsetX = 1;
-	    context.shadowOffsetY = 2;
-	    context.shadowBlur = 3;
-	    context.shadowColor = "rgba(0, 0, 0, 0.9)";
+            context.shadowOffsetX = 1;
+            context.shadowOffsetY = 2;
+            context.shadowBlur = 3;
+            context.shadowColor = "rgba(0, 0, 0, 0.9)";
             context.fill();
             context.restore();
 
             context.font = px + "px Courier New, monospace";
-	    context.strokeStyle = "white";
+	        context.strokeStyle = "white";
             context.fillStyle = "white";
             context.textAlign = "left";
             context.fillText(this.text1, x, y + Math.round(2.2*h));
