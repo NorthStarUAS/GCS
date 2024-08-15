@@ -1266,14 +1266,12 @@ class fcs_refs_v1():
 # Id: 60
 class mission_v1():
     id = 60
-    _pack_string = "<LBHHHHHHll"
+    _pack_string = "<LHHHHHll"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
         # public fields
         self.millis = 0
-        self.is_airborne = 0
-        self.flight_timer = 0.0
         self.task_name = ""
         self.task_attribute = 0
         self.route_size = 0
@@ -1287,8 +1285,6 @@ class mission_v1():
     def pack(self):
         msg = self._struct.pack(
                   self.millis,
-                  self.is_airborne,
-                  int(round(self.flight_timer * 1.0)),
                   len(self.task_name),
                   self.task_attribute,
                   self.route_size,
@@ -1304,8 +1300,6 @@ class mission_v1():
         extra = msg[base_len:]
         msg = msg[:base_len]
         (self.millis,
-         self.is_airborne,
-         self.flight_timer,
          self.task_name_len,
          self.task_attribute,
          self.route_size,
@@ -1313,14 +1307,11 @@ class mission_v1():
          self.wp_index,
          self.wp_longitude_raw,
          self.wp_latitude_raw) = self._struct.unpack(msg)
-        self.flight_timer /= 1.0
         self.task_name = extra[:self.task_name_len].decode()
         extra = extra[self.task_name_len:]
 
     def msg2props(self, node):
         node.setUInt("millis", self.millis)
-        node.setUInt("is_airborne", self.is_airborne)
-        node.setDouble("flight_timer", self.flight_timer)
         node.setString("task_name", self.task_name)
         node.setUInt("task_attribute", self.task_attribute)
         node.setUInt("route_size", self.route_size)
@@ -1331,8 +1322,6 @@ class mission_v1():
 
     def props2msg(self, node):
         self.millis = node.getUInt("millis")
-        self.is_airborne = node.getUInt("is_airborne")
-        self.flight_timer = node.getDouble("flight_timer")
         self.task_name = node.getString("task_name")
         self.task_attribute = node.getUInt("task_attribute")
         self.route_size = node.getUInt("route_size")
