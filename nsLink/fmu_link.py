@@ -5,7 +5,7 @@ from PropertyTree import PropertyNode
 import ns_messages
 from alerts import alert_mgr
 from logger import Logger
-from props import airdata_node, effectors_node, imu_node, inceptors_node, gps_node, nav_node, power_node, refs_node, remote_link_node, status_node
+from props import airdata_node, circle_node, effectors_node, home_node, imu_node, inceptors_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
@@ -100,7 +100,17 @@ def parse_msg(id, buf):
         msg.msg2props(refs_node)
     elif id == ns_messages.mission_v1_id:
         print("fixme: mission_v1")
-        # index = packer.unpack_mission_v1(buf)
+        # msg = ns_messages.mission_v1(buf)
+        # mission_node.setString("task", msg.task_name)
+        # # fixme: need to parse route / waypoints
+        # if mission_node.wp_index == 65534:
+        #     circle_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
+        #     circle_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
+        #     circle_node.setDouble("radius_m",msg.task_attribute)
+        # if mission_node.wp_index == 65535:
+        #     home_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
+        #     home_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
+        #     home_node.setDouble("azimuth_deg",msg.task_attribute)
     elif id == ns_messages.system_health_v6_id:
         index = packer.unpack_system_health_v6(buf)
     elif id == ns_messages.status_v7_id:

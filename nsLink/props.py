@@ -26,3 +26,8 @@ refs_node = PropertyNode("/fcs/refs")
 tecs_node = PropertyNode("/fcs/tecs")
 tecs_config_node = PropertyNode("/config/autopilot/TECS")
 effectors_node = PropertyNode("/fcs/effectors")
+
+# Mission and Tasks
+mission_node = PropertyNode("/mission")
+circle_node = PropertyNode("/task/circle")
+home_node = PropertyNode("/task/home")
