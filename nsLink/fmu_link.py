@@ -99,18 +99,22 @@ def parse_msg(id, buf):
         msg = ns_messages.fcs_refs_v1(buf)
         msg.msg2props(refs_node)
     elif id == ns_messages.mission_v1_id:
-        print("fixme: mission_v1")
-        # msg = ns_messages.mission_v1(buf)
-        # mission_node.setString("task", msg.task_name)
+        msg = ns_messages.mission_v1(buf)
+        mission_node.setString("task", msg.task_name)
         # # fixme: need to parse route / waypoints
-        # if mission_node.wp_index == 65534:
-        #     circle_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
-        #     circle_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
-        #     circle_node.setDouble("radius_m",msg.task_attribute)
-        # if mission_node.wp_index == 65535:
-        #     home_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
-        #     home_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
-        #     home_node.setDouble("azimuth_deg",msg.task_attribute)
+        if msg.wp_index == 65534:
+            circle_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
+            circle_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
+            if msg.task_attribute >= 30000:
+                circle_node.setString("direction", "right");
+                msg.task_attribute -= 30000
+            else:
+                circle_node.setString("direction", "left");
+            circle_node.setDouble("radius_m",msg.task_attribute)
+        if msg.wp_index == 65535:
+            home_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
+            home_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
+            home_node.setDouble("azimuth_deg",msg.task_attribute)
     elif id == ns_messages.system_health_v6_id:
         index = packer.unpack_system_health_v6(buf)
     elif id == ns_messages.status_v7_id:
@@ -118,7 +122,7 @@ def parse_msg(id, buf):
         msg.msg2props(status_node)
     elif id == ns_messages.event_v3_id:
         msg = ns_messages.event_v3(buf)
-        alert_mgr.add_message(msg.message, 2, 5)
+        alert_mgr.add_message(msg.message, 2, 10)
     elif id == ns_messages.command_v1_id:
         command = ns_messages.command_v1(buf)
         pos1 = command.message.find(" ")
