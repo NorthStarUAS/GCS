@@ -62,7 +62,7 @@ class ChatHandler(asynchat.async_chat):
 
     def process_command(self, msg):
         if msg != "" and msg != "\r":
-            alert_mgr.add_message("CMD: " + msg, timeout_sec=15)
+            alert_mgr.add_message("local: " + msg, timeout_sec=15)
 
         tokens = msg.split()
         if len(tokens) == 0:
