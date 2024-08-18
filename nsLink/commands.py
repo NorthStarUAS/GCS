@@ -43,7 +43,7 @@ class Commands():
                     self.cmd_queue.pop(0)
                 # send the command
                 command = self.cmd_queue[0]
-                print('writing:', sequence_num, command)
+                print('writing:', self.cmd_send_index, command)
                 cmd = ns_messages.command_v1()
                 cmd.sequence_num = self.cmd_send_index
                 cmd.message = command
