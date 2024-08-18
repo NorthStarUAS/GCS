@@ -5,7 +5,7 @@ from PropertyTree import PropertyNode
 import ns_messages
 from alerts import alert_mgr
 from logger import Logger
-from props import airdata_node, circle_node, effectors_node, home_node, imu_node, inceptors_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, status_node
+from props import airdata_node, circle_node, effectors_node, home_node, imu_node, inceptors_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
@@ -105,6 +105,12 @@ def parse_msg(id, buf):
         msg = ns_messages.mission_v1(buf)
         mission_node.setString("task", msg.task_name)
         # # fixme: need to parse route / waypoints
+        route_node.setUInt("route_size", msg.route_size)
+        route_node.setUInt("target_waypoint_idx", msg.target_waypoint_idx)
+        if msg.wp_index < msg.route_size:
+            wp_node = active_node.getChild("wpt/%d" % msg.wp_index)
+            wp_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
+            wp_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
         if msg.wp_index == 65534:
             circle_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
             circle_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)

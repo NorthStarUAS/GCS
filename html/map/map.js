@@ -343,7 +343,7 @@ map_update = function() {
         if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
             active_wpt.setLatLng( [json.task.circle.latitude_deg,
                                    json.task.circle.longitude_deg] );
-        } else if ( json.task.current_task_id == 'route' ) {
+        } else if ( json.mission.task == 'route' ) {
             i = json.task.route.target_waypoint_idx;
             if ( i < json.task.route.active.wpt.length ) {
                 active_wpt.setLatLng( [json.task.route.active.wpt[i].latitude_deg,
@@ -352,7 +352,7 @@ map_update = function() {
         }
     }
 
-    var route_size = json.task.route.active.route_size;
+    var route_size = json.task.route.route_size;
     if ( route_size > 0 ) {
         var wpts = [];
         var array_size = route_size;

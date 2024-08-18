@@ -30,4 +30,6 @@ effectors_node = PropertyNode("/fcs/effectors")
 # Mission and Tasks
 mission_node = PropertyNode("/mission")
 circle_node = PropertyNode("/task/circle")
+route_node = PropertyNode("/task/route")
+active_node = PropertyNode("/task/route/active")
 home_node = PropertyNode("/mission/home")
