@@ -185,22 +185,20 @@ function map_init() {
             if ( result == true ) {
                 // send route
                 var route = layer.editing.latlngs[0];
-                var route_string = "route";
+                var route_string = "route start";
                 for (var i = 0; i < route.length; i++) {
                     wpt = route[i];
-                    route_string += ",1,"
-		        + parseFloat(wpt.lng).toFixed(8) + ','
-		        + parseFloat(wpt.lat).toFixed(8) + ',-';
+                    route_string += ' ' + Math.round(wpt.lng*10000000).toString() + ' ' + Math.round(wpt.lat*10000000).toString();
                     if ( route_string.length > 180 ) {
                         link_send(route_string);
-	                route_string = "route_cont";
+	                    route_string = "route cont";
                     }
                 }
                 if ( route_string.length > 0 ) {
                     link_send(route_string);
                 }
                 if ( layer.editing.latlngs.length > 0 ) {
-	            link_send("route_end");
+	                link_send("route end");
                 }
             }
         } else if ( type == 'polygon' ) {
@@ -327,9 +325,9 @@ map_update = function() {
             points.splice(0, points.length - track_history);
         }
 
-        if ( json.task.home.latitude_deg != null ) {
-            home.setLatLng( [json.task.home.latitude_deg,
-                             json.task.home.longitude_deg] );
+        if ( json.mission.home.latitude_deg != null ) {
+            home.setLatLng( [json.mission.home.latitude_deg,
+                             json.mission.home.longitude_deg] );
         }
 
         if ( json.task.circle.latitude_deg != null ) {
