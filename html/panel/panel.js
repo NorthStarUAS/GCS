@@ -703,9 +703,9 @@ var panel = function() {
                         }
                     }
                     if ( this.state == 1 ) {
-                    this.pointer_color = 'red';
+                        this.pointer_color = 'red';
                     } else {
-                    this.pointer_color = 'white';
+                        this.pointer_color = 'white';
                     }
                     return;
                 }
@@ -741,7 +741,7 @@ var panel = function() {
                 console.log(val);
             }
             this.update_stats(val);
-	       this.set_pointer_color(val);
+	        this.set_pointer_color(val);
             context.save();
 
             context.shadowColor = "transparent";
