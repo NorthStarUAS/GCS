@@ -180,7 +180,7 @@ var annunciator = function() {
         var callsign_div = $("#callsign");
         var callsign_inner = $("#callsign #inner");
         if ( callsign_div != null ) {
-            var callsign = json.config.identity.call_sign;
+            var callsign = json.config.identity.call_sign + ": " + json.mission.task;
             if ( callsign != null && callsign != "" ) {
                 callsign_inner.html(callsign);
             } else {
