@@ -264,7 +264,7 @@ function map_init() {
     active_wpt = L.circleMarker(startLatLng, {
         color: 'blue',
         opacity: 0.5,
-        radius: 7,
+        radius: 9,
     });
     active_wpt.addTo(mymap);
 
@@ -330,44 +330,44 @@ map_update = function() {
                              json.mission.home.longitude_deg] );
         }
 
-        if ( json.task.circle.latitude_deg != null ) {
-            circle.setLatLng( [json.task.circle.latitude_deg,
-                               json.task.circle.longitude_deg] );
-            var r = json.task.circle.radius_m;
+        if ( json.mission.circle.latitude_deg != null ) {
+            circle.setLatLng( [json.mission.circle.latitude_deg,
+                               json.mission.circle.longitude_deg] );
+            var r = json.mission.circle.radius_m;
             if ( r > 1.0 ) {
                 circle.setRadius(r);
             }
             circle.setStyle( { color: 'blue', opacity: 0.5 } );
         }
 
-        if ( json.task.current_task_id == 'circle' || json.task.current_task_id == 'land' ) {
-            active_wpt.setLatLng( [json.task.circle.latitude_deg,
-                                   json.task.circle.longitude_deg] );
+        if ( json.mission.task == 'circle' || json.mission.task == 'land' ) {
+            active_wpt.setLatLng( [json.mission.circle.latitude_deg,
+                                   json.mission.circle.longitude_deg] );
         } else if ( json.mission.task == 'route' ) {
-            i = json.task.route.target_waypoint_idx;
-            if ( i < json.task.route.active.wpt.length ) {
-                active_wpt.setLatLng( [json.task.route.active.wpt[i].latitude_deg,
-                                       json.task.route.active.wpt[i].longitude_deg] );
+            i = json.mission.route.target_waypoint_idx;
+            if ( i < json.mission.route.active.wpt.length ) {
+                active_wpt.setLatLng( [json.mission.route.active.wpt[i].latitude_deg,
+                                       json.mission.route.active.wpt[i].longitude_deg] );
             }
         }
     }
 
-    var route_size = json.task.route.route_size;
+    var route_size = json.mission.route.route_size;
     if ( route_size > 0 ) {
         var wpts = [];
         var array_size = route_size;
-        if ( json.task.route.active.wpt.length < array_size ) {
-            array_size = json.task.route.active.wpt.length;
+        if ( json.mission.route.active.wpt.length < array_size ) {
+            array_size = json.mission.route.active.wpt.length;
         }
         for ( var i = 0; i < array_size; i++ ) {
-            var lat = json.task.route.active.wpt[i].latitude_deg;
-            var lon = json.task.route.active.wpt[i].longitude_deg;
+            var lat = json.mission.route.active.wpt[i].latitude_deg;
+            var lon = json.mission.route.active.wpt[i].longitude_deg;
             if ( Math.abs(lat) > 0.001 && Math.abs(lon) > 0.001 ) {
                 wpts.push( [lat, lon] );
             }
         }
-        // wpts.push( [json.task.route.active.wpt[0].latitude_deg,
-        //             json.task.route.active.wpt[0].longitude_deg] );
+        // wpts.push( [json.mission.route.active.wpt[0].latitude_deg,
+        //             json.mission.route.active.wpt[0].longitude_deg] );
         active_route.setLatLngs(wpts);
         active_route.setStyle( { color: 'blue', opacity: 0.5 } );
     }
@@ -398,11 +398,11 @@ function circleHere(e) {
         modal.hide();
         var dir = $("input[name='circle-dir']:checked").val().toLowerCase();
         if ( dir ) {
-            link_send('set /task/circle/direction ' + dir);
+            link_send('set /mission/circle/direction ' + dir);
         }
         var radius = $("#circle-radius").val();
         if ( parseFloat(radius) > 10 ) {
-            link_send('set /task/circle/radius_m ' + radius);
+            link_send('set /mission/circle/radius_m ' + radius);
         }
         link_send('task circle ' + user_latlng.lng + ' ' + user_latlng.lat);
     })
@@ -501,26 +501,26 @@ function land(e) {
         modal.hide();
         var dir = $("input[name='land-dir']:checked").val().toLowerCase();
         if ( dir ) {
-            link_send('set,/task/land/direction,' + dir);
+            link_send('set,/mission/land/direction,' + dir);
         }
         var radius = $("#land-radius").val();
         if ( parseFloat(radius) > 10 ) {
-            link_send('set,/task/land/turn_radius_m,' + radius);
+            link_send('set,/mission/land/turn_radius_m,' + radius);
         }
         var gs = $("#land-glideslope").val();
-        link_send('set,/task/land/glideslope_deg,' + gs);
+        link_send('set,/mission/land/glideslope_deg,' + gs);
         var airspeed = $("#land-airspeed").val();
-        link_send('set,/task/land/approach_speed_kt,' + airspeed);
+        link_send('set,/mission/land/approach_speed_kt,' + airspeed);
         var extend = $("#land-extend").val();
-        link_send('set,/task/land/extend_final_leg_m,' + extend);
+        link_send('set,/mission/land/extend_final_leg_m,' + extend);
         var flare_pitch = $("#land-flare-pitch").val();
-        link_send('set,/task/land/flare_pitch_deg,' + flare_pitch);
+        link_send('set,/mission/land/flare_pitch_deg,' + flare_pitch);
         var flare_sec = $("#land-flare-sec").val();
-        link_send('set,/task/land/flare_seconds,' + flare_sec);
+        link_send('set,/mission/land/flare_seconds,' + flare_sec);
         var lat = $("#land-lat-offset").val();
-        link_send('set,/task/land/lateral_offset_m,' + lat);
+        link_send('set,/mission/land/lateral_offset_m,' + lat);
         var alt = $("#land-alt-bias").val();
-        link_send('set,/task/land/alitutude_bias_ft,' + alt);
+        link_send('set,/mission/land/alitutude_bias_ft,' + alt);
 
         var hdg = $("#land-runway-hdg").val();
         link_send('task,land,' + hdg);
@@ -542,7 +542,7 @@ function set_airspeed(e) {
     }
     var value = $("#airspeed-target");
     var slider = $("#airspeed-slider");
-    var target_airspeed = json.autopilot.targets.airspeed_kt;
+    var target_airspeed = json.fcs.refs.airspeed_kt;
     value.html(target_airspeed);
     slider[0].min = json.config.autopilot.TECS.min_kt;
     slider[0].max = json.config.autopilot.TECS.max_kt;
@@ -554,7 +554,7 @@ function set_airspeed(e) {
     $("#airspeed-form-submit").click(function() {
         modal.hide();
         var airspeed = $("#airspeed-slider").val();
-        link_send('set,/autopilot/targets/airspeed_kt,' + airspeed);
+        link_send('set /fcs/refs/airspeed_kt ' + airspeed);
     })
 }
 
@@ -571,10 +571,10 @@ function set_altitude(e) {
             modal.hide();
         }
     }
-    $("#altitude-ground").html((json.position.altitude_ground_m * m2ft).toFixed(0));
+    $("#altitude-ground").html((json.sensors.airdata.altitude_ground_m * m2ft).toFixed(0));
     // estimate onboard agl
-    var ground = json.position.altitude_ground_m * m2ft;
-    var agl = json.autopilot.targets.altitude_msl_ft - ground;
+    var ground = json.sensors.airdata.altitude_ground_m * m2ft;
+    var agl = json.fcs.refs.altitude_msl_ft - ground;
     var msl = ground + agl;
     // snap to nearest 25'
     agl = parseFloat(agl / 25).toFixed(0) * 25;
@@ -594,7 +594,7 @@ function set_altitude(e) {
     $("#altitude-form-submit").click(function() {
         modal.hide();
         var altitude = $("#altitude-slider").val();
-        link_send('set,/autopilot/targets/altitude_agl_ft,' + altitude);
+        link_send('set /fcs/refs/altitude_agl_ft ' + altitude);
     })
 }
 
