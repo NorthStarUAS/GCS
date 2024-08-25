@@ -206,8 +206,8 @@ var panel = function() {
             display_units = "MPS";
         }
 
-        var min_kt = parseFloat(json.config.autopilot.TECS.min_kt);
-        var max_kt = parseFloat(json.config.autopilot.TECS.max_kt);
+        var min_kt = parseFloat(json.config.fcs.TECS.min_kt);
+        var max_kt = parseFloat(json.config.fcs.TECS.max_kt);
         var cruise_kt = parseFloat(json.config.specs.cruise_kt);
         var range_kt = max_kt - min_kt;
         var caution_kt = min_kt + 0.8 * range_kt;
@@ -335,8 +335,8 @@ var panel = function() {
             display_units = "mps";
         }
 
-        var min_kt = parseFloat(json.config.autopilot.TECS.min_kt);
-        var max_kt = parseFloat(json.config.autopilot.TECS.max_kt);
+        var min_kt = parseFloat(json.config.fcs.TECS.min_kt);
+        var max_kt = parseFloat(json.config.fcs.TECS.max_kt);
         var cruise_kt = parseFloat(json.config.specs.cruise_kt);
         var range_kt = max_kt - min_kt;
         var caution_kt = min_kt + 0.8 * range_kt;

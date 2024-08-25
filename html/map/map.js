@@ -544,8 +544,8 @@ function set_airspeed(e) {
     var slider = $("#airspeed-slider");
     var target_airspeed = json.fcs.refs.airspeed_kt;
     value.html(target_airspeed);
-    slider[0].min = json.config.autopilot.TECS.min_kt;
-    slider[0].max = json.config.autopilot.TECS.max_kt;
+    slider[0].min = json.config.fcs.TECS.min_kt;
+    slider[0].max = json.config.fcs.TECS.max_kt;
     slider.val(target_airspeed);
     slider.on('input change', function() {
         value.html(this.value);

@@ -21,4 +21,4 @@ def gen_requests():
             commands.add("get /config/specs")
         if tecs_config_node.getString("max_kt") == "":
             requests_pending = True
-            commands.add("get /config/autopilot/TECS")
+            commands.add("get /config/fcs/TECS")
