@@ -199,6 +199,7 @@ function map_init() {
                 }
                 if ( layer.editing.latlngs.length > 0 ) {
 	                link_send("route end");
+                    link_send("task route");
                 }
             }
         } else if ( type == 'polygon' ) {
