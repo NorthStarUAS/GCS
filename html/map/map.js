@@ -502,29 +502,29 @@ function land(e) {
         modal.hide();
         var dir = $("input[name='land-dir']:checked").val().toLowerCase();
         if ( dir ) {
-            link_send('set,/mission/land/direction,' + dir);
+            link_send("set /config/mission/land/direction " + dir);
         }
         var radius = $("#land-radius").val();
         if ( parseFloat(radius) > 10 ) {
-            link_send('set,/mission/land/turn_radius_m,' + radius);
+            link_send("set /config/mission/land/circle_radius_m " + radius);
         }
         var gs = $("#land-glideslope").val();
-        link_send('set,/mission/land/glideslope_deg,' + gs);
+        link_send("set /config/mission/land/glideslope_deg " + gs);
         var airspeed = $("#land-airspeed").val();
-        link_send('set,/mission/land/approach_speed_kt,' + airspeed);
+        link_send("set /config/mission/land/approach_speed_kt " + airspeed);
         var extend = $("#land-extend").val();
-        link_send('set,/mission/land/extend_final_leg_m,' + extend);
+        link_send("set /config/mission/land/extend_final_leg_m " + extend);
         var flare_pitch = $("#land-flare-pitch").val();
-        link_send('set,/mission/land/flare_pitch_deg,' + flare_pitch);
+        link_send("set /config/mission/land/flare_pitch_deg " + flare_pitch);
         var flare_sec = $("#land-flare-sec").val();
-        link_send('set,/mission/land/flare_seconds,' + flare_sec);
+        link_send("set /config/mission/land/flare_seconds " + flare_sec);
         var lat = $("#land-lat-offset").val();
-        link_send('set,/mission/land/lateral_offset_m,' + lat);
+        link_send("set /config/mission/land/lateral_offset_m " + lat);
         var alt = $("#land-alt-bias").val();
-        link_send('set,/mission/land/alitutude_bias_ft,' + alt);
-
+        link_send("set /config/mission/land/alt_base_agl_ft " + alt);
         var hdg = $("#land-runway-hdg").val();
-        link_send('task,land,' + hdg);
+        link_send("set /mission/home/azimuth_deg " + hdg);
+        link_send("task land");
     })
 }
 
