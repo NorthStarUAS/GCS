@@ -1402,7 +1402,7 @@ class system_health_v6():
 # Id: 56
 class status_v7():
     id = 56
-    _pack_string = "<LHHBLLHH"
+    _pack_string = "<LHHBLLHHH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
@@ -1413,6 +1413,7 @@ class status_v7():
         self.master_hz = 0
         self.baud = 0
         self.available_memory = 0
+        self.link_state = 0
         self.byte_rate = 0
         self.main_loop_timer_misses = 0
         # unpack if requested
@@ -1426,6 +1427,7 @@ class status_v7():
                   self.master_hz,
                   self.baud,
                   self.available_memory,
+                  self.link_state,
                   self.byte_rate,
                   self.main_loop_timer_misses)
         return msg
@@ -1437,6 +1439,7 @@ class status_v7():
          self.master_hz,
          self.baud,
          self.available_memory,
+         self.link_state,
          self.byte_rate,
          self.main_loop_timer_misses) = self._struct.unpack(msg)
 
@@ -1447,6 +1450,7 @@ class status_v7():
         node.setUInt("master_hz", self.master_hz)
         node.setUInt("baud", self.baud)
         node.setUInt("available_memory", self.available_memory)
+        node.setUInt("link_state", self.link_state)
         node.setUInt("byte_rate", self.byte_rate)
         node.setUInt("main_loop_timer_misses", self.main_loop_timer_misses)
 
@@ -1457,6 +1461,7 @@ class status_v7():
         self.master_hz = node.getUInt("master_hz")
         self.baud = node.getUInt("baud")
         self.available_memory = node.getUInt("available_memory")
+        self.link_state = node.getUInt("link_state")
         self.byte_rate = node.getUInt("byte_rate")
         self.main_loop_timer_misses = node.getUInt("main_loop_timer_misses")
 

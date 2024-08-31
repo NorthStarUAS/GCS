@@ -1,7 +1,6 @@
 from math import floor, pi, sqrt
-from time import time
+import time
 
-from props import PropertyNode
 from props import airdata_node, ann_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
 
 # ann_gps_node = PropertyNode("/annunciators/gps")
@@ -25,7 +24,7 @@ class Entry():
         self.alert = alert
         self.inverse = inverse
         if timeout_sec > 0:
-            self.timeout_sec = time() + timeout_sec
+            self.timeout_sec = time.time() + timeout_sec
         else:
             self.timeout_sec = 0
         self.val = 0
@@ -212,7 +211,7 @@ class Alerts():
         for i in reversed(range(len(self.msg_list))):
             e = self.msg_list[i]
             # print(e.timeout_sec, time())
-            if e.timeout_sec > 0 and time() > e.timeout_sec:
+            if e.timeout_sec > 0 and time.time() > e.timeout_sec:
                 del self.msg_list[i]
                 # quit()
 
@@ -264,11 +263,15 @@ class Alerts():
             msg += "%d:%02d:%02d" % (hours, mins, rem)
         ann_node.setString("timer", "1;%s" % msg)
 
-        link_state = remote_link_node.getString("link_state") == "ok"
-        if link_state:
+        elapsed_sec = time.time() - remote_link_node.getDouble("last_received_sec")
+        ground_link = elapsed_sec <= 10.0
+        remote_link = status_node.getBool("link_state")
+        if remote_link and ground_link:
             ann_node.setString("link", "1;Link")
+        elif not remote_link and ground_link:
+            ann_node.setString("link", "3;Link Remote lost GCS")
         else:
-            ann_node.setString("link", "3;Lost Link")
+            ann_node.setString("link", "3;Link Lost")
 
         auto = inceptors_node.getBool("master_switch")
         if auto:

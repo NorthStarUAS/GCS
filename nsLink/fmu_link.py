@@ -1,4 +1,5 @@
 import serial, serial.tools.list_ports
+import time
 
 from PropertyTree import PropertyNode
 
@@ -31,6 +32,7 @@ class FMULink:
             if pkt_id >= 0:
                 # print("received:", pkt_id)
                 parse_msg(pkt_id, self.parser.payload)
+                remote_link_node.setDouble("last_received_sec", time.time())
                 self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
             else:
                 new_data = False
