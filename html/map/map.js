@@ -33,7 +33,8 @@ var mps2kt = 1.9438444924406046432;
 
 menuitems = [
     { text: 'Circle Here', icon: 'icons/circle.png', callback: circleHere },
-    { text: 'Postion Home Here', icon: 'icons/home.png', callback: moveHomeHere },
+    { text: 'Move Home Here', icon: 'icons/home.png', callback: moveHomeHere },
+    { text: 'Launch Aircraft', icon: 'icons/launch.png', callback: launch },
     { text: 'Land Aircraft', icon: 'icons/land.png', callback: land },
     { separator: true },
     { text: 'Set Airspeed', icon: 'icons/speed.png', callback: set_airspeed },
@@ -482,6 +483,9 @@ function preflight(e) {
         var sec = $("#preflight-duration").val();
         link_send('task,preflight,' + sec);
     })
+}
+
+function launch(e) {
 }
 
 function land(e) {
