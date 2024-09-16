@@ -8,8 +8,12 @@ function link_init() {
         link_url = "ws://" + window.location.host + "/ws";
         console.log("Connecting to link_url : " + link_url);
 	    ws = new WebSocket(link_url);
+        var timeout = function() {
+            console.log("link state: " + ws.readyState);
+        }
+        setInterval(timeout, 1000);
         ws.onopen = function(msg) {
-            console.debug('Connection successfully opened (readyState ' + this.readyState+')');
+            console.debug('Connection successfully opened (readyState ' + this.readyState + ')');
         };
         ws.onmessage = function(msg) {
             // console.log(msg.data);
@@ -67,7 +71,7 @@ function link_update() {
         }
     }
     catch(exception) {
-	alert(exception);
+	    alert(exception);
     }
     setTimeout("link_update()", update_rate);
 }
