@@ -88,9 +88,9 @@ def parse_msg(id, buf):
         msg.msg2props(nav_node)
         nav_node.setDouble("latitude_deg", nav_node.getInt("latitude_raw") / 10000000.0)
         nav_node.setDouble("longitude_deg", nav_node.getInt("longitude_raw") / 10000000.0)
-        if remote_link_node.getInt("sequence_num") != msg.sequence_num:
-            print("nav msg incrementing sequence num:", msg.sequence_num)
-        remote_link_node.setInt("sequence_num", msg.sequence_num)
+        # if remote_link_node.getInt("sequence_num") != msg.sequence_num:
+        #     print("nav msg incrementing sequence num:", msg.sequence_num)
+        #     remote_link_node.setInt("sequence_num", msg.sequence_num)
     elif id == ns_messages.nav_metrics_v6_id:
         msg = ns_messages.nav_metrics_v6(buf)
         msg.msg2props(nav_node)
