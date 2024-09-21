@@ -3,7 +3,7 @@ import time
 
 from PropertyTree import PropertyNode
 
-import ns_messages
+import nst_messages
 from alerts import alert_mgr
 from logger import Logger
 from props import airdata_node, circle_node, effectors_node, home_node, imu_node, inceptors_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
@@ -59,52 +59,52 @@ fmu_link = FMULink()
 
 # working on eliminating "packer" and replacing it with auto-generated message code.
 def parse_msg(id, buf):
-    if id == ns_messages.gps_v4_id:
-        msg = ns_messages.gps_v4(buf)
+    if id == nst_messages.gps_v4_id:
+        msg = nst_messages.gps_v4(buf)
         msg.msg2props(gps_node)
-    elif id == ns_messages.gps_v5_id:
-        msg = ns_messages.gps_v5(buf)
+    elif id == nst_messages.gps_v5_id:
+        msg = nst_messages.gps_v5(buf)
         msg.msg2props(gps_node)
-    elif id == ns_messages.imu_v5_id:
-        msg = ns_messages.imu_v5(buf)
+    elif id == nst_messages.imu_v5_id:
+        msg = nst_messages.imu_v5(buf)
         msg.msg2props(imu_node)
-    elif id == ns_messages.imu_v6_id:
-        msg = ns_messages.imu_v6(buf)
+    elif id == nst_messages.imu_v6_id:
+        msg = nst_messages.imu_v6(buf)
         msg.msg2props(imu_node)
-    elif id == ns_messages.airdata_v7_id:
-        msg = ns_messages.airdata_v7(buf)
+    elif id == nst_messages.airdata_v7_id:
+        msg = nst_messages.airdata_v7(buf)
         msg.msg2props(airdata_node)
-    elif id == ns_messages.airdata_v8_id:
-        msg = ns_messages.airdata_v8(buf)
+    elif id == nst_messages.airdata_v8_id:
+        msg = nst_messages.airdata_v8(buf)
         msg.msg2props(airdata_node)
-    elif id == ns_messages.effectors_v1_id:
-        msg = ns_messages.effectors_v1(buf)
+    elif id == nst_messages.effectors_v1_id:
+        msg = nst_messages.effectors_v1(buf)
         msg.msg2props(effectors_node)
-    elif id == ns_messages.filter_v5_id:
-        msg = ns_messages.nav_v5(buf)
+    elif id == nst_messages.filter_v5_id:
+        msg = nst_messages.nav_v5(buf)
         msg.msg2props(nav_node)
-    elif id == ns_messages.nav_v6_id:
-        msg = ns_messages.nav_v6(buf)
+    elif id == nst_messages.nav_v6_id:
+        msg = nst_messages.nav_v6(buf)
         msg.msg2props(nav_node)
         nav_node.setDouble("latitude_deg", nav_node.getInt("latitude_raw") / 10000000.0)
         nav_node.setDouble("longitude_deg", nav_node.getInt("longitude_raw") / 10000000.0)
         # if remote_link_node.getInt("sequence_num") != msg.sequence_num:
         #     print("nav msg incrementing sequence num:", msg.sequence_num)
         #     remote_link_node.setInt("sequence_num", msg.sequence_num)
-    elif id == ns_messages.nav_metrics_v6_id:
-        msg = ns_messages.nav_metrics_v6(buf)
+    elif id == nst_messages.nav_metrics_v6_id:
+        msg = nst_messages.nav_metrics_v6(buf)
         msg.msg2props(nav_node)
-    elif id == ns_messages.inceptors_v2_id:
-        msg = ns_messages.inceptors_v2(buf)
+    elif id == nst_messages.inceptors_v2_id:
+        msg = nst_messages.inceptors_v2(buf)
         msg.msg2props(inceptors_node)
-    elif id == ns_messages.power_v1_id:
-        msg = ns_messages.power_v1(buf)
+    elif id == nst_messages.power_v1_id:
+        msg = nst_messages.power_v1(buf)
         msg.msg2props(power_node)
-    elif id == ns_messages.fcs_refs_v1_id:
-        msg = ns_messages.fcs_refs_v1(buf)
+    elif id == nst_messages.fcs_refs_v1_id:
+        msg = nst_messages.fcs_refs_v1(buf)
         msg.msg2props(refs_node)
-    elif id == ns_messages.mission_v1_id:
-        msg = ns_messages.mission_v1(buf)
+    elif id == nst_messages.mission_v1_id:
+        msg = nst_messages.mission_v1(buf)
         mission_node.setString("task", msg.task_name)
         # # fixme: need to parse route / waypoints
         route_node.setUInt("route_size", msg.route_size)
@@ -126,16 +126,16 @@ def parse_msg(id, buf):
             home_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
             home_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
             home_node.setDouble("azimuth_deg",msg.task_attribute)
-    elif id == ns_messages.system_health_v6_id:
+    elif id == nst_messages.system_health_v6_id:
         index = packer.unpack_system_health_v6(buf)
-    elif id == ns_messages.status_v7_id:
-        msg = ns_messages.status_v7(buf)
+    elif id == nst_messages.status_v7_id:
+        msg = nst_messages.status_v7(buf)
         msg.msg2props(status_node)
-    elif id == ns_messages.event_v3_id:
-        msg = ns_messages.event_v3(buf)
+    elif id == nst_messages.event_v3_id:
+        msg = nst_messages.event_v3(buf)
         alert_mgr.add_message(msg.message, 2, 10)
-    elif id == ns_messages.command_v1_id:
-        command = ns_messages.command_v1(buf)
+    elif id == nst_messages.command_v1_id:
+        command = nst_messages.command_v1(buf)
         pos1 = command.message.find(" ")
         pos2 = command.message.find(" ", pos1+1)
         path = command.message[pos1+1:pos2]
@@ -144,8 +144,8 @@ def parse_msg(id, buf):
         node = PropertyNode(path)
         if not node.set_json_string(json):
             print("json string parsing/setting failed")
-    elif id == ns_messages.ack_v1_id:
-        msg = ns_messages.ack_v1(buf)
+    elif id == nst_messages.ack_v1_id:
+        msg = nst_messages.ack_v1(buf)
         print("ack:", msg.sequence_num, "result:", msg.result)
         remote_link_node.setInt("sequence_num", msg.sequence_num)
     else:

@@ -1,6 +1,6 @@
 import time
 
-import ns_messages
+import nst_messages
 from fmu_link import fmu_link
 from props import remote_link_node
 
@@ -44,7 +44,7 @@ class Commands():
                 # send the command
                 command = self.cmd_queue[0]
                 print('writing:', self.cmd_send_index, command)
-                cmd = ns_messages.command_v1()
+                cmd = nst_messages.command_v1()
                 cmd.sequence_num = self.cmd_send_index
                 cmd.message = command
                 buf = cmd.pack()

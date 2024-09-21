@@ -1,7 +1,7 @@
 import socket
 
 from fmu_link import fmu_link
-from ns_messages import effectors_v1
+from nst_messages import effectors_v1
 from props import effectors_node
 from serial_link import wrap_packet
 
