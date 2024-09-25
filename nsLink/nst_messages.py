@@ -563,7 +563,7 @@ class airdata_v7():
 # Id: 54
 class airdata_v8():
     id = 54
-    _pack_string = "<LHHhhfffBLHBBH"
+    _pack_string = "<LHhhhfffBLHBBH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
@@ -589,7 +589,7 @@ class airdata_v8():
         msg = self._struct.pack(
                   self.millis,
                   int(round(self.baro_press_pa * 0.5)),
-                  int(round(self.diff_press_pa * 10.0)),
+                  int(round(self.diff_press_pa * 2.0)),
                   int(round(self.air_temp_C * 250.0)),
                   int(round(self.airspeed_mps * 100.0)),
                   self.altitude_agl_m,
@@ -619,7 +619,7 @@ class airdata_v8():
          self.pitot_scale_factor,
          self.error_count) = self._struct.unpack(msg)
         self.baro_press_pa /= 0.5
-        self.diff_press_pa /= 10.0
+        self.diff_press_pa /= 2.0
         self.air_temp_C /= 250.0
         self.airspeed_mps /= 100.0
         self.wind_dir_deg /= 100.0
@@ -1083,7 +1083,7 @@ class inceptors_v2():
         self.aux1 = 0.0
         self.aux2 = 0.0
         self.master_switch = 0
-        self.throttle_safety = 0
+        self.throttle_enable = 0
         # unpack if requested
         if msg: self.unpack(msg)
 
@@ -1099,7 +1099,7 @@ class inceptors_v2():
                   int(round(self.aux1 * 30000.0)),
                   int(round(self.aux2 * 30000.0)),
                   self.master_switch,
-                  self.throttle_safety)
+                  self.throttle_enable)
         return msg
 
     def unpack(self, msg):
@@ -1113,7 +1113,7 @@ class inceptors_v2():
          self.aux1,
          self.aux2,
          self.master_switch,
-         self.throttle_safety) = self._struct.unpack(msg)
+         self.throttle_enable) = self._struct.unpack(msg)
         self.roll /= 30000.0
         self.pitch /= 30000.0
         self.yaw /= 30000.0
@@ -1133,7 +1133,7 @@ class inceptors_v2():
         node.setDouble("aux1", self.aux1)
         node.setDouble("aux2", self.aux2)
         node.setUInt("master_switch", self.master_switch)
-        node.setUInt("throttle_safety", self.throttle_safety)
+        node.setUInt("throttle_enable", self.throttle_enable)
 
     def props2msg(self, node):
         self.millis = node.getUInt("millis")
@@ -1146,7 +1146,7 @@ class inceptors_v2():
         self.aux1 = node.getDouble("aux1")
         self.aux2 = node.getDouble("aux2")
         self.master_switch = node.getUInt("master_switch")
-        self.throttle_safety = node.getUInt("throttle_safety")
+        self.throttle_enable = node.getUInt("throttle_enable")
 
 # Message: power_v1
 # Id: 55
