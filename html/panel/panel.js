@@ -340,10 +340,10 @@ var panel = function() {
         var cruise_kt = parseFloat(json.config.specs.cruise_kt);
         var range_kt = max_kt - min_kt;
         var caution_kt = min_kt + 0.8 * range_kt;
-        var die_kt = max_kt + 10.0;
+        var die_kt = max_kt + 0.2 * range_kt;
 
-        var max_display = Math.ceil( die_kt / 10 ) * 10
-        max_display = 220;
+        var max_display = Math.ceil( die_kt / 10 ) * 10 + 10
+        // max_display = 220;
         var asi_interpx = [ 0, max_display, 2*max_display ];
         var asi_interpy = [ 0, 340, 360 ];
 
@@ -388,7 +388,7 @@ var panel = function() {
         context.fillStyle = "white";
         context.textAlign = "center";
         dstic = 0;
-        if ( max_display <= 50 ) {
+        if ( max_display <= 60 ) {
             dtic = 5;
             dstic = 1;
         } else if ( max_display <= 100 ) {
