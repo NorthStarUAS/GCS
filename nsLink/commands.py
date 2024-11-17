@@ -40,6 +40,7 @@ class Commands():
             if current_time > self.last_sent_time + 0.5:
                 # discard any pending heartbeat commands if we have real work
                 while len(self.cmd_queue) > 1 and self.cmd_queue[0] == 'hb':
+                    print("discarding heartbeat because we have real work ...")  # shouldn't ever see this?
                     self.cmd_queue.pop(0)
                 # send the command
                 command = self.cmd_queue[0]
