@@ -59,6 +59,7 @@ fmu_link = FMULink()
 
 # working on eliminating "packer" and replacing it with auto-generated message code.
 def parse_msg(id, buf):
+    msg = None
     if id == nst_messages.gps_v4_id:
         msg = nst_messages.gps_v4(buf)
         msg.msg2props(gps_node)
@@ -135,11 +136,11 @@ def parse_msg(id, buf):
         msg = nst_messages.event_v3(buf)
         alert_mgr.add_message(msg.message, 2, 10)
     elif id == nst_messages.command_v1_id:
-        command = nst_messages.command_v1(buf)
-        pos1 = command.message.find(" ")
-        pos2 = command.message.find(" ", pos1+1)
-        path = command.message[pos1+1:pos2]
-        json = command.message[pos2+1:len(command.message)]
+        msg = nst_messages.command_v1(buf)
+        pos1 = msg.message.find(" ")
+        pos2 = msg.message.find(" ", pos1+1)
+        path = msg.message[pos1+1:pos2]
+        json = msg.message[pos2+1:len(msg.message)]
         print(path, " = ", json)
         node = PropertyNode(path)
         if not node.set_json_string(json):
@@ -150,6 +151,7 @@ def parse_msg(id, buf):
         remote_link_node.setInt("sequence_num", msg.sequence_num)
     else:
         print("Unknown packet id:", id)
+    return msg
 
 counter = 0
 def file_read(buf):
@@ -188,8 +190,8 @@ def file_read(buf):
     (c0, c1) = checksum(id, savebuf, pkt_len_lo, pkt_len_hi)
     if cksum0 == c0 and cksum1 == c1:
         # print "check sum passed"
-        parse_msg(id, savebuf)
-        return (id, counter)
+        msg = parse_msg(id, savebuf)
+        return (id, msg, counter)
 
     print("Check sum failure!")
     return (-1, counter)
