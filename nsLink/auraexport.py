@@ -5,97 +5,52 @@
 import argparse
 import datetime
 import h5py
+import numpy as np
 import os
 import pandas as pd
 import sys
 import tempfile
 from tqdm import tqdm
 
-from PropertyTree import PropertyNode
+from props import gps_node, imu_node
 
 sys.path.append("../../src")
-from comms import ns_messages
-from comms.packer import packer
+import nst_messages
+#import packer
 
 import commands
-import current
-import auraparser
+from derived_states import derived_states
+import fmu_link
 
 m2nm = 0.0005399568034557235    # meters to nautical miles
 
-def generate_path(id, index):
-    if id in [ns_messages.gps_v3_id, ns_messages.gps_v4_id, ns_messages.gps_v5_id]:
-        category = 'gps'
-    elif id in [ns_messages.imu_v4_id, ns_messages.imu_v5_id, ns_messages.imu_v6_id]:
-        category = 'imu'
-    elif id in [ns_messages.airdata_v6_id, ns_messages.airdata_v7_id, ns_messages.airdata_v8_id]:
-        category = 'air'
-    elif id in [ns_messages.filter_v4_id, ns_messages.filter_v5_id, ns_messages.nav_v6_id]:
-        category = 'filter'
-    elif id == ns_messages.actuator_v2_id or id == ns_messages.actuator_v3_id:
-        category = 'act'
-    elif id in [ns_messages.pilot_v2_id, ns_messages.pilot_v3_id, ns_messages.pilot_v4_id]:
-        category = 'pilot'
-    elif id in [ns_messages.inceptors_v1_id]:
-        category = 'inceptors'
-    elif id in [ns_messages.ap_status_v6_id, ns_messages.ap_status_v7_id, ns_messages.ap_targets_v1_id]:
-        category = 'ap'
-    elif id in [ns_messages.system_health_v5_id, ns_messages.system_health_v6_id, ns_messages.status_v7_id]:
-        category = 'health'
-    elif id == ns_messages.event_v1_id or id == ns_messages.event_v2_id:
-        category = 'event'
+def generate_path(id):
+    if id in [nst_messages.gps_v4_id, nst_messages.gps_v5_id]:
+        path = '/sensors/gps'
+    elif id in [nst_messages.imu_v5_id, nst_messages.imu_v6_id]:
+        path = '/sensors/imu'
+    elif id in [nst_messages.airdata_v7_id, nst_messages.airdata_v8_id]:
+        path = '/sensors/airdata'
+    elif id in [nst_messages.inceptors_v2_id]:
+        path = '/sensors/inceptors'
+    elif id in [nst_messages.nav_v6_id]:
+        path = '/filters/nav'
+    elif id in [nst_messages.nav_metrics_v6_id]:
+        path = '/filters/nav_metrics'
+    elif id in [nst_messages.effectors_v1_id]:
+        path = '/fcs/effectors'
+    elif id in [nst_messages.fcs_refs_v1_id ]:
+        path = '/fcs/refs'
+    elif id in [nst_messages.system_health_v6_id]:
+        path = '/status/health'
+    elif id in [nst_messages.status_v7_id]:
+        path = '/status'
+    elif id in [nst_messages.event_v2_id, nst_messages.event_v3_id]:
+        path = '/status/events'
     else:
-        print("Unknown packet id!", id, index)
+        print("Unknown packet id!", id)
         path = '/unknown-packet-id'
-    if category == 'gps' or category == 'imu' \
-       or category == 'air' or category == 'pilot' or category == 'health':
-        basepath = '/sensors/' + category
-    elif category == 'filter':
-        basepath = '/navigation/' + category
-    elif category == 'act':
-        basepath = '/actuators/' + category
-    elif category == 'inceptors':
-        basepath = '/inceptors'
-    elif category == 'ap':
-        basepath = '/autopilot'
-    elif category == 'health':
-        basepath = '/health'
-    elif category == 'event':
-        basepath = '/events'
-    if index > 0:
-        basepath += "-%d" % index
-    return category, basepath
-
-# When a binary record of some id is read, it gets parsed into the
-# property tree structure.  The following code simple calls the
-# appropriate text packer function for the given id to extract the
-# same data back out of the property tree and format it as a text
-# record.
-def generate_record(category, index):
-    if category == 'gps':
-        return packer.pack_gps_dict(index)
-    elif category == 'imu':
-        return packer.pack_imu_dict(index)
-    elif category == 'air':
-        return packer.pack_airdata_dict(index)
-    elif category == 'filter':
-        return packer.pack_nav_dict(index)
-    elif category == 'act':
-        return packer.pack_act_dict(index)
-    elif category == 'pilot':
-        return packer.pack_pilot_dict(index)
-    elif category == 'ap':
-        return packer.pack_ap_status_dict(index)
-    elif category == 'inceptors':
-        return packer.pack_inceptors_dict(index)
-    elif category == 'health':
-        return packer.pack_system_health_dict(index)
-    elif category == 'payload':
-        return packer.pack_payload_dict(index)
-    elif category == 'event':
-        return packer.pack_event_dict(index)
-    else:
-        print("generate_record, unknown category:", category)
+    return path
 
 argparser = argparse.ArgumentParser(description='aura export')
 argparser.add_argument('flight', help='load specified flight log')
@@ -106,7 +61,6 @@ args = argparser.parse_args()
 data = {}
 master_headers = {}
 
-gps_node = PropertyNode('/sensors/gps/0')
 located = False
 lon = 0.0
 lat = 0.0
@@ -144,7 +98,8 @@ if args.flight:
     last_counter = 0
     while True:
         try:
-            (id, index, counter) = auraparser.file_read(full)
+            (id, msg, counter) = fmu_link.file_read(full)
+            # print(id, msg.__dict__)
             t.update(counter-last_counter)
             last_counter = counter
             if not located:
@@ -154,13 +109,12 @@ if args.flight:
                     lon = gps_node.getDouble('longitude_deg')
                     sec = gps_node.getDouble('unix_time_sec')
                     located = True
-            current.compute_derived_data()
-            category, path = generate_path(id, index)
-            record = generate_record(category, index)
+            derived_states.update()
+            path = generate_path(id)
             if path in data:
-                data[path].append(record)
+                data[path].append(msg.__dict__)
             else:
-                data[path] = [ record ]
+                data[path] = [ msg.__dict__ ]
         except IndexError:
             t.close()
             print("end of file")
@@ -171,22 +125,24 @@ else:
 output_dir = os.path.dirname(os.path.realpath(filename))
 
 # last recorded time stamp
-filter_node = PropertyNode('/filters/filter/0')
-status_node = PropertyNode('/status')
-total_time = filter_node.getDouble('timestamp')
-filter_node.pretty_print()
-apm2_node = PropertyNode("/sensors/APM2")
+total_time = imu_node.getDouble("millis") / 1000.0
+imu_node.pretty_print()
 
 filename = os.path.join(output_dir, "flight.h5")
 f = h5py.File(filename, 'w')
 
 md = f.create_group("/metadata")
-md.attrs["format"] = "AuraUAS"
-md.attrs["version"] = "2.1"
+md.attrs["format"] = "NorthStarUAS"
+md.attrs["version"] = "4.1"
 md.attrs["creator"] = "Curtis L. Olson"
 md.attrs["url"] = "https://www.flightgear.org"
 
 for key in sorted(data):
+    print("key:", key)
+    # print("data:", data[key])
+    print("data[0]:", data[key][0])
+    for sub in sorted(data[key][0]):
+        print("sub:", sub)
     size = len(data[key])
     if total_time > 0.01:
         rate = size / total_time
@@ -196,14 +152,14 @@ for key in sorted(data):
     if size == 0:
         continue
     df = pd.DataFrame(data[key])
-    df.set_index('timestamp', inplace=True, drop=False)
+    df.set_index('millis', inplace=True, drop=False)
     for column in df.columns:
-        print(key + '/' + column)
-        #print(df[column].values)
-        #print(type(df[column].values))
+        print("key2:", key + '/' + column)
+        print("vals:", np.array(df[column].tolist()))
+        print(type(df[column].values))
         if type(df[column].values[0]) != str:
             f.create_dataset(key + '/' + column,
-                             data=df[column].values,
+                             data=np.array(df[column].tolist()),
                              compression="gzip", compression_opts=9)
         else:
             # special str handling
