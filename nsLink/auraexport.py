@@ -12,11 +12,10 @@ import sys
 import tempfile
 from tqdm import tqdm
 
-from props import gps_node, imu_node
+from props import airdata_node, gps_node, imu_node, status_node
 
 sys.path.append("../../src")
 import nst_messages
-#import packer
 
 import commands
 from derived_states import derived_states
@@ -26,35 +25,43 @@ m2nm = 0.0005399568034557235    # meters to nautical miles
 
 def generate_path(id):
     if id in [nst_messages.gps_v4_id, nst_messages.gps_v5_id]:
-        path = '/sensors/gps'
+        path = "/sensors/gps"
     elif id in [nst_messages.imu_v5_id, nst_messages.imu_v6_id]:
-        path = '/sensors/imu'
+        path = "/sensors/imu"
     elif id in [nst_messages.airdata_v7_id, nst_messages.airdata_v8_id]:
-        path = '/sensors/airdata'
+        path = "/sensors/airdata"
     elif id in [nst_messages.inceptors_v2_id]:
-        path = '/sensors/inceptors'
+        path = "/sensors/inceptors"
+    elif id in [nst_messages.power_v1_id]:
+        path = "/sensors/power"
     elif id in [nst_messages.nav_v6_id]:
-        path = '/filters/nav'
+        path = "/filters/nav"
     elif id in [nst_messages.nav_metrics_v6_id]:
-        path = '/filters/nav_metrics'
+        path = "/filters/nav_metrics"
     elif id in [nst_messages.effectors_v1_id]:
-        path = '/fcs/effectors'
+        path = "/fcs/effectors"
     elif id in [nst_messages.fcs_refs_v1_id ]:
-        path = '/fcs/refs'
+        path = "/fcs/refs"
     elif id in [nst_messages.system_health_v6_id]:
-        path = '/status/health'
+        path = "/status/health"
     elif id in [nst_messages.status_v7_id]:
-        path = '/status'
+        path = "/status"
     elif id in [nst_messages.event_v2_id, nst_messages.event_v3_id]:
-        path = '/status/events'
+        path = "/status/events"
+    elif id in [nst_messages.command_v1_id]:
+        path = "/command"
+    elif id in [nst_messages.mission_v1_id]:
+        path = "/mission"
+    elif id in [nst_messages.ack_v1_id]:
+        path = "/ack"
     else:
         print("Unknown packet id!", id)
-        path = '/unknown-packet-id'
+        path = "/unknown-packet-id"
     return path
 
-argparser = argparse.ArgumentParser(description='aura export')
-argparser.add_argument('flight', help='load specified flight log')
-argparser.add_argument('--skip-seconds', help='seconds to skip when processing flight log')
+argparser = argparse.ArgumentParser(description="aura export")
+argparser.add_argument("flight", help="load specified flight log")
+argparser.add_argument("--skip-seconds", help="seconds to skip when processing flight log")
 
 args = argparser.parse_args()
 
@@ -62,28 +69,28 @@ data = {}
 master_headers = {}
 
 located = False
-lon = 0.0
-lat = 0.0
-sec = 0.0
+gps_lon = 0.0
+gps_lat = 0.0
+gps_unix_sec = 0.0
 
 if args.flight:
     if os.path.isdir(args.flight):
-        filename = os.path.join(args.flight, 'flight.dat.gz')
+        filename = os.path.join(args.flight, "flight.dat.gz")
     else:
         filename = args.flight
     print("filename:", filename)
-    if filename.endswith('.gz'):
+    if filename.endswith(".gz"):
         (fd, filetmp) = tempfile.mkstemp()
-        command = 'zcat ' + filename + ' > ' + filetmp
+        command = "zcat " + filename + " > " + filetmp
         print(command)
         os.system(command)
-        fd = open(filetmp, 'rb')
+        fd = open(filetmp, "rb")
     else:
-        fd = open(filename, 'rb')
+        fd = open(filename, "rb")
 
     full = fd.read()
 
-    if filename.endswith('.gz'):
+    if filename.endswith(".gz"):
         # remove temporary file name
         os.remove(filetmp)
 
@@ -103,18 +110,22 @@ if args.flight:
             t.update(counter-last_counter)
             last_counter = counter
             if not located:
-                gps_node.pretty_print()
-                if gps_node.getInt('num_sats') >= 5:
-                    lat = gps_node.getDouble('latitude_deg')
-                    lon = gps_node.getDouble('longitude_deg')
-                    sec = gps_node.getDouble('unix_time_sec')
+                if gps_node.getInt("status") >= 3 and gps_node.getInt("num_sats") >= 5:
+                    gps_node.pretty_print()
+                    gps_lat = gps_node.getDouble("latitude_raw") / 10000000.0
+                    gps_lon = gps_node.getDouble("longitude_raw") / 10000000.0
+                    gps_unix_sec = gps_node.getDouble("unix_usec") / 1000000.0
                     located = True
+                    print("start location:", gps_lat, gps_lon, gps_unix_sec)
             derived_states.update()
             path = generate_path(id)
-            if path in data:
-                data[path].append(msg.__dict__)
-            else:
-                data[path] = [ msg.__dict__ ]
+            if "unknown" in path:
+                print("unknown:", msg, msg.__dict__)
+            if msg is not None:
+                if path in data:
+                    data[path].append(msg.__dict__)
+                else:
+                    data[path] = [ msg.__dict__ ]
         except IndexError:
             t.close()
             print("end of file")
@@ -129,7 +140,7 @@ total_time = imu_node.getDouble("millis") / 1000.0
 imu_node.pretty_print()
 
 filename = os.path.join(output_dir, "flight.h5")
-f = h5py.File(filename, 'w')
+f = h5py.File(filename, "w")
 
 md = f.create_group("/metadata")
 md.attrs["format"] = "NorthStarUAS"
@@ -148,23 +159,26 @@ for key in sorted(data):
         rate = size / total_time
     else:
         rate = 0.0
-    print('%-10s %5.1f/sec (%7d records)' % (key, rate, size))
+    print("%-10s %5.1f/sec (%7d records)" % (key, rate, size))
     if size == 0:
         continue
     df = pd.DataFrame(data[key])
-    df.set_index('millis', inplace=True, drop=False)
+    if "millis" in data[key]:
+        df.set_index("millis", inplace=True, drop=False)
+    elif "metric_millis" in data[key]:
+        df.set_index("metric_millis", inplace=True, drop=False)
     for column in df.columns:
-        print("key2:", key + '/' + column)
+        print("key2:", key + "/" + column)
         print("vals:", np.array(df[column].tolist()))
         print(type(df[column].values))
         if type(df[column].values[0]) != str:
-            f.create_dataset(key + '/' + column,
+            f.create_dataset(key + "/" + column,
                              data=np.array(df[column].tolist()),
                              compression="gzip", compression_opts=9)
         else:
             # special str handling
             dt = h5py.special_dtype(vlen=str)
-            f.create_dataset(key + '/' + column,
+            f.create_dataset(key + "/" + column,
                              data=df[column].values, dtype=dt,
                              compression="gzip", compression_opts=9)
 
@@ -172,76 +186,76 @@ f.close()
 
 print()
 print("Total log time: %.1f min" % (total_time / 60.0))
-print("Flight timer: %.1f min" % (status_node.getDouble("flight_timer") / 60.0))
+print("Flight timer: %.1f min" % (airdata_node.getDouble("flight_timer_millis") / (1000 * 60.0)))
+print("Flight timer (accum/estim): %.1f min" % (status_node.getDouble("flight_timer") / 60))
 print("Autopilot timer: %.1f min" % (status_node.getDouble("ap_timer") / 60.0))
 print("Throttle timer: %.1f min" % (status_node.getDouble("throttle_timer") / 60.0))
-od = status_node.getDouble('odometer_m')
+od = status_node.getDouble("odometer_m")
 print("Distance flown: %.2f nm (%.2f km)" % (od*m2nm, od*0.001))
-print("Battery Usage: %.0f mah" % apm2_node.getInt("extern_current_mah"))
 print()
 
-apikey = None
+apikey = ""
 try:
     from os.path import expanduser
     home = expanduser("~")
-    f = open(home + '/.forecastio')
+    f = open(home + "/.pirateweather")
     apikey = f.read().rstrip()
 except:
-    print("you must sign up for a free apikey at forecast.io and insert it as a single line inside a file called ~/.forecastio (with no other text in the file)")
+    print("you must sign up for a free apikey at pirateweather.net and insert it as a single line inside a file called ~/.pirateweather (with no other text in the file)")
 
 if not apikey:
-    print("Cannot lookup weather because no forecastio apikey found.")
-elif sec < 1:
+    print("Cannot lookup weather because no pirateweather.net apikey found.")
+elif gps_unix_sec < 1:
     print("Cannot lookup weather because gps didn't report unix time.")
 else:
     print()
     #utc = datetime.timezone(0)
-    d = datetime.datetime.utcfromtimestamp(sec)
+    d = datetime.datetime.utcfromtimestamp(gps_unix_sec)
     print(d.strftime("%Y-%m-%d-%H:%M:%S"))
 
-    url = 'https://api.darksky.net/forecast/' + apikey + '/%.8f,%.8f,%.d' % (lat, lon, sec)
-
+    url = "https://timemachine.pirateweather.net/forecast/" + apikey + "/%.8f,%.8f,%.d" % (gps_lat, gps_lon, gps_unix_sec)
+    print("url:", url)
     import urllib.request, json
     response = urllib.request.urlopen(url)
     data = json.loads(response.read())
     mph2kt = 0.868976
     mb2inhg = 0.0295299830714
-    if 'currently' in data:
-        currently = data['currently']
+    if "currently" in data:
+        currently = data["currently"]
         #for key in currently:
-        #    print key, ':', currently[key]
-        if 'icon' in currently:
-            icon = currently['icon']
+        #    print key, ":", currently[key]
+        if "icon" in currently:
+            icon = currently["icon"]
             print("Summary:", icon)
-        if 'temperature' in currently:
-            tempF = currently['temperature']
+        if "temperature" in currently:
+            tempF = currently["temperature"]
             tempC = (tempF - 32.0) * 5 / 9
             print("Temp:", "%.1f F" % tempF, "(%.1f C)" % tempC)
-        if 'dewPoint' in currently:
-            tempF = currently['dewPoint']
+        if "dewPoint" in currently:
+            tempF = currently["dewPoint"]
             tempC = (tempF - 32.0) * 5 / 9
             print("Dewpoint:", "%.1f F" % tempF, "(%.1f C)" % tempC)
-        if 'humidity' in currently:
-            hum = currently['humidity']
+        if "humidity" in currently:
+            hum = currently["humidity"]
             print("Humidity:", "%.0f%%" % (hum * 100.0))
-        if 'pressure' in currently:
-            mbar = currently['pressure']
+        if "pressure" in currently:
+            mbar = currently["pressure"]
             inhg = mbar * mb2inhg
             print("Pressure:", "%.2f inhg" % inhg, "(%.1f mbar)" % mbar)
-        if 'windSpeed' in currently:
-            wind_mph = currently['windSpeed']
+        if "windSpeed" in currently:
+            wind_mph = currently["windSpeed"]
             wind_kts = wind_mph * mph2kt
         else:
             wind_mph = 0
             wind_kts = 0
-        if 'windBearing' in currently:
-            wind_deg = currently['windBearing']
+        if "windBearing" in currently:
+            wind_deg = currently["windBearing"]
         else:
             wind_deg = 0
         print("Wind %d deg @ %.1f kt (%.1f mph) @ " % (wind_deg, wind_kts, wind_mph, ))
-        if 'visibility' in currently:
-            vis = currently['visibility']
+        if "visibility" in currently:
+            vis = currently["visibility"]
             print("Visibility:", "%.1f miles" % vis)
-        if 'cloudCover' in currently:
-            cov = currently['cloudCover']
+        if "cloudCover" in currently:
+            cov = currently["cloudCover"]
             print("Cloud Cover:", "%.0f%%" % (cov * 100.0))

@@ -1,6 +1,6 @@
 import math
 
-from props import airdata_node, inceptors_node, nav_node, power_node, status_node, refs_node, tecs_config_node, tecs_node
+from props import airdata_node, imu_node, inceptors_node, nav_node, power_node, status_node, refs_node, tecs_config_node, tecs_node
 
 
 r2d = 180.0 / math.pi
@@ -44,18 +44,20 @@ class DerivedStates:
         ve = nav_node.getDouble("ve_mps")
         vd = nav_node.getDouble("vd_mps")
         hdg = (math.pi * 0.5 - math.atan2(vn, ve)) * r2d
-        vel_ms = math.sqrt( vn*vn + ve*ve )
+        vel_mps = math.sqrt( vn*vn + ve*ve )
         nav_node.setDouble("groundtrack_deg", hdg)
-        nav_node.setDouble("groundspeed_mps", vel_ms)
-        nav_node.setDouble("groundspeed_kt", vel_ms * mps2kt)
+        nav_node.setDouble("groundspeed_mps", vel_mps)
+        nav_node.setDouble("groundspeed_kt", vel_mps * mps2kt)
 
         # compute frame dt
-        current_time = nav_node.getDouble('timestamp')
+        current_time = nav_node.getDouble('millis') / 1000.0
+        print("millis:", imu_node.getInt('millis'), nav_node.getDouble('millis'))
         dt = current_time - self.last_time
+        print("cur: %.3f" % current_time, "dt: %.3f" % dt, "flt: %.3f" % self.flight_timer)
         self.last_time = current_time
 
         # local 'airborne' helper (not official)
-        is_airborne = airdata_node.getDouble("is_airborne")
+        is_airborne = airdata_node.getBool("is_airborne")
 
         # local autopilot timer
         ap_enabled = inceptors_node.getBool("master_switch")
@@ -63,7 +65,7 @@ class DerivedStates:
         # estimate odometer and timers
         if is_airborne:
             self.flight_timer += dt
-            self.odometer += vel_ms * dt
+            self.odometer += vel_mps * dt
             if ap_enabled:
                 self.ap_timer += dt
         if inceptors_node.getDouble("power") > 0.1:
