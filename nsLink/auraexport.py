@@ -119,7 +119,7 @@ if args.flight:
                     print("start location:", gps_lat, gps_lon, gps_unix_sec)
             derived_states.update()
             path = generate_path(id)
-            if "unknown" in path:
+            if "unknown" in path and msg is not None:
                 print("unknown:", msg, msg.__dict__)
             if msg is not None:
                 if path in data:
@@ -167,6 +167,8 @@ for key in sorted(data):
         df.set_index("millis", inplace=True, drop=False)
     elif "metric_millis" in data[key]:
         df.set_index("metric_millis", inplace=True, drop=False)
+    else:
+        print("oops, no timstamp?")
     for column in df.columns:
         print("key2:", key + "/" + column)
         print("vals:", np.array(df[column].tolist()))
@@ -188,7 +190,7 @@ print()
 print("Total log time: %.1f min" % (total_time / 60.0))
 print("Flight timer: %.1f min" % (airdata_node.getDouble("flight_timer_millis") / (1000 * 60.0)))
 print("Flight timer (accum/estim): %.1f min" % (status_node.getDouble("flight_timer") / 60))
-print("Autopilot timer: %.1f min" % (status_node.getDouble("ap_timer") / 60.0))
+print("Autopilot timer: %.1f min" % (status_node.getDouble("autopilot_timer") / 60.0))
 print("Throttle timer: %.1f min" % (status_node.getDouble("throttle_timer") / 60.0))
 od = status_node.getDouble("odometer_m")
 print("Distance flown: %.2f nm (%.2f km)" % (od*m2nm, od*0.001))
