@@ -1,6 +1,6 @@
 import math
 
-from props import airdata_node, imu_node, inceptors_node, nav_node, power_node, status_node, refs_node, tecs_config_node, tecs_node
+from props import airdata_node, gps_node, imu_node, inceptors_node, nav_node, power_node, status_node, refs_node, tecs_config_node, tecs_node
 
 
 r2d = 180.0 / math.pi
@@ -53,7 +53,7 @@ class DerivedStates:
         current_time = nav_node.getDouble('millis') / 1000.0
         print("millis:", imu_node.getInt('millis'), nav_node.getDouble('millis'))
         dt = current_time - self.last_time
-        print("cur: %.3f" % current_time, "dt: %.3f" % dt, "flt: %.3f" % self.flight_timer)
+        print("cur: %.3f" % current_time, "dt: %.3f" % dt, "flt: %.3f" % self.flight_timer, "ap: %.3f" % self.ap_timer, "power: %.3f" % self.throttle_timer)
         self.last_time = current_time
 
         # local 'airborne' helper (not official)
@@ -61,6 +61,7 @@ class DerivedStates:
 
         # local autopilot timer
         ap_enabled = inceptors_node.getBool("master_switch")
+        print("is_airborne:", is_airborne, "ap:", ap_enabled)
 
         # estimate odometer and timers
         if is_airborne:
