@@ -194,4 +194,4 @@ def file_read(buf):
         return (id, msg, counter)
 
     print("Check sum failure!")
-    return (-1, counter)
+    return (-1, None, counter)
