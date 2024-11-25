@@ -47,7 +47,7 @@ def generate_path(id):
     elif id in [nst_messages.status_v7_id]:
         path = "/status"
     elif id in [nst_messages.event_v2_id, nst_messages.event_v3_id]:
-        path = "/status/events"
+        path = "/events"
     elif id in [nst_messages.command_v1_id]:
         path = "/command"
     elif id in [nst_messages.mission_v1_id]:
