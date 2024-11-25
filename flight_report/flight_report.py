@@ -489,8 +489,8 @@ if "temp" in df0_air:
     plt.grid()
 
 plt.figure()
-plt.title("Airspeed (mps)")
-plt.plot(df0_air["airspeed_mps"])
+plt.title("Airspeed (kts)")
+plt.plot(df0_air["airspeed_mps"]*mps2kt)
 plt.grid()
 
 if "alt_press" in df0_air:
