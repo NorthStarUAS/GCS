@@ -57,8 +57,11 @@ class FMULink:
 
 fmu_link = FMULink()
 
+millis = 0
+
 # working on eliminating "packer" and replacing it with auto-generated message code.
 def parse_msg(id, buf):
+    global millis
     msg = None
     if id == nst_messages.gps_v4_id:
         msg = nst_messages.gps_v4(buf)
@@ -72,12 +75,15 @@ def parse_msg(id, buf):
     elif id == nst_messages.imu_v6_id:
         msg = nst_messages.imu_v6(buf)
         msg.msg2props(imu_node)
+        millis = msg.millis
     elif id == nst_messages.airdata_v7_id:
         msg = nst_messages.airdata_v7(buf)
         msg.msg2props(airdata_node)
     elif id == nst_messages.airdata_v8_id:
         msg = nst_messages.airdata_v8(buf)
         msg.msg2props(airdata_node)
+        msg.millis = millis
+        print("fmu_link.py: missing airdata millis hack...")
     elif id == nst_messages.effectors_v1_id:
         msg = nst_messages.effectors_v1(buf)
         msg.msg2props(effectors_node)
