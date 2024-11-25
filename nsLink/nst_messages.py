@@ -578,8 +578,8 @@ class airdata_v8():
         self.altitude_ground_m = 0.0
         self.is_airborne = 0
         self.flight_timer_millis = 0
-        self.wind_dir_deg = 0.0
-        self.wind_speed_mps = 0.0
+        self.wind_deg = 0.0
+        self.wind_mps = 0.0
         self.pitot_scale_factor = 0.0
         self.error_count = 0
         # unpack if requested
@@ -597,8 +597,8 @@ class airdata_v8():
                   self.altitude_ground_m,
                   self.is_airborne,
                   self.flight_timer_millis,
-                  int(round(self.wind_dir_deg * 100.0)),
-                  int(round(self.wind_speed_mps * 10.0)),
+                  int(round(self.wind_deg * 100.0)),
+                  int(round(self.wind_mps * 10.0)),
                   int(round(self.pitot_scale_factor * 100.0)),
                   self.error_count)
         return msg
@@ -614,16 +614,16 @@ class airdata_v8():
          self.altitude_ground_m,
          self.is_airborne,
          self.flight_timer_millis,
-         self.wind_dir_deg,
-         self.wind_speed_mps,
+         self.wind_deg,
+         self.wind_mps,
          self.pitot_scale_factor,
          self.error_count) = self._struct.unpack(msg)
         self.baro_press_pa /= 0.5
         self.diff_press_pa /= 2.0
         self.air_temp_C /= 250.0
         self.airspeed_mps /= 100.0
-        self.wind_dir_deg /= 100.0
-        self.wind_speed_mps /= 10.0
+        self.wind_deg /= 100.0
+        self.wind_mps /= 10.0
         self.pitot_scale_factor /= 100.0
 
     def msg2props(self, node):
@@ -637,8 +637,8 @@ class airdata_v8():
         node.setDouble("altitude_ground_m", self.altitude_ground_m)
         node.setUInt("is_airborne", self.is_airborne)
         node.setUInt("flight_timer_millis", self.flight_timer_millis)
-        node.setDouble("wind_dir_deg", self.wind_dir_deg)
-        node.setDouble("wind_speed_mps", self.wind_speed_mps)
+        node.setDouble("wind_deg", self.wind_deg)
+        node.setDouble("wind_mps", self.wind_mps)
         node.setDouble("pitot_scale_factor", self.pitot_scale_factor)
         node.setUInt("error_count", self.error_count)
 
@@ -653,8 +653,8 @@ class airdata_v8():
         self.altitude_ground_m = node.getDouble("altitude_ground_m")
         self.is_airborne = node.getUInt("is_airborne")
         self.flight_timer_millis = node.getUInt("flight_timer_millis")
-        self.wind_dir_deg = node.getDouble("wind_dir_deg")
-        self.wind_speed_mps = node.getDouble("wind_speed_mps")
+        self.wind_deg = node.getDouble("wind_deg")
+        self.wind_mps = node.getDouble("wind_mps")
         self.pitot_scale_factor = node.getDouble("pitot_scale_factor")
         self.error_count = node.getUInt("error_count")
 
@@ -1083,7 +1083,7 @@ class inceptors_v2():
         self.aux1 = 0.0
         self.aux2 = 0.0
         self.master_switch = 0
-        self.throttle_enable = 0
+        self.motor_enable = 0
         # unpack if requested
         if msg: self.unpack(msg)
 
@@ -1099,7 +1099,7 @@ class inceptors_v2():
                   int(round(self.aux1 * 30000.0)),
                   int(round(self.aux2 * 30000.0)),
                   self.master_switch,
-                  self.throttle_enable)
+                  self.motor_enable)
         return msg
 
     def unpack(self, msg):
@@ -1113,7 +1113,7 @@ class inceptors_v2():
          self.aux1,
          self.aux2,
          self.master_switch,
-         self.throttle_enable) = self._struct.unpack(msg)
+         self.motor_enable) = self._struct.unpack(msg)
         self.roll /= 30000.0
         self.pitch /= 30000.0
         self.yaw /= 30000.0
@@ -1133,7 +1133,7 @@ class inceptors_v2():
         node.setDouble("aux1", self.aux1)
         node.setDouble("aux2", self.aux2)
         node.setUInt("master_switch", self.master_switch)
-        node.setUInt("throttle_enable", self.throttle_enable)
+        node.setUInt("motor_enable", self.motor_enable)
 
     def props2msg(self, node):
         self.millis = node.getUInt("millis")
@@ -1146,13 +1146,13 @@ class inceptors_v2():
         self.aux1 = node.getDouble("aux1")
         self.aux2 = node.getDouble("aux2")
         self.master_switch = node.getUInt("master_switch")
-        self.throttle_enable = node.getUInt("throttle_enable")
+        self.motor_enable = node.getUInt("motor_enable")
 
 # Message: power_v1
 # Id: 55
 class power_v1():
     id = 55
-    _pack_string = "<LHHHHH"
+    _pack_string = "<LHHHH"
     _struct = struct.Struct(_pack_string)
 
     def __init__(self, msg=None):
@@ -1161,8 +1161,7 @@ class power_v1():
         self.avionics_vcc = 0.0
         self.main_vcc = 0.0
         self.cell_vcc = 0.0
-        self.main_amps = 0.0
-        self.total_mah = 0.0
+        self.pwm_vcc = 0.0
         # unpack if requested
         if msg: self.unpack(msg)
 
@@ -1172,8 +1171,7 @@ class power_v1():
                   int(round(self.avionics_vcc * 1000.0)),
                   int(round(self.main_vcc * 1000.0)),
                   int(round(self.cell_vcc * 1000.0)),
-                  int(round(self.main_amps * 1000.0)),
-                  int(round(self.total_mah * 0.5)))
+                  int(round(self.pwm_vcc * 1000.0)))
         return msg
 
     def unpack(self, msg):
@@ -1181,29 +1179,25 @@ class power_v1():
          self.avionics_vcc,
          self.main_vcc,
          self.cell_vcc,
-         self.main_amps,
-         self.total_mah) = self._struct.unpack(msg)
+         self.pwm_vcc) = self._struct.unpack(msg)
         self.avionics_vcc /= 1000.0
         self.main_vcc /= 1000.0
         self.cell_vcc /= 1000.0
-        self.main_amps /= 1000.0
-        self.total_mah /= 0.5
+        self.pwm_vcc /= 1000.0
 
     def msg2props(self, node):
         node.setUInt("millis", self.millis)
         node.setDouble("avionics_vcc", self.avionics_vcc)
         node.setDouble("main_vcc", self.main_vcc)
         node.setDouble("cell_vcc", self.cell_vcc)
-        node.setDouble("main_amps", self.main_amps)
-        node.setDouble("total_mah", self.total_mah)
+        node.setDouble("pwm_vcc", self.pwm_vcc)
 
     def props2msg(self, node):
         self.millis = node.getUInt("millis")
         self.avionics_vcc = node.getDouble("avionics_vcc")
         self.main_vcc = node.getDouble("main_vcc")
         self.cell_vcc = node.getDouble("cell_vcc")
-        self.main_amps = node.getDouble("main_amps")
-        self.total_mah = node.getDouble("total_mah")
+        self.pwm_vcc = node.getDouble("pwm_vcc")
 
 # Message: fcs_refs_v1
 # Id: 65
@@ -1275,10 +1269,10 @@ class mission_v1():
         self.task_name = ""
         self.task_attribute = 0
         self.route_size = 0
-        self.target_waypoint_idx = 0
-        self.wp_index = 0
-        self.wp_longitude_raw = 0
-        self.wp_latitude_raw = 0
+        self.target_wpt_idx = 0
+        self.wpt_index = 0
+        self.wpt_longitude_raw = 0
+        self.wpt_latitude_raw = 0
         # unpack if requested
         if msg: self.unpack(msg)
 
@@ -1288,10 +1282,10 @@ class mission_v1():
                   len(self.task_name),
                   self.task_attribute,
                   self.route_size,
-                  self.target_waypoint_idx,
-                  self.wp_index,
-                  self.wp_longitude_raw,
-                  self.wp_latitude_raw)
+                  self.target_wpt_idx,
+                  self.wpt_index,
+                  self.wpt_longitude_raw,
+                  self.wpt_latitude_raw)
         msg += str.encode(self.task_name)
         return msg
 
@@ -1303,10 +1297,10 @@ class mission_v1():
          self.task_name_len,
          self.task_attribute,
          self.route_size,
-         self.target_waypoint_idx,
-         self.wp_index,
-         self.wp_longitude_raw,
-         self.wp_latitude_raw) = self._struct.unpack(msg)
+         self.target_wpt_idx,
+         self.wpt_index,
+         self.wpt_longitude_raw,
+         self.wpt_latitude_raw) = self._struct.unpack(msg)
         self.task_name = extra[:self.task_name_len].decode()
         extra = extra[self.task_name_len:]
 
@@ -1315,20 +1309,20 @@ class mission_v1():
         node.setString("task_name", self.task_name)
         node.setUInt("task_attribute", self.task_attribute)
         node.setUInt("route_size", self.route_size)
-        node.setUInt("target_waypoint_idx", self.target_waypoint_idx)
-        node.setUInt("wp_index", self.wp_index)
-        node.setInt("wp_longitude_raw", self.wp_longitude_raw)
-        node.setInt("wp_latitude_raw", self.wp_latitude_raw)
+        node.setUInt("target_wpt_idx", self.target_wpt_idx)
+        node.setUInt("wpt_index", self.wpt_index)
+        node.setInt("wpt_longitude_raw", self.wpt_longitude_raw)
+        node.setInt("wpt_latitude_raw", self.wpt_latitude_raw)
 
     def props2msg(self, node):
         self.millis = node.getUInt("millis")
         self.task_name = node.getString("task_name")
         self.task_attribute = node.getUInt("task_attribute")
         self.route_size = node.getUInt("route_size")
-        self.target_waypoint_idx = node.getUInt("target_waypoint_idx")
-        self.wp_index = node.getUInt("wp_index")
-        self.wp_longitude_raw = node.getInt("wp_longitude_raw")
-        self.wp_latitude_raw = node.getInt("wp_latitude_raw")
+        self.target_wpt_idx = node.getUInt("target_wpt_idx")
+        self.wpt_index = node.getUInt("wpt_index")
+        self.wpt_longitude_raw = node.getInt("wpt_longitude_raw")
+        self.wpt_latitude_raw = node.getInt("wpt_latitude_raw")
 
 # Message: system_health_v6
 # Id: 46
