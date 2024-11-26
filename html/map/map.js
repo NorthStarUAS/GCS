@@ -346,7 +346,7 @@ map_update = function() {
             active_wpt.setLatLng( [json.mission.circle.latitude_deg,
                                    json.mission.circle.longitude_deg] );
         } else if ( json.mission.task == 'route' ) {
-            i = json.mission.route.target_waypoint_idx;
+            i = json.mission.route.target_wpt_idx;
             if ( i < json.mission.route.active.wpt.length ) {
                 active_wpt.setLatLng( [json.mission.route.active.wpt[i].latitude_deg,
                                        json.mission.route.active.wpt[i].longitude_deg] );
