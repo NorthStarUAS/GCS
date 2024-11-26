@@ -199,7 +199,7 @@ class Alerts():
         # Wind
         if airdata_node.getBool("is_airborne"):
             if False: #fixme
-                wind_kt = airdata_node.getDouble("wind_speed_mps") * mps2kt
+                wind_kt = airdata_node.getDouble("wind_mps") * mps2kt
                 target_airspeed_kt = refs_node.getDouble("airspeed_kt")
                 ratio = 0.0
                 if target_airspeed_kt > 0.1:
@@ -291,19 +291,19 @@ class Alerts():
             # default to mps if not specified
             speed_scale = kt2mps
             display_units = "ms"
-        wind_dir = int(round(airdata_node.getDouble("wind_dir_deg") * 0.1) * 10)
-        wind_speed = airdata_node.getDouble("wind_speed_mps")*mps2kt*speed_scale
+        wind_deg = int(round(airdata_node.getDouble("wind_deg") * 0.1) * 10)
+        wind_mps = airdata_node.getDouble("wind_mps")*mps2kt*speed_scale
         target_airspeed = refs_node.getDouble("airspeed_kt")*speed_scale
         ratio = 0.0
         if target_airspeed > 0.1:
-            ratio = wind_speed / target_airspeed
+            ratio = wind_mps / target_airspeed
         if ratio < 0.5:
             wind_level = 1
         elif ratio < 0.7:
             wind_level = 2
         else:
             wind_level = 3
-        ann_node.setString("wind", "%d;%03d@%.0f" % (wind_level, wind_dir, wind_speed) + display_units)
+        ann_node.setString("wind", "%d;%03d@%.0f" % (wind_level, wind_deg, wind_mps) + display_units)
 
         temp = airdata_node.getDouble("air_temp_C")
         if temp < -30 or temp > 50:
