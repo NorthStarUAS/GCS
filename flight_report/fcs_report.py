@@ -65,7 +65,7 @@ if 'pilot' in data:
 if 'ap' in data:
     df0_ap = pd.DataFrame(data['ap'])
     df0_ap.set_index('time', inplace=True, drop=False)
-    
+
 launch_sec = None
 mission = None
 land_sec = None
@@ -110,7 +110,7 @@ if 'event' in data:
             startE = event['time']
         if event['message'] == "Excitation End":
             regions.append( [startE, event['time'], label] )
-    
+
 # Iterate through the flight and collect some stats
 print("Collecting flight stats:")
 in_flight = False
@@ -150,21 +150,21 @@ def add_regions(plot, regions):
         plot.text(region[0], 0.5, region[2], transform=trans,
                   verticalalignment='center',
                   rotation=90, color=colors[i % len(colors)])
-        
-if not 'wind_dir' in data['air'][0] or args.wind_time:
+
+if not 'wind_deg' in data['air'][0] or args.wind_time:
     # run a quick wind estimate
     import wind
     w = wind.Wind()
     winds = w.estimate(data, args.wind_time)
     df1_wind = pd.DataFrame(winds)
     time = df1_wind['time']
-    wind_dir = df1_wind['wind_deg']
-    wind_speed = df1_wind['wind_kt']
+    wind_deg = df1_wind['wind_deg']
+    wind_mps = df1_wind['wind_mps']
     pitot_scale = df1_wind['pitot_scale']
 else:
     time = df0_air['time']
-    wind_dir = df0_air['wind_dir']
-    wind_speed = df0_air['wind_speed']
+    wind_deg = df0_air['wind_deg']
+    wind_mps = df0_air['wind_mps']
     pitot_scale = df0_air['pitot_scale']
 
 # IMU plots
