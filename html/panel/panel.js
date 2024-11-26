@@ -858,12 +858,16 @@ var panel = function() {
                              [[0,10]], [], [[25,100]]);
     var cell_bar = new MyBar("Per Cell", 3.0, 4.2, 0.1,
                              [[3.0,3.3]], [], [[3.5,4.2]]);
-    var curr_bar = new MyBar("Current Draw", 0, 200, 25,
-                             [[150,200]], [], [[0,50]]);
+    // var curr_bar = new MyBar("Current Draw", 0, 200, 25,
+    //                          [[150,200]], [], [[0,50]]);
     var vcc_bar = new MyBar("Avionics", 4.5, 5.5, 0.1,
                             [[4.5,4.8], [5.2,5.5]],
                             [],
                             [[4.9,5.1]]);
+    var pwm_vcc_bar = new MyBar("PWM", 4.5, 6.0, 0.1,
+                            [[4.5,4.8], [5.8,6.0]],
+                            [],
+                            [[4.9,5.5]]);
     var imu_temp_bar = new MyBar("IMU Temp", 0, 60, 10,
                                  [[50,60]], [], [[0,40]]);
 
@@ -912,11 +916,11 @@ var panel = function() {
         cell_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
                       px, cell_volts, val_text);
 
-        y1 += vspace;
-        var watts = json.sensors.power.main_watts;
-        var val_text = (watts).toFixed(0) + "W";
-        curr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
-                      px, watts, val_text);
+        // y1 += vspace;
+        // var watts = json.sensors.power.main_watts;
+        // var val_text = (watts).toFixed(0) + "W";
+        // curr_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+        //               px, watts, val_text);
 
         y1 += vspace;
         var vcc = json.sensors.power.avionics_vcc;
@@ -926,6 +930,13 @@ var panel = function() {
                      px, vcc, val_text);
 
         y1 += vspace;
+        var pwm_vcc = json.sensors.power.pwm_vcc;
+        if ( pwm_vcc == null ) { pwm_vcc = 0; }
+        var val_text = (pwm_vcc).toFixed(2) + "V";
+        pwm_vcc_bar.draw(x + ipad, y + y1, size - 2*ipad, h,
+                    px, pwm_vcc, val_text);
+        y1 += vspace;
+
         var imu_temp = 0;
         if ( typeof json.sensors.imu !== 'undefined' ) {
             imu_temp = parseFloat(json.sensors.imu.temp_C);
@@ -1310,7 +1321,7 @@ var panel = function() {
         // Wind
 
         if ( json.status.in_flight == "True" ) {
-            var wind_kt = parseFloat(json.sensors.airdata.wind_speed_mps)*mps2kt;
+            var wind_kt = parseFloat(json.sensors.airdata.wind_mps)*mps2kt;
             var target_airspeed_kt = parseFloat(json.fcs.refs.airspeed_kt);
             text = "Wind: " + wind_kt.toFixed(0) + " kt";
             var ratio = 0.0;
@@ -1490,7 +1501,7 @@ var panel = function() {
             groundtrack_deg = json.filters.nav.groundtrack_deg;
         }
         var ap_hdg = json.fcs.refs.groundtrack_deg
-        var wind_deg = json.sensors.airdata.wind_dir_deg;
+        var wind_deg = json.sensors.airdata.wind_deg;
 
         var display_units = json.config.specs.display_units;
         var speed_scale = 1.0;
@@ -1535,8 +1546,8 @@ var panel = function() {
 
         // wind label
         var wind_kt = 0;
-        if ( json.sensors.airdata.wind_speed_mps != null ) {
-            wind_kt = parseFloat(json.sensors.airdata.wind_speed_mps*mps2kt*speed_scale).toFixed(0);
+        if ( json.sensors.airdata.wind_mps != null ) {
+            wind_kt = parseFloat(json.sensors.airdata.wind_mps*mps2kt*speed_scale).toFixed(0);
         }
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";
