@@ -83,7 +83,6 @@ def parse_msg(id, buf):
         msg = nst_messages.airdata_v8(buf)
         msg.msg2props(airdata_node)
         msg.millis = millis
-        print("fmu_link.py: missing airdata millis hack...")
     elif id == nst_messages.effectors_v1_id:
         msg = nst_messages.effectors_v1(buf)
         msg.msg2props(effectors_node)
@@ -115,23 +114,23 @@ def parse_msg(id, buf):
         mission_node.setString("task", msg.task_name)
         # # fixme: need to parse route / waypoints
         route_node.setUInt("route_size", msg.route_size)
-        route_node.setUInt("target_waypoint_idx", msg.target_waypoint_idx)
-        if msg.wp_index < msg.route_size:
-            wp_node = active_node.getChild("wpt/%d" % msg.wp_index)
-            wp_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
-            wp_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
-        if msg.wp_index == 65534:
-            circle_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
-            circle_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
+        route_node.setUInt("target_wpt_idx", msg.target_wpt_idx)
+        if msg.wpt_index < msg.route_size:
+            wp_node = active_node.getChild("wpt/%d" % msg.wpt_index)
+            wp_node.setDouble("longitude_deg", msg.wpt_longitude_raw / 10000000.0)
+            wp_node.setDouble("latitude_deg", msg.wpt_latitude_raw / 10000000.0)
+        if msg.wpt_index == 65534:
+            circle_node.setDouble("longitude_deg", msg.wpt_longitude_raw / 10000000.0)
+            circle_node.setDouble("latitude_deg", msg.wpt_latitude_raw / 10000000.0)
             if msg.task_attribute >= 30000:
                 circle_node.setString("direction", "right");
                 msg.task_attribute -= 30000
             else:
                 circle_node.setString("direction", "left");
             circle_node.setDouble("radius_m",msg.task_attribute)
-        if msg.wp_index == 65535:
-            home_node.setDouble("longitude_deg", msg.wp_longitude_raw / 10000000.0)
-            home_node.setDouble("latitude_deg", msg.wp_latitude_raw / 10000000.0)
+        if msg.wpt_index == 65535:
+            home_node.setDouble("longitude_deg", msg.wpt_longitude_raw / 10000000.0)
+            home_node.setDouble("latitude_deg", msg.wpt_latitude_raw / 10000000.0)
             home_node.setDouble("azimuth_deg",msg.task_attribute)
     elif id == nst_messages.system_health_v6_id:
         index = packer.unpack_system_health_v6(buf)
