@@ -57,15 +57,14 @@ df0_nav_metrics = pd.DataFrame(data["nav_metrics"])
 df0_nav_metrics.set_index("timestamp", inplace=True, drop=False)
 df0_air = pd.DataFrame(data["airdata"])
 df0_air.set_index("timestamp", inplace=True, drop=False)
-if "health" in data:
-    df0_health = pd.DataFrame(data["health"])
-    df0_health.set_index("timestamp", inplace=True, drop=False)
-if "act" in data and len(data["act"]):
-    df0_act = pd.DataFrame(data["act"])
-    df0_act.set_index("timestamp", inplace=True, drop=False)
-if "inceptor" in data and len(data["inceptor"]):
-    df0_inceptor = pd.DataFrame(data["inceptor"])
-    df0_inceptor.set_index("timestamp", inplace=True, drop=False)
+df0_env = pd.DataFrame(data["env"])
+df0_env.set_index("timestamp", inplace=True, drop=False)
+df0_eff = pd.DataFrame(data["effectors"])
+df0_eff.set_index("timestamp", inplace=True, drop=False)
+df0_inceptors = pd.DataFrame(data["inceptors"])
+df0_inceptors.set_index("timestamp", inplace=True, drop=False)
+df0_env = pd.DataFrame(data["env"])
+df0_env.set_index("timestamp", inplace=True, drop=False)
 
 launch_sec = None
 mission = None
@@ -131,11 +130,13 @@ for i in tqdm(range(iter.size())):
         gps = record["gps"]
     if "airdata" in record:
         air = record["airdata"]
+    if "env" in record:
+        env = record["env"]
         if startA == 0.0 and env["is_airborne"]:
-            startA = air["timestamp"]
+            startA = env["timestamp"]
         if startA > 0.0 and not env["is_airborne"]:
-            if air["timestamp"] - startA >= 10.0:
-                airborne.append([startA, air["timestamp"], "Airborne"])
+            if env["timestamp"] - startA >= 10.0:
+                airborne.append([startA, env["timestamp"], "Airborne"])
             startA = 0.0
         in_flight = env["is_airborne"]
     if "pilot" in record:
@@ -321,13 +322,14 @@ if not time is None:
     wind_fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True)
     ax0.set_title("Winds Aloft")
     ax0.set_ylabel("Heading (degrees)", weight="bold")
-    ax0.plot(time, wind_deg)
+    print(wind_deg)
+    ax0.plot(wind_deg)
     add_regions(ax0, airborne)
     ax0.grid()
     ax1.set_xlabel("Time (secs)", weight="bold")
     ax1.set_ylabel("Speed (kts)", weight="bold")
-    ax1.plot(time, wind_mps*mps2kt, label="Wind Speed")
-    ax1.plot(time, pitot_scale, label="Pitot Scale")
+    ax1.plot(wind_mps*mps2kt, label="Wind Speed")
+    ax1.plot(pitot_scale, label="Pitot Scale")
     add_regions(ax1, airborne)
     ax1.grid()
     ax1.legend()
@@ -502,14 +504,14 @@ if "alt_press" in df0_air:
 if "act" in data and "pilot" in data:
     fig = plt.figure()
     plt.title("Effectors")
-    plt.plot(df0_inceptor["auto_manual"]+0.05, label="auto")
-    if "throttle_safety" in df0_inceptor:
-        plt.plot(df0_inceptor["throttle_safety"]+0.1, label="safety")
-    plt.plot(df0_act["throttle"], label="throttle")
-    plt.plot(df0_act["aileron"], label="aileron")
-    plt.plot(df0_act["elevator"], label="elevator")
-    plt.plot(df0_act["rudder"], label="rudder")
-    plt.plot(df0_act["flaps"], label="flaps")
+    plt.plot(df0_inceptors["auto_manual"]+0.05, label="auto")
+    if "throttle_safety" in df0_inceptors:
+        plt.plot(df0_inceptors["throttle_safety"]+0.1, label="safety")
+    plt.plot(df0_eff["throttle"], label="throttle")
+    plt.plot(df0_eff["aileron"], label="aileron")
+    plt.plot(df0_eff["elevator"], label="elevator")
+    plt.plot(df0_eff["rudder"], label="rudder")
+    plt.plot(df0_eff["flaps"], label="flaps")
     add_regions(fig.gca(), airborne)
     add_regions(fig.gca(), regions)
     plt.legend()
@@ -518,15 +520,15 @@ if "act" in data and "pilot" in data:
 if "pilot" in data:
     fig = plt.figure()
     plt.title("Pilot Inputs (sbus)")
-    plt.plot(df0_inceptor["auto_manual"]+0.05, label="auto")
+    plt.plot(df0_inceptors["auto_manual"]+0.05, label="auto")
     if "throttle_safety" in df0_inceptor:
-        plt.plot(df0_inceptor["throttle_safety"]+0.1, label="safety")
-    plt.plot(df0_inceptor["throttle"], label="throttle")
-    plt.plot(df0_inceptor["aileron"], label="aileron")
-    plt.plot(df0_inceptor["elevator"], label="elevator")
-    plt.plot(df0_inceptor["rudder"], label="rudder")
-    plt.plot(df0_inceptor["flaps"], label="flaps")
-    plt.plot(df0_inceptor["aux1"], label="aux1")
+        plt.plot(df0_inceptors["throttle_safety"]+0.1, label="safety")
+    plt.plot(df0_inceptors["throttle"], label="throttle")
+    plt.plot(df0_inceptors["aileron"], label="aileron")
+    plt.plot(df0_inceptors["elevator"], label="elevator")
+    plt.plot(df0_inceptors["rudder"], label="rudder")
+    plt.plot(df0_inceptors["flaps"], label="flaps")
+    plt.plot(df0_inceptors["aux1"], label="aux1")
     add_regions(fig.gca(), airborne)
     add_regions(fig.gca(), regions)
     plt.legend()
