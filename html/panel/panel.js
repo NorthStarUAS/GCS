@@ -282,7 +282,7 @@ var panel = function() {
         context.strokeStyle = 'orange';
         context.lineWidth = 5;
         context.translate(cx, cy);
-        var ps = json.sensors.airdata.pitot_scale_factor;
+        var ps = json.filters.env.pitot_scale_factor;
         var true_kt = json.sensors.airdata.airspeed_filt_mps*mps2kt*speed_scale * ps;
         var deg = my_interp( true_kt, asi_interpx, asi_interpy);
         context.rotate(deg*d2r);
@@ -551,9 +551,9 @@ var panel = function() {
         var cy = y + size*0.5;
         var scale = size/512;
 
-        //var alt_ft = json.position.altitude_true_m / 0.3048;
-        var alt_ft = json.filters.nav.altitude_m / 0.3048;
-        var ground_ft = json.sensors.airdata.altitude_ground_m / 0.3048;
+        var alt_ft = json.filters.env.altitude_true_m / 0.3048;
+        // var alt_ft = json.filters.nav.altitude_m / 0.3048;
+        var ground_ft = json.filters.env.altitude_ground_m / 0.3048;
         var target_ft = ground_ft + json.fcs.refs.altitude_agl_ft;
 
         // kollsman
@@ -1321,7 +1321,7 @@ var panel = function() {
         // Wind
 
         if ( json.status.in_flight == "True" ) {
-            var wind_kt = parseFloat(json.sensors.airdata.wind_mps)*mps2kt;
+            var wind_kt = parseFloat(json.filters.env.wind_mps)*mps2kt;
             var target_airspeed_kt = parseFloat(json.fcs.refs.airspeed_kt);
             text = "Wind: " + wind_kt.toFixed(0) + " kt";
             var ratio = 0.0;
@@ -1501,7 +1501,7 @@ var panel = function() {
             groundtrack_deg = json.filters.nav.groundtrack_deg;
         }
         var ap_hdg = json.fcs.refs.groundtrack_deg
-        var wind_deg = json.sensors.airdata.wind_deg;
+        var wind_deg = json.filters.env.wind_deg;
 
         var display_units = json.config.specs.display_units;
         var speed_scale = 1.0;
@@ -1546,8 +1546,8 @@ var panel = function() {
 
         // wind label
         var wind_kt = 0;
-        if ( json.sensors.airdata.wind_mps != null ) {
-            wind_kt = parseFloat(json.sensors.airdata.wind_mps*mps2kt*speed_scale).toFixed(0);
+        if ( json.filters.env.wind_mps != null ) {
+            wind_kt = parseFloat(json.filters.env.wind_mps*mps2kt*speed_scale).toFixed(0);
         }
         var px = Math.round(size * 0.06);
         context.font = px + "px Courier New, monospace";

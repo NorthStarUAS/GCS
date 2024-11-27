@@ -10,7 +10,7 @@ from PropertyTree import PropertyNode
 
 from alerts import alert_mgr
 from commands import commands
-from props import airdata_node, effectors_node, imu_node, nav_node, refs_node
+from props import airdata_node, effectors_node, environment_node, imu_node, nav_node, refs_node
 
 mps2kt = 1.9438444924406046432
 m2ft = 1.0 / 0.3048
@@ -51,7 +51,7 @@ class TelnetServer(tornado.tcpserver.TCPServer):
 
     def gen_fcs_altitude_string(self):
         result = [ refs_node.getDouble('altitude_msl_ft'),
-                   self.pos_comb_node.getDouble('altitude_true_m') * m2ft,
+                   self.environment_node.getDouble('altitude_true_m') * m2ft,
                    effectors_node.getDouble('channel', 2) ]
         return ','.join(map(str, result))
 

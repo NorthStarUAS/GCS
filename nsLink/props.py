@@ -12,6 +12,7 @@ gps_node = PropertyNode("/sensors/gps")
 power_node = PropertyNode("/sensors/power")
 
 # INS/GNSS
+environment_node = PropertyNode("/filters/env")
 nav_node = PropertyNode("/filters/nav")
 
 # Status and Comms

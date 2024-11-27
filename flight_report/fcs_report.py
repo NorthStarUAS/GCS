@@ -124,10 +124,10 @@ for i in tqdm(range(iter.size())):
         gps = record["gps"]
     if "airdata" in record:
         air = record["airdata"]
-        if startA == 0.0 and air["is_airborne"]:
+        if startA == 0.0 and env["is_airborne"]:
             startA = air["timestamp"]
             in_flight = True
-        if startA > 0.0 and not air["is_airborne"]:
+        if startA > 0.0 and not env["is_airborne"]:
             if air["timestamp"] - startA >= 10.0:
                 airborne.append([startA, air["timestamp"], "Airborne"])
             startA = 0.0
@@ -149,7 +149,7 @@ def add_regions(plot, regions):
                   verticalalignment="center",
                   rotation=90, color=colors[i % len(colors)])
 
-if not "wind_deg" in data["airdata"][0] or args.wind_time:
+if not "wind_deg" in data["environment"][0] or args.wind_time:
     # run a quick wind estimate
     import wind
     w = wind.Wind()
@@ -161,9 +161,9 @@ if not "wind_deg" in data["airdata"][0] or args.wind_time:
     pitot_scale = df1_wind["pitot_scale"]
 else:
     time = df0_air["timestamp"]
-    wind_deg = df0_air["wind_deg"]
-    wind_mps = df0_air["wind_mps"]
-    pitot_scale = df0_air["pitot_scale"]
+    wind_deg = df0_env["wind_deg"]
+    wind_mps = df0_env["wind_mps"]
+    pitot_scale = df0_env["pitot_scale"]
 
 # IMU plots
 imu_fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True)

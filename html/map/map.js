@@ -576,13 +576,9 @@ function set_altitude(e) {
             modal.hide();
         }
     }
-    $("#altitude-ground").html((json.sensors.airdata.altitude_ground_m * m2ft).toFixed(0));
-    // estimate onboard agl
-    var ground = json.sensors.airdata.altitude_ground_m * m2ft;
-    var agl = json.fcs.refs.altitude_msl_ft - ground;
-    var msl = ground + agl;
-    // snap to nearest 25'
-    agl = parseFloat(agl / 25).toFixed(0) * 25;
+    $("#altitude-ground").html((json.filters.env.altitude_ground_m * m2ft).toFixed(0));
+    // current agl to nearest 25'
+    agl = parseFloat( json.filters.env.altitude_agl_m*m2ft / 25).toFixed(0) * 25;
     var label_agl = $("#altitude-target-agl");
     var label_msl = $("#altitude-target-msl");
     var slider = $("#altitude-slider");
@@ -602,7 +598,6 @@ function set_altitude(e) {
         link_send('set /fcs/refs/altitude_agl_ft ' + altitude);
     })
 }
-
 
 function updateSettings(e) {
     modal = $("#settings-form");

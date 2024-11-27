@@ -91,21 +91,22 @@ class serial_link():
             input = ser.read(1)
             if len(input):
                 self.pkt_id = input[0]
-                #print(" pkt_id:", self.pkt_id)
+                # print(" pkt_id:", self.pkt_id)
                 self.state += 1
         if self.state == 3:
             input = ser.read(1)
             if len(input):
                 self.pkt_len_lo = input[0]
-                #print(" pkt_len_lo:", self.pkt_len_lo)
+                # print(" pkt_len_lo:", self.pkt_len_lo)
                 # print " payload =",
                 self.state += 1
         if self.state == 4:
             input = ser.read(1)
             if len(input):
                 self.pkt_len_hi = input[0]
+                # print(" pkt_len_hi:", self.pkt_len_hi)
                 self.pkt_len = self.pkt_len_hi*256 + self.pkt_len_lo
-                #print(" pkt_len:", self.pkt_len)
+                # print(" pkt_len:", self.pkt_len)
                 if self.pkt_len > 4096:
                     print("bogus packet len:", self.pkt_len)
                     self.state = 0

@@ -12,7 +12,7 @@ import sys
 import tempfile
 from tqdm import tqdm
 
-from props import airdata_node, gps_node, imu_node, status_node
+from props import environment_node, gps_node, imu_node, status_node
 
 sys.path.append("../../src")
 import nst_messages
@@ -188,7 +188,7 @@ f.close()
 
 print()
 print("Total log time: %.1f min" % (total_time / 60.0))
-print("Flight timer: %.1f min" % (airdata_node.getDouble("flight_timer_millis") / (1000 * 60.0)))
+print("Flight timer: %.1f min" % (environment_node.getDouble("flight_timer_millis") / (1000 * 60.0)))
 print("Flight timer (accum/estim): %.1f min" % (status_node.getDouble("flight_timer") / 60))
 print("Autopilot timer: %.1f min" % (status_node.getDouble("autopilot_timer") / 60.0))
 print("Throttle timer: %.1f min" % (status_node.getDouble("throttle_timer") / 60.0))

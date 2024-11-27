@@ -1,7 +1,7 @@
 from math import floor, pi, sqrt
 import time
 
-from props import airdata_node, ann_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
+from props import airdata_node, ann_node, environment_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
 
 # ann_gps_node = PropertyNode("/annunciators/gps")
 # ann_ekf_node = PropertyNode("/annunciators/ekf")
@@ -190,16 +190,16 @@ class Alerts():
 
         self.cell_vcc_msg.update(power_node.getDouble("cell_vcc"))
 
-        if False: #fixem
-            if airdata_node.getBool("is_airborne"):
+        if False: #fixme
+            if environment_node.getBool("is_airborne"):
                 self.thr_msg.update(eff_node.getDouble("throttle"))
             else:
                 self.thr_msg.update(eff_node.getDouble("throttle"), force_level=0)
 
         # Wind
-        if airdata_node.getBool("is_airborne"):
+        if environment_node.getBool("is_airborne"):
             if False: #fixme
-                wind_kt = airdata_node.getDouble("wind_mps") * mps2kt
+                wind_kt = environment_node.getDouble("wind_mps") * mps2kt
                 target_airspeed_kt = refs_node.getDouble("airspeed_kt")
                 ratio = 0.0
                 if target_airspeed_kt > 0.1:
@@ -251,7 +251,7 @@ class Alerts():
 
         ann_node.setString("battery", "%d;Batt %.0f%% %.2fv" % (self.cell_vcc_msg.level, power_node.getDouble("battery_perc")*100, self.cell_vcc_msg.val))
 
-        secs = airdata_node.getUInt("flight_timer_millis")/1000.0
+        secs = environment_node.getUInt("flight_timer_millis")/1000.0
         hours = floor(secs / 3600)
         rem = secs - (hours * 3600)
         mins = floor(rem / 60)
@@ -291,8 +291,8 @@ class Alerts():
             # default to mps if not specified
             speed_scale = kt2mps
             display_units = "ms"
-        wind_deg = int(round(airdata_node.getDouble("wind_deg") * 0.1) * 10)
-        wind_mps = airdata_node.getDouble("wind_mps")*mps2kt*speed_scale
+        wind_deg = int(round(environment_node.getDouble("wind_deg") * 0.1) * 10)
+        wind_mps = environment_node.getDouble("wind_mps")*mps2kt*speed_scale
         target_airspeed = refs_node.getDouble("airspeed_kt")*speed_scale
         ratio = 0.0
         if target_airspeed > 0.1:

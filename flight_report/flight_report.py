@@ -131,13 +131,13 @@ for i in tqdm(range(iter.size())):
         gps = record["gps"]
     if "airdata" in record:
         air = record["airdata"]
-        if startA == 0.0 and air["is_airborne"]:
+        if startA == 0.0 and env["is_airborne"]:
             startA = air["timestamp"]
-        if startA > 0.0 and not air["is_airborne"]:
+        if startA > 0.0 and not env["is_airborne"]:
             if air["timestamp"] - startA >= 10.0:
                 airborne.append([startA, air["timestamp"], "Airborne"])
             startA = 0.0
-        in_flight = air["is_airborne"]
+        in_flight = env["is_airborne"]
     if "pilot" in record:
         pilot = record["pilot"]
         if pilot["auto_manual"] > 0.0:
@@ -299,7 +299,7 @@ def add_regions(plot, regions):
 
 time = None
 print(data["airdata"][0])
-if False and not "wind_deg" in data["airdata"][0] or args.wind_time:
+if False and not "wind_deg" in data["environment"][0] or args.wind_time:
     # run a quick wind estimate
     import wind
     w = wind.Wind()
@@ -313,9 +313,9 @@ if False and not "wind_deg" in data["airdata"][0] or args.wind_time:
 else:
     print("not right now")
     time = df0_air["timestamp"]
-    wind_deg = df0_air["wind_deg"]
-    wind_mps = df0_air["wind_mps"]
-    pitot_scale = df0_air["pitot_scale"]
+    wind_deg = df0_env["wind_deg"]
+    wind_mps = df0_env["wind_mps"]
+    pitot_scale = df0_env["pitot_scale"]
 
 if not time is None:
     wind_fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True)
