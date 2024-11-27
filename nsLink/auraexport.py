@@ -24,29 +24,29 @@ import fmu_link
 m2nm = 0.0005399568034557235    # meters to nautical miles
 
 def generate_path(id):
-    if id in [nst_messages.gps_v4_id, nst_messages.gps_v5_id]:
+    if id in [nst_messages.gps_v5_id]:
         path = "/sensors/gps"
-    elif id in [nst_messages.imu_v5_id, nst_messages.imu_v6_id]:
+    elif id in [nst_messages.imu_v6_id]:
         path = "/sensors/imu"
-    elif id in [nst_messages.airdata_v7_id, nst_messages.airdata_v8_id]:
+    elif id in [nst_messages.airdata_v8_id, nst_messages.airdata_v9_id]:
         path = "/sensors/airdata"
     elif id in [nst_messages.inceptors_v2_id]:
         path = "/sensors/inceptors"
-    elif id in [nst_messages.power_v1_id]:
+    elif id in [nst_messages.power_v2_id]:
         path = "/sensors/power"
     elif id in [nst_messages.nav_v6_id]:
         path = "/filters/nav"
     elif id in [nst_messages.nav_metrics_v6_id]:
         path = "/filters/nav_metrics"
+    elif id in [nst_messages.environment_v1_id]:
+        path = "/filters/env"
     elif id in [nst_messages.effectors_v1_id]:
         path = "/fcs/effectors"
     elif id in [nst_messages.fcs_refs_v1_id ]:
         path = "/fcs/refs"
-    elif id in [nst_messages.system_health_v6_id]:
-        path = "/status/health"
-    elif id in [nst_messages.status_v7_id]:
+    elif id in [nst_messages.status_v8_id]:
         path = "/status"
-    elif id in [nst_messages.event_v2_id, nst_messages.event_v3_id]:
+    elif id in [nst_messages.event_v3_id]:
         path = "/events"
     elif id in [nst_messages.command_v1_id]:
         path = "/command"
