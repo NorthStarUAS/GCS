@@ -25,6 +25,7 @@ remote_link_node = PropertyNode("/comms/remote_link")
 refs_node = PropertyNode("/fcs/refs")
 tecs_node = PropertyNode("/fcs/tecs")
 tecs_config_node = PropertyNode("/config/fcs/TECS")
+outputs_node = PropertyNode("/fcs/outputs")
 effectors_node = PropertyNode("/fcs/effectors")
 
 # Mission and Tasks

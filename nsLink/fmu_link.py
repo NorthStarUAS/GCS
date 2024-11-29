@@ -6,7 +6,7 @@ from PropertyTree import PropertyNode
 import nst_messages
 from alerts import alert_mgr
 from logger import Logger
-from props import airdata_node, circle_node, effectors_node, environment_node, home_node, imu_node, inceptors_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
+from props import airdata_node, circle_node, effectors_node, environment_node, home_node, imu_node, inceptors_node, outputs_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
@@ -77,7 +77,6 @@ def parse_msg(id, buf):
     elif id == nst_messages.environment_v1_id:
         msg = nst_messages.environment_v1(buf)
         msg.msg2props(environment_node)
-        msg.millis = millis
     elif id == nst_messages.effectors_v1_id:
         msg = nst_messages.effectors_v1(buf)
         msg.msg2props(effectors_node)
@@ -95,6 +94,10 @@ def parse_msg(id, buf):
     elif id == nst_messages.inceptors_v2_id:
         msg = nst_messages.inceptors_v2(buf)
         msg.msg2props(inceptors_node)
+    elif id == nst_messages.fcs_outputs_v1_id:
+        msg = nst_messages.fcs_outputs_v1(buf)
+        msg.msg2props(outputs_node)
+        msg.millis = millis
     elif id == nst_messages.power_v2_id:
         msg = nst_messages.power_v2(buf)
         msg.msg2props(power_node)

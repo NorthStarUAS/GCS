@@ -40,6 +40,8 @@ def generate_path(id):
         path = "/filters/nav_metrics"
     elif id in [nst_messages.environment_v1_id]:
         path = "/filters/env"
+    elif id in [nst_messages.fcs_outputs_v1_id]:
+        path = "/fcs/outputs"
     elif id in [nst_messages.effectors_v1_id]:
         path = "/fcs/effectors"
     elif id in [nst_messages.fcs_refs_v1_id ]:

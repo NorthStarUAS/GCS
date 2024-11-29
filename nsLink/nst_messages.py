@@ -11,6 +11,7 @@ power_v2_id = 68
 nav_v6_id = 52
 nav_metrics_v6_id = 53
 inceptors_v2_id = 63
+fcs_outputs_v1_id = 71
 effectors_v1_id = 61
 fcs_refs_v1_id = 65
 mission_v1_id = 60
@@ -814,6 +815,68 @@ class inceptors_v2():
         self.aux2 = node.getDouble("aux2")
         self.master_switch = node.getUInt("master_switch")
         self.motor_enable = node.getUInt("motor_enable")
+
+# Message: fcs_outputs_v1
+# Id: 71
+class fcs_outputs_v1():
+    id = 71
+    _pack_string = "<LhhhHHB"
+    _struct = struct.Struct(_pack_string)
+
+    def __init__(self, msg=None):
+        # public fields
+        self.millis = 0
+        self.roll = 0.0
+        self.pitch = 0.0
+        self.yaw = 0.0
+        self.power = 0.0
+        self.flaps = 0.0
+        self.gear = 0
+        # unpack if requested
+        if msg: self.unpack(msg)
+
+    def pack(self):
+        msg = self._struct.pack(
+                  self.millis,
+                  int(round(self.roll * 30000.0)),
+                  int(round(self.pitch * 30000.0)),
+                  int(round(self.yaw * 30000.0)),
+                  int(round(self.power * 60000.0)),
+                  int(round(self.flaps * 60000.0)),
+                  self.gear)
+        return msg
+
+    def unpack(self, msg):
+        (self.millis,
+         self.roll,
+         self.pitch,
+         self.yaw,
+         self.power,
+         self.flaps,
+         self.gear) = self._struct.unpack(msg)
+        self.roll /= 30000.0
+        self.pitch /= 30000.0
+        self.yaw /= 30000.0
+        self.power /= 60000.0
+        self.flaps /= 60000.0
+
+    def msg2props(self, node):
+        node.setUInt("millis", self.millis)
+        node.setDouble("roll", self.roll)
+        node.setDouble("pitch", self.pitch)
+        node.setDouble("yaw", self.yaw)
+        node.setDouble("power", self.power)
+        node.setDouble("flaps", self.flaps)
+        node.setUInt("gear", self.gear)
+
+    def props2msg(self, node):
+        self.millis = node.getUInt("millis")
+        self.roll = node.getDouble("roll")
+        self.pitch = node.getDouble("pitch")
+        self.yaw = node.getDouble("yaw")
+        self.power = node.getDouble("power")
+        self.flaps = node.getDouble("flaps")
+        self.gear = node.getUInt("gear")
 
 # Message: effectors_v1
 # Id: 61
