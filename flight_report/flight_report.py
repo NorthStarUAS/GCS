@@ -309,13 +309,13 @@ if False and not "wind_deg" in data["environment"][0] or args.wind_time:
         time = df1_wind["timestamp"]
         wind_deg = df1_wind["wind_deg"]
         wind_mps = df1_wind["wind_mps"]
-        pitot_scale = df1_wind["pitot_scale"]
+        pitot_scale_factor = df1_wind["pitot_scale_factor"]
 else:
     print("not right now")
     time = df0_air["timestamp"]
     wind_deg = df0_env["wind_deg"]
     wind_mps = df0_env["wind_mps"]
-    pitot_scale = df0_env["pitot_scale"]
+    pitot_scale_factor = df0_env["pitot_scale_factor"]
 
 if not time is None:
     wind_fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True)
@@ -328,7 +328,7 @@ if not time is None:
     ax1.set_xlabel("Time (secs)", weight="bold")
     ax1.set_ylabel("Speed (kts)", weight="bold")
     ax1.plot(wind_mps*mps2kt, label="Wind Speed")
-    ax1.plot(pitot_scale, label="Pitot Scale")
+    ax1.plot(pitot_scale_factor, label="Pitot Scale")
     add_regions(ax1, airborne)
     ax1.grid()
     ax1.legend()
@@ -412,9 +412,9 @@ imu_fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True)
 
 ax0.set_title("IMU Sensors")
 ax0.set_ylabel("Gyros (deg/sec)", weight="bold")
-ax0.plot(np.rad2deg(df0_imu["p"]), label="p")
-ax0.plot(np.rad2deg(df0_imu["q"]), label="q")
-ax0.plot(np.rad2deg(df0_imu["r"]), label="r")
+ax0.plot(np.rad2deg(df0_imu["p_rps"]), label="p")
+ax0.plot(np.rad2deg(df0_imu["q_rps"]), label="q")
+ax0.plot(np.rad2deg(df0_imu["r_rps"]), label="r")
 add_regions(ax0, airborne)
 add_regions(ax0, regions)
 ax0.grid()
@@ -422,9 +422,9 @@ ax0.legend()
 
 ax1.set_ylabel("Accels (m/sec^2)", weight="bold")
 ax1.set_xlabel("Time (sec)", weight="bold")
-ax1.plot(df0_imu["ax"], label="ax")
-ax1.plot(df0_imu["ay"], label="ay")
-ax1.plot(df0_imu["az"], label="az")
+ax1.plot(df0_imu["ax_mps2"], label="ax")
+ax1.plot(df0_imu["ay_mps2"], label="ay")
+ax1.plot(df0_imu["az_mps2"], label="az")
 add_regions(ax1, airborne)
 add_regions(ax1, regions)
 ax1.grid()
@@ -435,19 +435,19 @@ att_fig, (ax0, ax1, ax2) = plt.subplots(3, 1, sharex=True)
 
 ax0.set_title("Attitude Angles")
 ax0.set_ylabel("Roll (deg)", weight="bold")
-ax0.plot(np.rad2deg(df0_nav["phi"]))
+ax0.plot(df0_nav["roll_deg"])
 add_regions(ax0, airborne)
 add_regions(ax0, regions)
 ax0.grid()
 
 ax1.set_ylabel("Pitch (deg)", weight="bold")
-ax1.plot(np.rad2deg(df0_nav["the"]))
+ax1.plot(df0_nav["pitch_deg"])
 add_regions(ax1, airborne)
 add_regions(ax1, regions)
 ax1.grid()
 
 ax2.set_ylabel("Yaw (deg)", weight="bold")
-ax2.plot(np.rad2deg(df0_nav["psi"]))
+ax2.plot(df0_nav["yaw_deg"])
 add_regions(ax2, airborne)
 add_regions(ax2, regions)
 ax2.set_xlabel("Time (sec)", weight="bold")
@@ -606,9 +606,9 @@ accels = []
 for i in tqdm(range(iter.size())):
     record = iter.next()
     imu = record["imu"]
-    ax = imu["ax"]
-    ay = imu["ay"]
-    az = imu["az"]
+    ax = imu["ax_mps2"]
+    ay = imu["ay_mps2"]
+    az = imu["az_mps2"]
     norm = np.linalg.norm(np.array([ax, ay, az]))
     accels.append(norm)
 accels = np.array(accels)
