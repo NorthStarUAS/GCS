@@ -40,6 +40,7 @@ imu_dt = (data["imu"][-1]["timestamp"] - data["imu"][0]["timestamp"]) \
 print("imu dt: %.3f" % imu_dt)
 print("gps records:", len(data["gps"]))
 print("nav records:", len(data["nav"]))
+print("nav metrics records:", len(data["nav_metrics"]))
 if "airdata" in data:
     print("airdata records:", len(data["airdata"]))
 if len(data["imu"]) == 0 and len(data["gps"]) == 0:
@@ -63,8 +64,6 @@ df0_eff = pd.DataFrame(data["effectors"])
 df0_eff.set_index("timestamp", inplace=True, drop=False)
 df0_inceptors = pd.DataFrame(data["inceptors"])
 df0_inceptors.set_index("timestamp", inplace=True, drop=False)
-df0_env = pd.DataFrame(data["env"])
-df0_env.set_index("timestamp", inplace=True, drop=False)
 
 launch_sec = None
 mission = None

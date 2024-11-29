@@ -53,18 +53,20 @@ df0_nav = pd.DataFrame(data["nav"])
 df0_nav.set_index("timestamp", inplace=True, drop=False)
 df0_air = pd.DataFrame(data["airdata"])
 df0_air.set_index("timestamp", inplace=True, drop=False)
+df0_env = pd.DataFrame(data["env"])
+df0_env.set_index("timestamp", inplace=True, drop=False)
 if "health" in data:
     df0_health = pd.DataFrame(data["health"])
     df0_health.set_index("timestamp", inplace=True, drop=False)
-if "act" in data:
-    df0_act = pd.DataFrame(data["act"])
-    df0_act.set_index("timestamp", inplace=True, drop=False)
+if "fcs_outputs" in data:
+    df0_out = pd.DataFrame(data["fcs_outputs"])
+    df0_out.set_index("timestamp", inplace=True, drop=False)
 if "pilot" in data:
     df0_pilot = pd.DataFrame(data["pilot"])
     df0_pilot.set_index("timestamp", inplace=True, drop=False)
-if "ap" in data:
-    df0_ap = pd.DataFrame(data["ap"])
-    df0_ap.set_index("timestamp", inplace=True, drop=False)
+if "refs" in data:
+    df0_refs = pd.DataFrame(data["refs"])
+    df0_refs.set_index("timestamp", inplace=True, drop=False)
 
 launch_sec = None
 mission = None
@@ -124,14 +126,15 @@ for i in tqdm(range(iter.size())):
         gps = record["gps"]
     if "airdata" in record:
         air = record["airdata"]
+    if "env" in record:
+        env = record["env"]
         if startA == 0.0 and env["is_airborne"]:
-            startA = air["timestamp"]
-            in_flight = True
+            startA = env["timestamp"]
         if startA > 0.0 and not env["is_airborne"]:
-            if air["timestamp"] - startA >= 10.0:
-                airborne.append([startA, air["timestamp"], "Airborne"])
+            if env["timestamp"] - startA >= 10.0:
+                airborne.append([startA, env["timestamp"], "Airborne"])
             startA = 0.0
-            in_flight = False
+        in_flight = env["is_airborne"]
 # catch a truncated flight log
 if startA > 0.0:
     airborne.append([startA, air["timestamp"], "Airborne"])
@@ -149,7 +152,7 @@ def add_regions(plot, regions):
                   verticalalignment="center",
                   rotation=90, color=colors[i % len(colors)])
 
-if not "wind_deg" in data["environment"][0] or args.wind_time:
+if not "wind_deg" in data["env"][0] or args.wind_time:
     # run a quick wind estimate
     import wind
     w = wind.Wind()
@@ -192,7 +195,7 @@ ax1.legend()
 fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
 ax1.set_title("Roll Angle (Positive Right)")
 ax1.set_ylabel("Roll (deg)", weight="bold")
-ax1.plot(df0_ap["roll"], label="Target Roll (deg)")
+ax1.plot(df0_refs["roll_deg"], label="Reference Roll (deg)")
 ax1.plot(np.rad2deg(df0_nav["phi"]), label="Actual Roll (deg)")
 ax1.legend()
 ax1.grid()
@@ -200,7 +203,7 @@ add_regions(ax1, airborne)
 add_regions(ax1, regions)
 ax2.set_xlabel("Time (sec)", weight="bold")
 ax2.set_ylabel("AP Aileron (norm)")
-ax2.plot(df0_act["aileron"], label="AP Aileron")
+ax2.plot(df0_out["roll"], label="AP Aileron")
 ax2.legend()
 ax2.grid()
 
@@ -208,7 +211,7 @@ ax2.grid()
 fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
 ax1.set_title("Pitch Angle")
 ax1.set_ylabel("Pitch (deg)", weight="bold")
-ax1.plot(df0_ap["pitch"], label="Target Pitch (deg)")
+ax1.plot(df0_refs["pitch_deg"], label="Reference Pitch (deg)")
 ax1.plot(np.rad2deg(df0_nav["the"]), label="Actual Pitch (deg)")
 ax1.legend()
 ax1.grid()
@@ -216,7 +219,7 @@ add_regions(ax1, airborne)
 add_regions(ax1, regions)
 ax2.set_xlabel("Time (sec)", weight="bold")
 ax2.set_ylabel("AP Elevator (norm)")
-ax2.plot(df0_act["elevator"], label="AP Elevator (Positive Down)")
+ax2.plot(df0_out["pitch"], label="AP Elevator (Positive Down)")
 ax2.legend()
 ax2.grid()
 
@@ -224,15 +227,15 @@ ax2.grid()
 fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
 ax1.set_title("Yaw Angle (True)")
 ax1.set_ylabel("Yaw (deg)", weight="bold")
-ax1.plot(df0_ap["hdg"], label="Target Yaw (deg)")
+ax1.plot(df0_refs["groundtrack_deg"], label="Reference Yaw (deg)")
 ax1.plot(np.mod(np.rad2deg(df0_nav["psi"]), 360), label="Actual Yaw (deg)")
 ax1.legend()
 ax1.grid()
 add_regions(ax1, airborne)
 add_regions(ax1, regions)
 ax2.set_xlabel("Time (sec)", weight="bold")
-ax2.set_ylabel("AP Target Roll (deg)")
-ax2.plot(df0_ap["roll"], label="AP Target Roll (Positive Right)")
+ax2.set_ylabel("Reference Roll (deg)")
+ax2.plot(df0_refs["roll_deg"], label="Reference Roll (Positive Right)")
 ax2.legend()
 ax2.grid()
 
@@ -259,12 +262,12 @@ if len(tecs_totals):
     fig, (ax1, ax2, ax3) = plt.subplots(3,1, sharex=True)
     ax1.set_title("Total Energy Control System")
     ax1.set_ylabel("Altitude")
-    lns1 = ax1.plot(df0_ap["alt"], label="Target Alt (MSL)")
+    lns1 = ax1.plot(df0_refs["alt"], label="Reference Alt (MSL)")
     lns2 = ax1.plot(df0_nav["alt"]*m2ft, label="EKF Altitude (MSL)")
     ax1b = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     ax1b._get_lines.prop_cycler = ax1._get_lines.prop_cycler
     ax1b.set_ylabel("Airspeed")
-    lns3 = ax1b.plot(df0_ap["speed"], label="Target Airspeed (Kts)")
+    lns3 = ax1b.plot(df0_refs["speed"], label="Reference Airspeed (Kts)")
     lns4 = ax1b.plot(df0_air["airspeed"], label="Airspeed (Kts)")
     ax1b.tick_params(axis="y")
     add_regions(ax1, airborne)
@@ -275,7 +278,7 @@ if len(tecs_totals):
     ax1.grid()
 
     ax2.set_ylabel("Energy")
-    ax2.plot(df0_ap["tecs_target_tot"], label="TECS Target Total")
+    ax2.plot(df0_refs["tecs_target_tot"], label="TECS Reference Total")
     ax2.plot(df1_tecs["tecs_total"], label="TECS Total Energy")
     ax2.plot(df0_air["tecs_error_diff"], label="TECS Energy Balance Error")
     ax2.legend()
@@ -288,7 +291,7 @@ if len(tecs_totals):
     ax3b = ax3.twinx()  # instantiate a second axes that shares the same x-axis
     ax3b._get_lines.prop_cycler = ax3._get_lines.prop_cycler
     ax3b.set_ylabel("Angle")
-    lns3 = ax3b.plot(df0_ap["pitch"], label="AP Pitch (deg)")
+    lns3 = ax3b.plot(df0_refs["pitch_deg"], label="AP Pitch (deg)")
     lns = lns1+lns2+lns3
     labs = [l.get_label() for l in lns]
     ax3.legend(lns, labs)
