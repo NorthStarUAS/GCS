@@ -64,8 +64,8 @@ if "fcs_outputs" in data:
 if "pilot" in data:
     df0_pilot = pd.DataFrame(data["pilot"])
     df0_pilot.set_index("timestamp", inplace=True, drop=False)
-if "refs" in data:
-    df0_refs = pd.DataFrame(data["refs"])
+if "fcs_refs" in data:
+    df0_refs = pd.DataFrame(data["fcs_refs"])
     df0_refs.set_index("timestamp", inplace=True, drop=False)
 
 launch_sec = None
@@ -161,21 +161,21 @@ if not "wind_deg" in data["env"][0] or args.wind_time:
     time = df1_wind["timestamp"]
     wind_deg = df1_wind["wind_deg"]
     wind_mps = df1_wind["wind_mps"]
-    pitot_scale = df1_wind["pitot_scale"]
+    pitot_scale_factor = df1_wind["pitot_scale_factor"]
 else:
     time = df0_air["timestamp"]
     wind_deg = df0_env["wind_deg"]
     wind_mps = df0_env["wind_mps"]
-    pitot_scale = df0_env["pitot_scale"]
+    pitot_scale_factor = df0_env["pitot_scale_factor"]
 
 # IMU plots
 imu_fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True)
 
 ax0.set_title("IMU Sensors")
 ax0.set_ylabel("Gyros (deg/sec)", weight="bold")
-ax0.plot(np.rad2deg(df0_imu["p"]), label="p")
-ax0.plot(np.rad2deg(df0_imu["q"]), label="q")
-ax0.plot(np.rad2deg(df0_imu["r"]), label="r")
+ax0.plot(np.rad2deg(df0_imu["p_rps"]), label="p")
+ax0.plot(np.rad2deg(df0_imu["q_rps"]), label="q")
+ax0.plot(np.rad2deg(df0_imu["r_rps"]), label="r")
 add_regions(ax0, airborne)
 add_regions(ax0, regions)
 ax0.grid()
@@ -183,9 +183,9 @@ ax0.legend()
 
 ax1.set_ylabel("Accels (m/sec^2)", weight="bold")
 ax1.set_xlabel("Time (sec)", weight="bold")
-ax1.plot(df0_imu["ax"], label="ax")
-ax1.plot(df0_imu["ay"], label="ay")
-ax1.plot(df0_imu["az"], label="az")
+ax1.plot(df0_imu["ax_mps2"], label="ax")
+ax1.plot(df0_imu["ay_mps2"], label="ay")
+ax1.plot(df0_imu["az_mps2"], label="az")
 add_regions(ax1, airborne)
 add_regions(ax1, regions)
 ax1.grid()
@@ -196,7 +196,7 @@ fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
 ax1.set_title("Roll Angle (Positive Right)")
 ax1.set_ylabel("Roll (deg)", weight="bold")
 ax1.plot(df0_refs["roll_deg"], label="Reference Roll (deg)")
-ax1.plot(np.rad2deg(df0_nav["phi"]), label="Actual Roll (deg)")
+ax1.plot(df0_nav["roll_deg"], label="Actual Roll (deg)")
 ax1.legend()
 ax1.grid()
 add_regions(ax1, airborne)
@@ -212,7 +212,7 @@ fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
 ax1.set_title("Pitch Angle")
 ax1.set_ylabel("Pitch (deg)", weight="bold")
 ax1.plot(df0_refs["pitch_deg"], label="Reference Pitch (deg)")
-ax1.plot(np.rad2deg(df0_nav["the"]), label="Actual Pitch (deg)")
+ax1.plot(df0_nav["pitch_deg"], label="Actual Pitch (deg)")
 ax1.legend()
 ax1.grid()
 add_regions(ax1, airborne)
@@ -228,7 +228,7 @@ fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
 ax1.set_title("Yaw Angle (True)")
 ax1.set_ylabel("Yaw (deg)", weight="bold")
 ax1.plot(df0_refs["groundtrack_deg"], label="Reference Yaw (deg)")
-ax1.plot(np.mod(np.rad2deg(df0_nav["psi"]), 360), label="Actual Yaw (deg)")
+ax1.plot(np.mod(df0_nav["yaw_deg"], 360), label="Actual Yaw (deg)")
 ax1.legend()
 ax1.grid()
 add_regions(ax1, airborne)
