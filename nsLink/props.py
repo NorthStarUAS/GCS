@@ -17,7 +17,7 @@ nav_node = PropertyNode("/filters/nav")
 
 # Status and Comms
 status_node = PropertyNode("/status")
-events_node = PropertyNode("/status/events")
+events_node = PropertyNode("/events")
 ann_node = PropertyNode("/status/annunciators")
 remote_link_node = PropertyNode("/comms/remote_link")
 
