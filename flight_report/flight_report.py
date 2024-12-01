@@ -32,17 +32,15 @@ mps2kt = 1.94384               # m/s to kts
 path = args.flight
 data, flight_format = flight_loader.load(path)
 
-# print("data:", data, flight_format)
-
-print("imu records:", len(data["imu"]))
+# print("imu records:", len(data["imu"]))
 imu_dt = (data["imu"][-1]["timestamp"] - data["imu"][0]["timestamp"]) \
     / float(len(data["imu"]))
 print("imu dt: %.3f" % imu_dt)
-print("gps records:", len(data["gps"]))
-print("nav records:", len(data["nav"]))
-print("nav metrics records:", len(data["nav_metrics"]))
-if "airdata" in data:
-    print("airdata records:", len(data["airdata"]))
+# print("gps records:", len(data["gps"]))
+# print("nav records:", len(data["nav"]))
+# print("nav metrics records:", len(data["nav_metrics"]))
+# if "airdata" in data:
+#     print("airdata records:", len(data["airdata"]))
 if len(data["imu"]) == 0 and len(data["gps"]) == 0:
     print("not enough data loaded to continue.")
     quit()
@@ -64,6 +62,8 @@ df0_eff = pd.DataFrame(data["effectors"])
 df0_eff.set_index("timestamp", inplace=True, drop=False)
 df0_inceptors = pd.DataFrame(data["inceptors"])
 df0_inceptors.set_index("timestamp", inplace=True, drop=False)
+df0_power = pd.DataFrame(data["power"])
+df0_power.set_index("timestamp", inplace=True, drop=False)
 
 launch_sec = None
 mission = None
@@ -138,16 +138,12 @@ for i in tqdm(range(iter.size())):
                 airborne.append([startA, env["timestamp"], "Airborne"])
             startA = 0.0
         in_flight = env["is_airborne"]
-    if "pilot" in record:
-        pilot = record["pilot"]
-        if pilot["auto_manual"] > 0.0:
+    if "inceptors" in record:
+        inceptors = record["inceptors"]
+        if inceptors["master_switch"]:
             ap_enabled = True
         else:
             ap_enable = False
-    if "health" in record:
-        health = record["health"]
-        if "total_mah" in health:
-            total_mah = health["total_mah"]
     if "nav" in record:
         nav = record["nav"]
         current_time = nav["timestamp"]
@@ -173,20 +169,20 @@ plotname = os.path.basename(args.flight.rstrip("/"))
 f.write("# Flight Report\n")
 f.write("\n")
 f.write("## Summary\n")
-f.write("- File: %s\n" % plotname)
+f.write("* File: %s\n" % plotname)
 d = datetime.datetime.utcfromtimestamp( data["gps"][0]["unix_sec"] )
-f.write("- Date: %s (UTC)\n" % d.strftime("%Y-%m-%d %H:%M:%S"))
-f.write("- Log time: %.1f minutes\n" % (log_time / 60.0))
-f.write("- Flight time: %.1f minutes\n" % (flight_time / 60.0))
+f.write("* Date: %s (UTC)\n" % d.strftime("%Y-%m-%d %H:%M:%S"))
+f.write("* Log time: %.1f minutes\n" % (log_time / 60.0))
+f.write("* Flight time: %.1f minutes\n" % (flight_time / 60.0))
 if ap_time > 0.0:
-    f.write("- Autopilot time: %.1f minutes\n" % (ap_time / 60.0))
+    f.write("* Autopilot time: %.1f minutes\n" % (ap_time / 60.0))
 if odometer > 0.0:
-    f.write("- Flight distance: %.2f nm (%.2f km)\n" % (odometer*m2nm, odometer/1000.0))
+    f.write("* Flight distance: %.2f nm (%.2f km)\n" % (odometer*m2nm, odometer/1000.0))
 if odometer > 0.0 and flight_time > 0.0:
     gs_mps = odometer / flight_time
-    f.write("- Average ground speed: %.1f kts (%.1f m/s)\n" % (gs_mps * mps2kt, gs_mps))
+    f.write("* Average ground speed: %.1f kts (%.1f m/s)\n" % (gs_mps * mps2kt, gs_mps))
 if total_mah > 0.0:
-    f.write("- Total Battery: " + "%0f" % total_mah + " (mah)\n")
+    f.write("* Total Battery: " + "%0f" % total_mah + " (mah)\n")
 f.write("\n")
 
 # Weather Summary
@@ -227,31 +223,31 @@ else:
         #    print key, ":", currently[key]
         if "icon" in currently:
             icon = currently["icon"]
-            f.write("- Conditions: " + icon + "\n")
+            f.write("* Conditions: " + icon + "\n")
         if "temperature" in currently:
             tempF = currently["temperature"]
             tempC = (tempF - 32.0) * 5 / 9
-            f.write("- Temperature: %.1f F" % tempF + " (%.1f C)" % tempC + "\n")
+            f.write("* Temperature: %.1f F" % tempF + " (%.1f C)" % tempC + "\n")
         else:
             tempF = 0.0
             tempC = 0.0
         if "dewPoint" in currently:
             dewF = currently["dewPoint"]
             dewC = (dewF - 32.0) * 5 / 9
-            f.write("- Dewpoint: %.1f F" % dewF + " (%.1f C)" % dewC + "\n")
+            f.write("* Dewpoint: %.1f F" % dewF + " (%.1f C)" % dewC + "\n")
         else:
             dewF = 0.0
             dewC = 0.0
         if "humidity" in currently:
             hum = currently["humidity"]
-            f.write("- Humidity: %.0f%%" % (hum * 100.0) + "\n")
+            f.write("* Humidity: %.0f%%" % (hum * 100.0) + "\n")
         if "pressure" in currently:
             mbar = currently["pressure"]
             inhg = mbar * mb2inhg
         else:
             mbar = 0
             inhg = 11.11
-        f.write("- Pressure: %.2f inhg" % inhg + " (%.1f mbar)" % mbar + "\n")
+        f.write("* Pressure: %.2f inhg" % inhg + " (%.1f mbar)" % mbar + "\n")
         if "windSpeed" in currently:
             wind_mph = currently["windSpeed"]
             wind_kts = wind_mph * mph2kt
@@ -262,16 +258,16 @@ else:
             wind_deg = currently["windBearing"]
         else:
             wind_deg = 0
-        f.write("- Wind %d deg @ %.1f kt (%.1f mph)" % (wind_deg, wind_kts, wind_mph) + "\n")
+        f.write("* Wind %d deg @ %.1f kt (%.1f mph)" % (wind_deg, wind_kts, wind_mph) + "\n")
         if "visibility" in currently:
             vis = currently["visibility"]
-            f.write("- Visibility: %.1f miles" % vis + "\n")
+            f.write("* Visibility: %.1f miles" % vis + "\n")
         else:
             vis = 10
         if "cloudCover" in currently:
             cov = currently["cloudCover"]
-            f.write("- Cloud Cover: %.0f%%" % (cov * 100.0) + "\n")
-        f.write("- METAR: KXYZ " + d.strftime("%d%H%M") + "Z" +
+            f.write("* Cloud Cover: %.0f%%" % (cov * 100.0) + "\n")
+        f.write("* METAR: KXYZ " + d.strftime("%d%H%M") + "Z" +
                 " %03d%02dKT" % (round(wind_deg/10)*10, wind_kts) +
                 " " + ("%.1f" % vis).rstrip("0").rstrip(".") + "SM" +
                 " " + ("%.0f" % tempC).replace("-", "M") + "/" +
@@ -282,7 +278,6 @@ else:
 
 # end of written report
 f.close()
-
 
 # add a shaded time region(s) to plot
 blend = matplotlib.transforms.blended_transform_factory
@@ -483,10 +478,10 @@ ax2.set_xlabel("Time (secs)", weight="bold")
 ax2.grid()
 ax2.legend(loc=0)
 
-if "temp" in df0_air:
+if "air_temp_C" in df0_air:
     plt.figure()
-    plt.title("Air Temp")
-    plt.plot(df0_air["temp"])
+    plt.title("Air Temp (C)")
+    plt.plot(df0_air["air_temp_C"])
     plt.grid()
 
 plt.figure()
@@ -494,18 +489,18 @@ plt.title("Airspeed (kts)")
 plt.plot(df0_air["airspeed_mps"]*mps2kt)
 plt.grid()
 
-if "alt_press" in df0_air:
+if "baro_press_pa" in df0_air:
     plt.figure()
-    plt.title("Altitude (press)")
-    plt.plot(df0_air["alt_press"])
+    plt.title("Pressure (pa)")
+    plt.plot(df0_air["baro_press_pa"])
     plt.grid()
 
-if "act" in data and "pilot" in data:
+if "inceptors" in data and "effectors" in data:
     fig = plt.figure()
     plt.title("Effectors")
-    plt.plot(df0_inceptors["auto_manual"]+0.05, label="auto")
-    if "throttle_safety" in df0_inceptors:
-        plt.plot(df0_inceptors["throttle_safety"]+0.1, label="safety")
+    plt.plot(df0_inceptors["master_switch"]+0.05, label="auto")
+    if "motor_enable" in df0_inceptors:
+        plt.plot(df0_inceptors["motor_enable"]+0.1, label="motor enable")
     plt.plot(df0_eff["throttle"], label="throttle")
     plt.plot(df0_eff["aileron"], label="aileron")
     plt.plot(df0_eff["elevator"], label="elevator")
@@ -516,16 +511,16 @@ if "act" in data and "pilot" in data:
     plt.legend()
     plt.grid()
 
-if "pilot" in data:
+if "inceptors" in data:
     fig = plt.figure()
-    plt.title("Pilot Inputs (sbus)")
-    plt.plot(df0_inceptors["auto_manual"]+0.05, label="auto")
-    if "throttle_safety" in df0_inceptor:
-        plt.plot(df0_inceptors["throttle_safety"]+0.1, label="safety")
-    plt.plot(df0_inceptors["throttle"], label="throttle")
-    plt.plot(df0_inceptors["aileron"], label="aileron")
-    plt.plot(df0_inceptors["elevator"], label="elevator")
-    plt.plot(df0_inceptors["rudder"], label="rudder")
+    plt.title("Inceptors (Pilot Inputs)")
+    plt.plot(df0_inceptors["master_switch"]+0.05, label="auto")
+    if "motor_eanble" in df0_inceptors:
+        plt.plot(df0_inceptors["motor_enable"]+0.1, label="motor_enable")
+    plt.plot(df0_inceptors["power"], label="power")
+    plt.plot(df0_inceptors["roll"], label="roll")
+    plt.plot(df0_inceptors["pitch"], label="pitch")
+    plt.plot(df0_inceptors["yaw"], label="yaw")
     plt.plot(df0_inceptors["flaps"], label="flaps")
     plt.plot(df0_inceptors["aux1"], label="aux1")
     add_regions(fig.gca(), airborne)
@@ -581,15 +576,24 @@ ax1.set_xlabel("Time (secs)", weight="bold")
 ax1.grid()
 ax1.legend()
 
-if "health" in data:
-    # System health
+if "power" in data:
+    # Power systems
     plt.figure()
     plt.title("Avionics VCC")
-    if "avionics_vcc" in df0_health:
-        plt.plot(df0_health["avionics_vcc"], label="Avionics V")
-    plt.plot(df0_health["main_vcc"], label="Main battery V")
-    if "load_avg" in df0_health:
-        plt.plot(df0_health["load_avg"], label="Load avg")
+    if "avionics_vcc" in df0_power:
+        plt.plot(df0_power["avionics_vcc"], label="Avionics V")
+    if "pwm_vcc" in df0_power:
+        plt.plot(df0_power["pwm_vcc"], label="Avionics V")
+    if "load_avg" in df0_power:
+        plt.plot(df0_power["load_avg"], label="Load avg")
+    plt.legend()
+    plt.grid()
+
+    plt.figure()
+    plt.title("Battery")
+    plt.plot(df0_power["cell_vcc"], label="Main battery (per cell) V")
+    # plt.plot(df0_power["battery_perc"], label="Battery %")
+    plt.plot(df0_eff["throttle"], label="throttle")
     plt.legend()
     plt.grid()
 

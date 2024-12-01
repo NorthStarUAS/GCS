@@ -163,7 +163,7 @@ if not "wind_deg" in data["env"][0] or args.wind_time:
     wind_mps = df1_wind["wind_mps"]
     pitot_scale_factor = df1_wind["pitot_scale_factor"]
 else:
-    time = df0_air["timestamp"]
+    time = df0_env["timestamp"]
     wind_deg = df0_env["wind_deg"]
     wind_mps = df0_env["wind_mps"]
     pitot_scale_factor = df0_env["pitot_scale_factor"]
