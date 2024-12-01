@@ -450,7 +450,7 @@ function calibrate(e) {
     $("#calibrate-form-submit").off("click");
     $("#calibrate-form-submit").click(function() {
         modal.hide();
-        link_send('task,calib_home');
+        link_send('task calib_home');
     })
     $("#calibrate-reset-ekf").off("click");
     $("#calibrate-reset-ekf").click(function() {
@@ -578,7 +578,9 @@ function set_altitude(e) {
     }
     $("#altitude-ground").html((json.filters.env.altitude_ground_m * m2ft).toFixed(0));
     // current agl to nearest 25'
-    agl = parseFloat( json.filters.env.altitude_agl_m*m2ft / 25).toFixed(0) * 25;
+    var ground = parseFloat( json.filters.env.altitude_ground_m*m2ft );
+    var agl = parseFloat( json.fcs.refs.altitude_agl_ft );
+    var msl = (ground + agl).toFixed(0);
     var label_agl = $("#altitude-target-agl");
     var label_msl = $("#altitude-target-msl");
     var slider = $("#altitude-slider");
