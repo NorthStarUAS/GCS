@@ -6,7 +6,7 @@ from PropertyTree import PropertyNode
 import nst_messages
 from alerts import alert_mgr
 from logger import Logger
-from props import airdata_node, circle_node, effectors_node, environment_node, home_node, imu_node, inceptors_node, outputs_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
+from nodes import airdata_node, circle_node, effectors_node, environment_node, home_node, imu_node, inceptors_node, outputs_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:

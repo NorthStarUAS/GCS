@@ -2,7 +2,7 @@ import time
 
 import nst_messages
 from fmu_link import fmu_link
-from props import remote_link_node
+from nodes import remote_link_node
 
 class Commands():
     def __init__(self):

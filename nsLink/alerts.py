@@ -1,16 +1,7 @@
 from math import floor, pi, sqrt
 import time
 
-from props import airdata_node, ann_node, environment_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
-
-# ann_gps_node = PropertyNode("/annunciators/gps")
-# ann_ekf_node = PropertyNode("/annunciators/ekf")
-# ann_batt_node = PropertyNode("/annunciators/battery")
-# ann_timer_node = PropertyNode("/annunciators/timer")
-# ann_link_node = PropertyNode("/annunciators/link")
-# ann_auto_node = PropertyNode("/annunciators/auto")
-# ann_wind_node = PropertyNode("/annunciators/wind")
-# ann_temp_node = PropertyNode("/annunciators/temp")
+from nodes import airdata_node, ann_node, environment_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
 
 r2d = 180 / pi
 kt2mps = 0.5144444444444444444

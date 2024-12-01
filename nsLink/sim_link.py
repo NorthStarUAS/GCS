@@ -2,7 +2,7 @@ import socket
 
 from fmu_link import fmu_link
 from nst_messages import effectors_v1
-from props import effectors_node
+from nodes import effectors_node
 from serial_link import wrap_packet
 
 sim_host = "localhost"

@@ -1,6 +1,6 @@
 import math
 
-from props import airdata_node, environment_node, inceptors_node, nav_node, power_node, status_node, refs_node, tecs_config_node, tecs_node
+from nodes import airdata_node, environment_node, inceptors_node, nav_node, power_node, status_node, refs_node, tecs_config_node, tecs_node
 
 
 r2d = 180.0 / math.pi

@@ -3,7 +3,7 @@
 from PropertyTree import PropertyNode
 
 from commands import commands
-from props import ident_node, specs_node, tecs_config_node
+from nodes import ident_node, specs_node, tecs_config_node
 
 requests_pending = True
 def gen_requests():

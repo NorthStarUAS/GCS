@@ -5,7 +5,6 @@ import tornado.httpserver
 import tornado.websocket
 
 from PropertyTree import PropertyNode
-# import props_json
 
 from commands import commands
 import projects
@@ -43,22 +42,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def check_origin(self, origin):
         return True
-
-    # def bind_props(self):
-    #     print('binding property nodes')
-    #     self.pos_combined_node = PropertyNode('/position/combined')
-    #     self.velocity_node = PropertyNode('/velocity')
-    #     self.act_node = PropertyNode('/actuators/actuator')
-    #     self.ap_node = PropertyNode('/autopilot')
-    #     self.targets_node = PropertyNode('/autopilot/targets')
-    #     self.route_node = PropertyNode('/task/route')
-    #     self.active_node = PropertyNode('/task/route/active')
-    #     self.home_node = PropertyNode('/task/home')
-    #     self.circle_node = PropertyNode('/task/circle')
-    #     self.status_node = PropertyNode('/status')
-    #     self.cam_node = PropertyNode('/payload/camera')
-    #     self.wind_node = PropertyNode('/filters/wind')
-    #     self.apm2_node = PropertyNode('/sensors/APM2')
 
 def nullfunc():
     pass

@@ -14,7 +14,7 @@ from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
-from props import ident_node, remote_link_node
+from nodes import ident_node, remote_link_node
 import requests
 from sim_link import sim_link
 import telnet

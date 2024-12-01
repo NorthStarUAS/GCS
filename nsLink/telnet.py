@@ -1,5 +1,4 @@
 
-import asyncio
 import tornado
 import tornado.tcpserver
 from tornado.iostream import StreamClosedError
@@ -10,7 +9,7 @@ from PropertyTree import PropertyNode
 
 from alerts import alert_mgr
 from commands import commands
-from props import airdata_node, effectors_node, environment_node, imu_node, nav_node, refs_node
+from nodes import airdata_node, effectors_node, imu_node, nav_node, refs_node
 
 mps2kt = 1.9438444924406046432
 m2ft = 1.0 / 0.3048

@@ -12,7 +12,7 @@ import sys
 import tempfile
 from tqdm import tqdm
 
-from props import environment_node, gps_node, imu_node, status_node
+from nodes import environment_node, gps_node, imu_node, status_node
 
 sys.path.append("../../src")
 import nst_messages
