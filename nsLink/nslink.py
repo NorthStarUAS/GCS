@@ -20,8 +20,8 @@ from sim_link import sim_link
 import telnet
 
 argparser = argparse.ArgumentParser(description='aura link')
-argparser.add_argument('--hertz', default=10, type=int, help='specify main loop rate')
 argparser.add_argument('--serial', required=True, help='input serial port')
+argparser.add_argument('--hertz', default=10, type=int, help='specify main loop rate')
 argparser.add_argument('--baud', default=57600, type=int, help='serial port baud rate')
 argparser.add_argument('--telnet-port', default=5050, help='telnet port')
 argparser.add_argument('--http-port', default=8888, help='http/ws port')
