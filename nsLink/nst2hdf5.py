@@ -138,7 +138,7 @@ else:
 output_dir = os.path.dirname(os.path.realpath(filename))
 
 # last recorded time stamp
-total_time = imu_node.getDouble("millis") / 1000.0
+total_time = imu_node.getUInt("millis") / 1000.0
 imu_node.pretty_print()
 
 filename = os.path.join(output_dir, "flight.h5")
