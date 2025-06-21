@@ -40,7 +40,14 @@ fmu_link.begin(args.serial, args.baud, timeout=dt)
 
 app.add_static_files("/html", "../html")
 
-ii = ui.interactive_image("html/panel/textures/alt1.png")
+with ui.row().classes("w-full"):
+    ui.label('label 1')
+    ui.label('label 2')
+    ui.label('label 3')
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
 deg = 0.0
 
 @ui.refreshable
