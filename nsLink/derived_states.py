@@ -50,7 +50,7 @@ class DerivedStates:
         nav_node.setDouble("groundspeed_kt", vel_mps * mps2kt)
 
         # compute frame dt
-        current_time = nav_node.getDouble('millis') / 1000.0
+        current_time = nav_node.getUInt("millis") / 1000.0
         # print("millis:", imu_node.getInt('millis'), nav_node.getDouble('millis'))
         dt = current_time - self.last_time
         # print("cur: %.3f" % current_time, "dt: %.3f" % dt, "flt: %.3f" % self.flight_timer, "ap: %.3f" % self.ap_timer, "power: %.3f" % self.throttle_timer)
@@ -97,7 +97,7 @@ class DerivedStates:
         power_node.setDouble("battery_perc", filt_perc)
 
     def compute_tecs(self):
-        if nav_node.getDouble('timestamp') < 0.01:
+        if nav_node.getUInt("millis") < 1:
             # do nothing if filter not inited
             return
 
