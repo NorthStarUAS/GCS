@@ -40,21 +40,25 @@ fmu_link.begin(args.serial, args.baud, timeout=dt)
 
 app.add_static_files("/html", "../html")
 
-with ui.row().classes("w-full"):
-    ui.label('label 1')
-    ui.label('label 2')
-    ui.label('label 3')
+with ui.row(wrap=False).classes("w-full"):
     ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
     ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
     ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
     ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+
+with ui.row(wrap=False).classes("w-full"):
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+
 deg = 0.0
 
 @ui.refreshable
 async def gauge_test():
     global deg
-    deg += 1
-    ii.content = '<image href="html/panel/textures/alt3.png" transform="rotate(%.0f)" />' % deg
+    deg += 0.2
+    ii.content = '<image href="html/panel/textures/alt3.png" transform="rotate(%.1f)" />' % deg
 
 gauge_test()
 
@@ -104,7 +108,7 @@ with ui.tab_panels(tabs, value=panel).classes('w-full'):
 ui.timer(0.1, bus_data.refresh)
 ui.timer(0.1, gauge_test.refresh)
 
-ui.run(reload=False, native=True)
+ui.run(reload=False, native=False)
 
 # class MainApp(QWidget):
 #     def __init__(self):
