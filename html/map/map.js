@@ -486,6 +486,7 @@ function preflight(e) {
 }
 
 function launch(e) {
+    link_send("task launch");
 }
 
 function land(e) {
