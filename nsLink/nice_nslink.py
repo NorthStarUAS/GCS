@@ -1,10 +1,13 @@
 #!/usr/bin/python3
 
 import argparse
+import pathlib
 import sys
 
 import asyncio
 from nicegui import app, ui
+
+from PropertyTree import PropertyNode
 
 from alerts import alert_mgr
 from commands import commands
@@ -12,7 +15,7 @@ from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
-from PropertyTree import PropertyNode
+from nice_gauge import Airspeed
 from nodes import ident_node, remote_link_node
 import requests
 from sim_link import sim_link
@@ -38,19 +41,21 @@ httpserver.init(args.http_port, args.html_root)
 # commands.set_serial(ser)
 fmu_link.begin(args.serial, args.baud, timeout=dt)
 
-app.add_static_files("/html", "../html")
+# maps a resource url to physical path for the nicegui app
+file_dir = pathlib.Path(__file__).parent.resolve()
+app.add_static_files("/resources", file_dir / "../html")
 
 with ui.row(wrap=False).classes("w-full"):
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    asi = Airspeed()
+    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
 
 with ui.row(wrap=False).classes("w-full"):
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
-    ii = ui.interactive_image("html/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
 
 deg = 0.0
 
@@ -58,7 +63,8 @@ deg = 0.0
 async def gauge_test():
     global deg
     deg += 0.2
-    ii.content = '<image href="html/panel/textures/alt3.png" transform="rotate(%.1f)" />' % deg
+    ii.content = '<image href="resources/panel/textures/alt3.png" transform="rotate(%.1f)" />' % deg
+    asi.update()
 
 gauge_test()
 

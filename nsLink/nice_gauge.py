@@ -2,9 +2,9 @@ from math import ceil, cos, sin
 from nicegui import ui
 from scipy.interpolate import interp1d
 
-from nstSimulator.utils.constants import d2r, kt2mps
+from nstSimulator.utils.constants import d2r, kt2mps, mps2kt
 
-from nodes import specs_node, tecs_config_node
+from nodes import airdata_node, nav_node, refs_node, specs_node, tecs_config_node
 
 class NiceGauge():
     def __init__(self):
@@ -15,14 +15,14 @@ class NiceGauge():
         self.radius = self.width * 0.5
         self.bg_color = "#202020"
 
-    def arc(self, cx, cy, radius, start_deg, end_deg, stroke, fill, stroke_width, fill_opacity):
+    def arc(self, cx, cy, radius, start_deg, end_deg, color, fill, stroke_width, fill_opacity):
         # print("cx:", cx, "start_deg:", start_deg, "end_deg:", end_deg)
         x1 = cx + cos(start_deg*d2r)*radius
         x2 = cx + cos(end_deg*d2r)*radius
         y1 = cy - sin(start_deg*d2r)*radius
         y2 = cy - sin(end_deg*d2r)*radius
         svg = '<path d="M %.0f %.0f A %.0f %.0f 0 %d 1 %.0f %.0f" ' % (x1, y1, radius, radius, end_deg-start_deg>180, x2, y2)
-        svg += 'stroke="%s" ' % stroke
+        svg += 'stroke="%s" ' % color
         if len(fill):
             svg += 'fill="%s" ' % fill
         svg += 'stroke-width="%.0f" ' % stroke_width
@@ -31,14 +31,14 @@ class NiceGauge():
         # print("arc:", svg)
         return svg
 
-    def tic(self, cx, cy, inner_radius, outer_radius, angle_deg, stroke, fill, stroke_width, fill_opacity):
+    def tic(self, cx, cy, inner_radius, outer_radius, angle_deg, color, fill, stroke_width, fill_opacity):
         # print("cx:", cx, "angle_deg:", angle_deg)
         x1 = cx + cos(angle_deg*d2r)*inner_radius
         x2 = cx + cos(angle_deg*d2r)*outer_radius
         y1 = cy - sin(angle_deg*d2r)*inner_radius
         y2 = cy - sin(angle_deg*d2r)*outer_radius
         svg = '<path d="M %.0f %.0f L %.0f %.0f" ' % (x1, y1, x2, y2)
-        svg += 'stroke="%s" ' % stroke
+        svg += 'stroke="%s" ' % color
         if len(fill):
             svg += 'fill="%s" ' % fill
         svg += 'stroke-width="%.0f" ' % stroke_width
@@ -47,17 +47,37 @@ class NiceGauge():
         # print("tic:", svg)
         return svg
 
-    def label(self, cx, cy, radius, angle_deg, text, stroke, font_size):
+    def label(self, cx, cy, radius, angle_deg, text, color, font_size):
         # print("cx:", cx, "angle_deg:", angle_deg)
         x1 = cx + cos(angle_deg*d2r)*radius
         y1 = cy - sin(angle_deg*d2r)*radius
-        # svg = '<text x="%.0f" y="%.0f" dominant-baseline="middle" text-anchor="middle">%s</text>' % (x1, y1, text)
-        svg = '<text x="%.0f" y="%.0f" text-anchor="middle" dominant-baseline="middle" fill="%s" font-size="%.0f">%s</text>' % (x1, y1, stroke, font_size, text)
-        # svg += 'stroke="%s" ' % stroke
-        # svg += 'stroke-width="%.0f" ' % stroke_width
-        # svg += 'fill-opacity="%0.1f" ' % fill_opacity
-        # svg += '/>'
+        svg = '<text x="%.0f" y="%.0f" text-anchor="middle" dominant-baseline="middle" fill="%s" font-size="%.0f">%s</text>' % (x1, y1, color, font_size, text)
         # print("tic:", svg)
+        return svg
+
+    def image(self, cx, cy, w, h, path, radius, angle_deg):
+        # svg = '<image href="%s" transform="translate(%.0f %.0f) rotate(%.1f, %.0f, %.0f)" />' % (path, cx, cy, angle_deg, cx, cy)
+        svg = '<image href="%s" transform="rotate(%.1f %.0f %.0f) translate(%.0f %.0f)" />' % (path, angle_deg, cx, cy, cx-w*0.5, cy-radius)
+        return svg
+
+    def needle(self, cx, cy, radius, angle_deg, style, color, stroke_width):
+        svg = '<g transform="rotate(%.1f %.0f %.0f)"> ' % (angle_deg, cx, cy)
+        if style == "pointer":
+            arrow_head = radius * 0.05
+            start = radius * 0.05
+            svg += '<path d="M %.0f %.0f L %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-start, cx-arrow_head, cy-start-1.5*arrow_head,
+                                                                                   cx, cy-radius, cx+arrow_head, cy-start-1.5*arrow_head)
+            svg += 'fill="%s" ' % color
+        elif style == "arrow":
+            arrow_head = radius * 0.08
+            start = radius * 0.4
+            svg += '<path d="M %.0f %.0f L %.0f %.0f M %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-start, cx, cy-radius,
+                                                                                            cx-arrow_head, cy-(radius-2*arrow_head),
+                                                                                            cx, cy-radius,
+                                                                                            cx+arrow_head, cy-(radius-2*arrow_head))
+        svg += 'stroke="%s" ' % color
+        svg += 'stroke-width="%.0f" ' % stroke_width
+        svg += ' /> </g>'
         return svg
 
 class Airspeed(NiceGauge):
@@ -67,7 +87,6 @@ class Airspeed(NiceGauge):
         bg_radius = self.width*0.5 * 0.95
         self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
         self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
-        # self.background = ""
         self.base.content = self.background
         print("asi init svg:", self.base.content)
 
@@ -85,6 +104,7 @@ class Airspeed(NiceGauge):
 
         min_kt = tecs_config_node.getDouble("min_kt")
         max_kt = tecs_config_node.getDouble("max_kt")
+        if max_kt < 0.1: return
         cruise_kt = tecs_config_node.getDouble("cruise_kt")
         range_kt = max_kt - min_kt
         caution_kt = min_kt + 0.8 * range_kt
@@ -137,77 +157,26 @@ class Airspeed(NiceGauge):
                 tic_deg = 90 - asi_func(tic_kt*speed_scale)
                 tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width*0.8, 0)
 
-        # var speed = 0.0;
-        # if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
-        #     speed = json.sensors.airdata.airspeed_filt_mps*mps2kt;
-        # } else {
-        #     speed = json.filters.nav.groundspeed_kt;
-        # }
+        if specs_node.getString("vehicle_class") == "surface":
+            speed = nav_node.getDouble("groundspeed_kt")
+        else:
+            speed = airdata_node.getDouble("airspeed_filt_mps") * mps2kt
+        speed_text = self.label(self.cx, self.cy, self.width*0.08, 90, "%.0f %s" % (speed, display_units.upper()), "white", px)
 
-        # // units label
-        # var px = Math.round(size * 0.07);
-        # context.font = px + "px Courier New, monospace";
-        # context.fillStyle = "white";
-        # context.textAlign = "center";
-        # context.fillText(speed.toFixed(0) + " " + display_units.toUpperCase(), cx, cy - size*0.08);
+        ground_kt = nav_node.getDouble("groundspeed_kt")
+        ground_text = self.label(self.cx, self.cy, self.width*0.16, -90, "GS: %.0f" % ground_kt, "orange", round(self.width*0.06))
 
-        # // ground speed label
-        # var px = Math.round(size * 0.06);
-        # context.font = px + "px Courier New, monospace";
-        # context.fillStyle = "orange";
-        # context.textAlign = "center";
-        # gs = json.filters.nav.groundspeed_kt;
-        # context.fillText("GS: " + gs.toFixed(0), cx, cy + size*0.16);
+        bug_kt = refs_node.getDouble("airseped_kt")
+        bug_deg = asi_func(bug_kt*speed_scale)
+        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius+arc_width, bug_deg)
 
-        # // bug
-        # context.save();
-        # var nw = Math.floor(img_hdg2.width*scale)
-        # var nh = Math.floor(img_hdg2.height*scale)
-        # context.translate(cx, cy);
-        # var deg = my_interp( json.fcs.refs.airspeed_kt*speed_scale,
-        #                      asi_interpx, asi_interpy);
-        # context.rotate(deg*d2r);
-        # context.drawImage(img_hdg2, -nw*0.5, -size*0.5*0.95, width=nw, height=nh);
-        # context.restore();
+        ground_deg = asi_func(ground_kt)
+        ground_needle = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, ground_deg, "arrow", "orange", 6)
 
-        # // gs needle
-        # context.save();
-        # context.strokeStyle = 'orange';
-        # context.lineWidth = 4;
-        # context.translate(cx, cy);
-        # var gs_kt = json.filters.nav.groundspeed_kt*speed_scale;
-        # var deg = my_interp( gs_kt, asi_interpx, asi_interpy);
-        # context.rotate(deg*d2r);
-        # context.beginPath();
-        # context.moveTo(0, 0);
-        # context.lineTo(0, -size*0.44*0.85);
-        # context.stroke();
-        # context.beginPath();
-        # context.moveTo(0, -size*0.44*0.85);
-        # context.lineTo(-size*0.03*0.85, -size*0.37*0.85);
-        # context.stroke();
-        # context.beginPath();
-        # context.moveTo(0, -size*0.44*0.85);
-        # context.lineTo(size*0.03*0.85, -size*0.37*0.85);
-        # context.stroke();
-        # context.restore();
+        speed_deg = asi_func(speed*speed_scale)
+        speed_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, speed_deg, "pointer", "white", 2)
 
-        # // airspeed needle
-        # context.save();
-        # var nw = Math.floor(img_asi3.width*scale)
-        # var nh = Math.floor(img_asi3.height*scale)
-        # context.translate(cx, cy);
-        # var speed = 0.0;
-        # if ( json.config.specs.vehicle_class != null && json.config.specs.vehicle_class != "surface" ) {
-        #     speed = json.sensors.airdata.airspeed_filt_mps*mps2kt;
-        # } else {
-        #     speed = json.filters.nav.groundspeed_kt;
-        # }
-
-        # var deg = my_interp( speed * speed_scale, asi_interpx, asi_interpy);
-        # context.rotate(deg*d2r);
-        # context.drawImage(img_asi3, -nw*0.5, -nh*0.85, width=nw, height=nh);
-        # context.restore();
-
-        self.base.content = self.background + self.green_arc + self.yellow_arc + self.red_arc + tic_svg
-        # print(self.base.content)
+        # assemble the components
+        self.base.content = self.background
+        self.base.content += self.green_arc + self.yellow_arc + self.red_arc + tic_svg
+        self.base.content += speed_text + ground_text + ground_needle + bug + speed_needle
