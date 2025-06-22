@@ -89,7 +89,7 @@ def update():
     # telnet.update()
     # httpserver.update()
 
-app.timer(0.1, update)
+app.timer(0.01, update)
 
 @ui.refreshable
 async def bus_data():
