@@ -166,7 +166,7 @@ class Airspeed(NiceGauge):
         ground_kt = nav_node.getDouble("groundspeed_kt")
         ground_text = self.label(self.cx, self.cy, self.width*0.16, -90, "GS: %.0f" % ground_kt, "orange", round(self.width*0.06))
 
-        bug_kt = refs_node.getDouble("airseped_kt")
+        bug_kt = refs_node.getDouble("airspeed_kt")
         bug_deg = asi_func(bug_kt*speed_scale)
         bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius+arc_width, bug_deg)
 
