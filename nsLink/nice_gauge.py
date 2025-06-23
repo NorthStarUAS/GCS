@@ -57,7 +57,7 @@ class NiceGauge():
 
     def image(self, cx, cy, w, h, path, radius, angle_deg):
         # svg = '<image href="%s" transform="translate(%.0f %.0f) rotate(%.1f, %.0f, %.0f)" />' % (path, cx, cy, angle_deg, cx, cy)
-        svg = '<image href="%s" transform="rotate(%.1f %.0f %.0f) translate(%.0f %.0f)" />' % (path, angle_deg, cx, cy, cx-w*0.5, cy-radius)
+        svg = '<image href="%s" transform="rotate(%.1f %.0f %.0f) translate(%.0f %.0f)" />' % (path, angle_deg, cx, cy, cx-w*0.5, cy-h*0.5-radius)
         return svg
 
     def needle(self, cx, cy, radius, angle_deg, style, color, stroke_width):
@@ -88,7 +88,7 @@ class Airspeed(NiceGauge):
         self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
         self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
         self.base.content = self.background
-        print("asi init svg:", self.base.content)
+        print("ati init svg:", self.base.content)
 
     def update(self):
         display_units = specs_node.getString("display_units")
@@ -168,7 +168,7 @@ class Airspeed(NiceGauge):
 
         bug_kt = refs_node.getDouble("airspeed_kt")
         bug_deg = asi_func(bug_kt*speed_scale)
-        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius+arc_width, bug_deg)
+        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius, bug_deg)
 
         ground_deg = asi_func(ground_kt)
         ground_needle = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, ground_deg, "arrow", "orange", 6)
@@ -180,3 +180,36 @@ class Airspeed(NiceGauge):
         self.base.content = self.background
         self.base.content += self.green_arc + self.yellow_arc + self.red_arc + tic_svg
         self.base.content += speed_text + ground_text + ground_needle + bug + speed_needle
+
+class Attitude(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        bg_radius = self.width*0.5 * 0.95
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.base.content = self.background
+        print("ati init svg:", self.base.content)
+
+    def update(self):
+        roll_deg = nav_node.getDouble("roll_deg")
+        pitch_deg = nav_node.getDouble("pitch_deg")
+
+        backplate = self.image(self.cx, self.cy, 384, 384, "resources/panel/textures/ati1.png", 0, -roll_deg)
+
+        p = pitch_deg
+        if p < -20: p = -20
+        if p > 20: p = 20
+        y_offset = p * 4.5
+        pitch = self.image(self.cx, self.cy+y_offset, 392, 256, "resources/panel/textures/ati2.png", 0, -roll_deg)
+
+        roll = self.image(self.cx, self.cy, 464, 464, "resources/panel/textures/ati3.png", 0, -roll_deg)
+
+        bird = self.image(self.cx, self.cy+75, 264, 174, "resources/panel/textures/ati4.png", 0, 0)
+
+        bezel = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/ati5.png", 0, 0)
+
+        # // bezel
+        # context.drawImage(img_ati5, x, y, width=size, height=size);
+
+        self.base.content = self.background + backplate + pitch + roll + bird + bezel
