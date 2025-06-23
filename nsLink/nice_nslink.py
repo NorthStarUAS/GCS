@@ -15,7 +15,7 @@ from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
-from nice_gauge import Airspeed, Attitude
+from nice_gauge import Airspeed, Attitude, Altitude
 from nodes import ident_node, remote_link_node
 import requests
 from sim_link import sim_link
@@ -48,7 +48,7 @@ app.add_static_files("/resources", file_dir / "../html")
 with ui.row(wrap=False).classes("w-full"):
     asi = Airspeed()
     ati = Attitude()
-    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    alt = Altitude()
     ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
 
 with ui.row(wrap=False).classes("w-full"):
@@ -61,11 +61,9 @@ deg = 0.0
 
 @ui.refreshable
 async def gauge_test():
-    # global deg
-    # deg += 0.2
-    # ii.content = '<image href="resources/panel/textures/alt3.png" transform="rotate(%.1f)" />' % deg
     asi.update()
     ati.update()
+    alt.update()
 
 gauge_test()
 

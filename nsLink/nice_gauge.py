@@ -2,9 +2,9 @@ from math import ceil, cos, sin
 from nicegui import ui
 from scipy.interpolate import interp1d
 
-from nstSimulator.utils.constants import d2r, kt2mps, mps2kt
+from nstSimulator.utils.constants import d2r, kt2mps, m2ft, mps2kt
 
-from nodes import airdata_node, nav_node, refs_node, specs_node, tecs_config_node
+from nodes import airdata_node, environment_node, nav_node, refs_node, specs_node, tecs_config_node
 
 class NiceGauge():
     def __init__(self):
@@ -161,7 +161,8 @@ class Airspeed(NiceGauge):
             speed = nav_node.getDouble("groundspeed_kt")
         else:
             speed = airdata_node.getDouble("airspeed_filt_mps") * mps2kt
-        speed_text = self.label(self.cx, self.cy, self.width*0.08, 90, "%.0f %s" % (speed, display_units.upper()), "white", px)
+        # speed_text = self.label(self.cx, self.cy, self.width*0.08, 90, "%.0f %s" % (speed, display_units.upper()), "white", px)
+        speed_text = self.label(self.cx, self.cy, self.width*0.08, 90, "%s" % (display_units.upper()), "white", px)
 
         ground_kt = nav_node.getDouble("groundspeed_kt")
         ground_text = self.label(self.cx, self.cy, self.width*0.16, -90, "GS: %.0f" % ground_kt, "orange", round(self.width*0.06))
@@ -205,7 +206,7 @@ class Attitude(NiceGauge):
 
         roll = self.image(self.cx, self.cy, 464, 464, "resources/panel/textures/ati3.png", 0, -roll_deg)
 
-        bird = self.image(self.cx, self.cy+75, 264, 174, "resources/panel/textures/ati4.png", 0, 0)
+        bird = self.image(self.cx, self.cy+77, 264, 174, "resources/panel/textures/ati4.png", 0, 0)
 
         bezel = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/ati5.png", 0, 0)
 
@@ -213,3 +214,78 @@ class Attitude(NiceGauge):
         # context.drawImage(img_ati5, x, y, width=size, height=size);
 
         self.base.content = self.background + backplate + pitch + roll + bird + bezel
+
+class Altitude(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        bg_radius = self.width*0.5 * 0.95
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.base.content = self.background
+        print("ati init svg:", self.base.content)
+
+    def update(self):
+        max_ft = specs_node.getDouble("max_ft")
+        safe_ft = 100
+        if max_ft < 200:
+            max_ft = 400
+        vne_ft = max_ft + 100
+
+        upper_ft = ceil( max_ft / 100 ) * 100 + 200
+        alt_interpx = [ 0, upper_ft, 2*upper_ft ]
+        alt_interpy = [ 0, 340, 360 ]
+        alt_func = interp1d(alt_interpx, alt_interpy, bounds_error=False, fill_value="extrapolate")
+
+        safe_deg = 90 - alt_func(safe_ft)
+        max_deg = 90 - alt_func(max_ft)
+        vne_deg = 90 - alt_func(vne_ft)
+
+        arc_radius = self.width*0.5 * 0.84
+        arc_width = self.width * 0.04
+
+        # arcs
+        self.green_arc = self.arc(self.cx, self.cy, arc_radius - arc_width*0.5, safe_deg, max_deg, "green", "", arc_width, 0)
+        self.yellow_arc = self.arc(self.cx, self.cy, arc_radius - arc_width*0.5, max_deg, vne_deg, "yellow", "", arc_width, 0)
+
+        # tics
+        px = round(self.width * 0.07)
+        dstic = 0
+        if max_ft <= 500:
+            dtic = 100
+            dstic = 20
+        elif max_ft <= 200:
+            dtic = 100
+            dstic = 50
+        else:
+            dtic = 500
+            dstic = 100
+        tic_svg = ""
+        inner_radius = arc_radius - 1.5*arc_width
+        tic_width = self.width * 0.01
+        label_radius = self.width*0.5 * 0.55
+        for tic_ft in range(dtic, int(upper_ft+1), dtic):
+            tic_deg = 90 - alt_func(tic_ft)
+            tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width, 0)
+            tic_svg += self.label(self.cx, self.cy, label_radius, tic_deg, str(tic_ft), "white", px)
+        if dstic > 0:
+            inner_radius = arc_radius - arc_width
+            for tic_kt in range(dstic, int(upper_ft+1), dstic):
+                tic_deg = 90 - alt_func(tic_kt)
+                tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width*0.8, 0)
+
+        bug_kt = refs_node.getDouble("altitude_agl_ft")
+        bug_deg = alt_func(bug_kt)
+        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius, bug_deg)
+
+        alt_ft = environment_node.getDouble("altitude_agl_m") * m2ft
+        # display_ft = round(alt_ft/10)*10
+        alt_text = self.label(self.cx, self.cy, self.width*0.08, 90, "AGL (ft)", "white", px)
+
+        alt_deg = alt_func(alt_ft)
+        alt_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, alt_deg, "pointer", "white", 2)
+
+        # assemble the components
+        self.base.content = self.background
+        self.base.content += self.green_arc + self.yellow_arc + tic_svg
+        self.base.content += bug + alt_text + alt_needle
