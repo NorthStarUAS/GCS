@@ -60,21 +60,20 @@ class NiceGauge():
         svg = '<image href="%s" transform="rotate(%.1f %.0f %.0f) translate(%.0f %.0f)" />' % (path, angle_deg, cx, cy, cx-w*0.5, cy-h*0.5-radius)
         return svg
 
-    def needle(self, cx, cy, radius, angle_deg, style, color, stroke_width):
+    def needle(self, cx, cy, pointer_radius, tail_radius, angle_deg, style, color, stroke_width):
         svg = '<g transform="rotate(%.1f %.0f %.0f)"> ' % (angle_deg, cx, cy)
         if style == "pointer":
-            arrow_head = radius * 0.05
-            start = radius * 0.05
-            svg += '<path d="M %.0f %.0f L %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-start, cx-arrow_head, cy-start-1.5*arrow_head,
-                                                                                   cx, cy-radius, cx+arrow_head, cy-start-1.5*arrow_head)
+            arrow_head = pointer_radius * 0.05
+            svg += '<path d="M %.0f %.0f L %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-tail_radius, cx-arrow_head, cy-tail_radius-1.5*arrow_head,
+                                                                                   cx, cy-pointer_radius, cx+arrow_head, cy-tail_radius-1.5*arrow_head)
             svg += 'fill="%s" ' % color
         elif style == "arrow":
-            arrow_head = radius * 0.08
-            start = radius * 0.4
-            svg += '<path d="M %.0f %.0f L %.0f %.0f M %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-start, cx, cy-radius,
-                                                                                            cx-arrow_head, cy-(radius-2*arrow_head),
-                                                                                            cx, cy-radius,
-                                                                                            cx+arrow_head, cy-(radius-2*arrow_head))
+            arrow_head = pointer_radius * 0.08
+            svg += '<path d="M %.0f %.0f L %.0f %.0f M %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-tail_radius, cx, cy-pointer_radius,
+                                                                                            cx-arrow_head, cy-(pointer_radius-2*arrow_head),
+                                                                                            cx, cy-pointer_radius,
+                                                                                            cx+arrow_head, cy-(pointer_radius-2*arrow_head))
+            svg += 'fill-opacity="0" '
         svg += 'stroke="%s" ' % color
         svg += 'stroke-width="%.0f" ' % stroke_width
         svg += ' /> </g>'
@@ -172,10 +171,10 @@ class Airspeed(NiceGauge):
         bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius, bug_deg)
 
         ground_deg = asi_func(ground_kt)
-        ground_needle = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, ground_deg, "arrow", "orange", 6)
+        ground_needle = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, arc_radius*0.2, ground_deg, "arrow", "orange", 5)
 
         speed_deg = asi_func(speed*speed_scale)
-        speed_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, speed_deg, "pointer", "white", 2)
+        speed_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, arc_radius*0.05, speed_deg, "pointer", "white", 2)
 
         # assemble the components
         self.base.content = self.background
@@ -209,9 +208,6 @@ class Attitude(NiceGauge):
         bird = self.image(self.cx, self.cy+77, 264, 174, "resources/panel/textures/ati4.png", 0, 0)
 
         bezel = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/ati5.png", 0, 0)
-
-        # // bezel
-        # context.drawImage(img_ati5, x, y, width=size, height=size);
 
         self.base.content = self.background + backplate + pitch + roll + bird + bezel
 
@@ -283,9 +279,58 @@ class Altitude(NiceGauge):
         alt_text = self.label(self.cx, self.cy, self.width*0.08, 90, "AGL (ft)", "white", px)
 
         alt_deg = alt_func(alt_ft)
-        alt_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, alt_deg, "pointer", "white", 2)
+        alt_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, arc_radius*0.05, alt_deg, "pointer", "white", 2)
 
         # assemble the components
         self.base.content = self.background
         self.base.content += self.green_arc + self.yellow_arc + tic_svg
         self.base.content += bug + alt_text + alt_needle
+
+class Heading(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        bg_radius = self.width*0.5 * 0.95
+        self.groundtrack_deg = 0
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.base.content = self.background
+        print("ati init svg:", self.base.content)
+
+    def update(self):
+        heading_deg = nav_node.getDouble("yaw_deg")
+        groundspeed_kt = nav_node.getDouble("groundspeed_kt")
+        if groundspeed_kt > 0.5:
+            self.groundtrack_deg = nav_node.getDouble("groundtrack_deg")
+        wind_deg = environment_node.getDouble("wind_deg")
+        wind_kt = environment_node.getDouble("wind_mps")*mps2kt
+
+        rose = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/hdg1.png", 0, -heading_deg)
+
+        display_units = specs_node.getString("display_units")
+        speed_scale = 1.0
+        if display_units == "mps":
+            speed_scale = kt2mps
+        elif display_units == "kts":
+            speed_scale = 1.0
+        else:
+            # default to mps if not specified
+            speed_scale = kt2mps
+            display_units = "mps"
+
+        arc_radius = self.width*0.5 * 0.84
+        arc_width = self.width * 0.04
+        wind_vane = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, -arc_radius*0.6, wind_deg + 180 - heading_deg, "arrow", "lightblue", 5)
+        wind_text = self.label(self.cx+self.width*0.14, self.cy-self.width*0.06, 0, 0, "WND:%.0f" % (wind_kt*speed_scale), "lightblue", self.width*0.06)
+
+        course = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, -arc_radius*0.6, self.groundtrack_deg - heading_deg, "arrow", "orange", 5)
+        ground_text = self.label(self.cx-self.width*0.14, self.cy-self.width*0.06, 0, 0, "CRS", "orange", self.width*0.06)
+
+        bug_deg = refs_node.getDouble("groundtrack_deg")
+        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius-arc_width, bug_deg - heading_deg)
+
+        # // face plate
+        # context.drawImage(img_hdg3, x, y, width=size, height=size);
+        faceplate = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/hdg3.png", 0, 0)
+
+        self.base.content = self.background + rose + wind_vane + wind_text + course + ground_text + bug + faceplate
