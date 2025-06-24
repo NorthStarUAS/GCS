@@ -59,11 +59,11 @@ class NiceGauge():
         svg = self.line( [[x1, y1], [x2, y2]], color, fill, stroke_width, fill_opacity)
         return svg
 
-    def label(self, cx, cy, radius, angle_deg, text, color, font_size):
+    def label(self, cx, cy, radius, angle_deg, text, color, font_size, align="middle"):
         # print("cx:", cx, "angle_deg:", angle_deg)
         x1 = cx + cos(angle_deg*d2r)*radius
         y1 = cy - sin(angle_deg*d2r)*radius
-        svg = '<text x="%.0f" y="%.0f" text-anchor="middle" dominant-baseline="middle" fill="%s" font-size="%.0f">%s</text>' % (x1, y1, color, font_size, text)
+        svg = '<text x="%.0f" y="%.0f" text-anchor="%s" dominant-baseline="middle" fill="%s" font-size="%.0f">%s</text>' % (x1, y1, align, color, font_size, text)
         # print("tic:", svg)
         return svg
 
@@ -177,6 +177,7 @@ class NiceBar(NiceGauge):
         # main bar
         svg += self.line( [[x, y+h*0.5], [x+w, y+h*0.5]], "white", "", h*0.4, 1)
 
+        # regions
         if self.draw_yellows:
             for yellow in self.yellows:
                 x1 = ((yellow[0] - self.minv) / self.range) * w
@@ -198,53 +199,32 @@ class NiceBar(NiceGauge):
                 svg += self.line( [[x + x1, y], [x + x1, y+h]], "red", "", w*0.02, 1)
             if x2 > 1 and x2 < w-1:
                 svg += self.line( [[x + x2, y], [x + x2, y+h]], "red", "", w*0.02, 1)
-        # context.strokeStyle = "cyan"
-        # var std = Math.sqrt(self.std2)
-        # var v1 = self.avg - std
-        # if (v1 < self.minv) { v1 = self.minv }
-        # if (v1 > self.maxv) { v1 = self.maxv }
-        # var v2 = self.avg + std
-        # if (v2 < self.minv) { v2 = self.minv }
-        # if (v2 > self.maxv) { v2 = self.maxv }
-        # var x1 = ((v1 - self.minv) / self.range) * w
-        # var x2 = ((v2 - self.minv) / self.range) * w
-        # var y1 = Math.round(h*0.5)
-        # context.lineWidth = Math.round(h*0.4)
-        # context.beginPath()
-        # context.moveTo(x+x1, y + y1)
-        # context.lineTo(x+x2, y + y1)
-        # context.stroke()
-        # context.strokeStyle = "white"
-        # context.lineWidth = 3
-        # var x1 = ((self.avg - self.minv) / self.range) * w
-        # context.beginPath()
-        # context.moveTo(x+x1, y)
-        # context.lineTo(x+x1, y + h)
-        # context.stroke()
 
-        # context.save()
+        # trends
+        std = sqrt(self.std2)
+        v1 = self.avg - std
+        if v1 < self.minv: v1 = self.minv
+        if v1 > self.maxv: v1 = self.maxv
+        v2 = self.avg + std
+        if v2 < self.minv: v2 = self.minv
+        if v2 > self.maxv: v2 = self.maxv
+        x1 = ((v1 - self.minv) / self.range) * w
+        x2 = ((v2 - self.minv) / self.range) * w
+        y1 = h*0.5
+        svg += self.line( [[x+x1, y+h*0.5], [x+x2, y+h*0.5]], "cyan", "", h*0.4, 1)
+
+        x1 = ((self.avg - self.minv) / self.range) * w
+        svg += self.line( [[x+x1, y], [x+x1, y+h]], "white", "", 3, 1)
+
+        # current value pointer
         x1 = ((val - self.minv) / self.range) * w
         y1 = h*0.5
         tmp = self.line([[x+x1, y+y1], [x+x1-y1, y+y1-y1*sqrt(3)], [x+x1+y1, y+y1-y1*sqrt(3)], [x+x1, y+y1]],
-                        self.pointer_color, self.pointer_color, 1, 1, shadow=True)
+                        self.pointer_color, self.pointer_color, 1, 1)
         svg += self.add_shadow(tmp)
 
-        # context.lineWidth = 1
-        # context.strokeStyle = self.pointer_color
-        # context.fillStyle = self.pointer_color
-        # context.beginPath()
-        # context.moveTo(x+x1, y+y1)
-        # context.lineTo(x+x1-y1, y+y1-y1*Math.sqrt(3))
-        # context.lineTo(x+x1+y1, y+y1-y1*Math.sqrt(3))
-        # context.lineTo(x+x1, y+y1)
-        # context.stroke()
-        # context.shadowOffsetX = 1
-        # context.shadowOffsetY = 2
-        # context.shadowBlur = 3
-        # context.shadowColor = "rgba(0, 0, 0, 0.9)"
-        # context.fill()
-        # context.restore()
-
+        svg += self.label(x, y+2.2*h, 0, 0, self.text1, "white", px, align="start")
+        svg += self.label(x+w, y+2.2*h, 0, 0, text2, "white", px, align="end")
         # context.font = px + "px Courier New, monospace"
         # context.strokeStyle = "white"
         # context.fillStyle = "white"
@@ -284,7 +264,7 @@ class Power(NiceGauge):
 
         y = 100
         battery_percent = 85
-        val_text = "battery"
+        val_text = "%.0f%%" % battery_percent
         print("width:", self.width, "ipad:", ipad, "val:", self.width - 2*ipad)
         svg = self.batt_bar.draw(ipad, y, self.width - 2*ipad, h, px, battery_percent, val_text)
         print("bar:", svg)
