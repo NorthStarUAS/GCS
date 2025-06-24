@@ -11,6 +11,7 @@ sim_recv_port = 5052
 
 class SimLink():
     def __init__(self):
+        print("SimLink initing.")
         self.sock_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock_in.bind( ("", link_recv_port))
         self.sock_in.setblocking(0)
