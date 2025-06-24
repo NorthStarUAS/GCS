@@ -1,10 +1,11 @@
 from math import ceil, cos, sin
 from nicegui import ui
 from scipy.interpolate import interp1d
+import time
 
 from nstSimulator.utils.constants import d2r, kt2mps, m2ft, mps2kt
 
-from nodes import airdata_node, environment_node, nav_node, refs_node, specs_node, tecs_config_node
+from nodes import airdata_node, environment_node, imu_node, nav_node, refs_node, specs_node, tecs_config_node
 
 class NiceGauge():
     def __init__(self):
@@ -61,7 +62,8 @@ class NiceGauge():
         return svg
 
     def needle(self, cx, cy, pointer_radius, tail_radius, angle_deg, style, color, stroke_width):
-        svg = '<g transform="rotate(%.1f %.0f %.0f)"> ' % (angle_deg, cx, cy)
+        svg = '<defs><filter id="f1"><feDropShadow dx="-4" dy="-4" stdDeviation="2" flood-opacity="1"/></filter></defs>'
+        svg += '<g transform="rotate(%.1f %.0f %.0f)"> ' % (angle_deg, cx, cy)
         if style == "pointer":
             arrow_head = pointer_radius * 0.05
             svg += '<path d="M %.0f %.0f L %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-tail_radius, cx-arrow_head, cy-tail_radius-1.5*arrow_head,
@@ -76,15 +78,190 @@ class NiceGauge():
             svg += 'fill-opacity="0" '
         svg += 'stroke="%s" ' % color
         svg += 'stroke-width="%.0f" ' % stroke_width
+        svg += 'filter="url(#f1)" '
         svg += ' /> </g>'
         return svg
+
+class NiceBar(NiceGauge):
+    def __init__(self, text1, minv, maxv, tics, reds, yellows, greens):
+        self.time_factor = 60
+        self.text1 = text1
+        self.minv = minv
+        self.maxv = maxv
+        self.range = self.maxv - self.minv
+        self.tics = tics
+        self.reds = reds
+        self.yellows = yellows
+        self.greens = greens
+        self.avg = None
+        self.std2 = None
+        self.last_time = 0
+        self.pointer_color = "white"
+        self.start = 0
+        self.state = 0
+        self.verbose = False
+
+    def set_pointer_color(self, val):
+        for green in self.greens:
+            if val >= green[0] and val <= green[1]:
+                self.pointer_color = "white"
+                return
+        for red  in self.reds:
+            alert = 0
+            if val >= red[0] and val <= red[1]:
+                alert = 1
+            elif val < self.minv or val > self.maxv:
+                alert = 1
+            if alert:
+                if not self.state:
+                    if time.time() >= self.start +  0.3:
+                        self.state = 1
+                        self.start = time.time()
+                elif self.state:
+                    if time.time() >= self.start + 1.0:
+                        self.state = 0
+                        self.start = time.time()
+                if self.state:
+                    self.pointer_color = "red"
+                else:
+                    self.pointer_color = "white"
+                return
+        self.pointer_color = "yellow"
+
+    def update_stats(self, val):
+        timestamp = imu_node.getUInt("millis") / 1000.0
+        dt = timestamp - self.last_time
+        self.last_time = timestamp
+        if self.avg is None:
+            self.avg = val
+            self.std2 = 0
+        elif dt > 0:
+            wf = dt / self.time_factor
+            if wf < 0: wf = 0
+            if wf > 1: wf = 1
+            self.avg = (1-wf)*self.avg + wf*val
+            err = abs(val - self.avg)
+            self.std2 = (1-wf)*self.std2 + wf*err*err
+
+    def draw(self, x, y, w, h, px, val, text2):
+        if val < self.minv - 0.05*self.range:
+            val = self.minv - 0.05*self.range
+        if val > self.maxv + 0.05*self.range:
+            val = self.maxv + 0.05*self.range
+        if self.verbose:
+            print("bar:", val)
+        self.update_stats(val)
+        self.set_pointer_color(val)
+
+        svg = '<defs><filter id="f1"><feDropShadow dx="-4" dy="-4" stdDeviation="2" flood-opacity="1"/></filter></defs>'
+
+        # context.strokeStyle = "white"
+        # context.lineWidth = Math.round(h*0.4)
+        # context.beginPath()
+        # context.moveTo(x, y+Math.round(h*0.5))
+        # context.lineTo(x+w, y+Math.round(h*0.5))
+        # context.stroke()
+        # context.strokeStyle = "yellow"
+        # for ( var i = 0; i < self.yellows.length; i++ ) {
+        #     context.lineWidth = h
+        #     var x1 = ((self.yellows[i][0] - self.minv) / self.range) * w
+        #     var x2 = ((self.yellows[i][1] - self.minv) / self.range) * w
+        #     context.beginPath()
+        #     context.moveTo(x+x1, y + Math.round(h*0.5))
+        #     context.lineTo(x+x2, y + Math.round(h*0.5))
+        #     context.stroke()
+        # context.strokeStyle = "#0C0"
+        # context.lineWidth = h
+        # for ( var i = 0; i < self.greens.length; i++ ) {
+        #     var x1 = ((self.greens[i][0] - self.minv) / self.range) * w
+        #     var x2 = ((self.greens[i][1] - self.minv) / self.range) * w
+        #     context.beginPath()
+        #     context.moveTo(x+x1, y + Math.round(h*0.5))
+        #     context.lineTo(x+x2, y + Math.round(h*0.5))
+        #     context.stroke()
+        # context.strokeStyle = "black"
+        # context.lineWidth = 1
+        # context.beginPath()
+        # for ( var xt = self.minv+self.tics; xt < self.maxv; xt += self.tics ) {
+        #     var x1 = ((xt - self.minv) / self.range) * w
+        #     context.moveTo(x+x1, y)
+        #     context.lineTo(x+x1, y + Math.round(h*0.8))
+        # context.stroke()
+        # context.strokeStyle = "#e03030"
+        # for ( var i = 0 i < self.reds.length; i++ ) {
+        #     context.lineWidth = Math.round(w*0.02)
+        #     var x1 = ((self.reds[i][0] - self.minv) / self.range) * w
+        #     var x2 = ((self.reds[i][1] - self.minv) / self.range) * w
+        #     if ( x1 > 1 && x1 < w-1 ) {
+        #                 context.beginPath()
+        #                 context.moveTo(x+x1, y)
+        #                 context.lineTo(x+x1, y + h)
+        #                 context.stroke()
+        #             }
+        #     if ( x2 > 1 && x2 < w-1 ) {
+        #                 context.beginPath()
+        #                 context.moveTo(x+x2, y)
+        #                 context.lineTo(x+x2, y + h)
+        #                 context.stroke()
+        # context.strokeStyle = "cyan"
+        # var std = Math.sqrt(self.std2)
+        # var v1 = self.avg - std
+        # if (v1 < self.minv) { v1 = self.minv }
+        # if (v1 > self.maxv) { v1 = self.maxv }
+        # var v2 = self.avg + std
+        # if (v2 < self.minv) { v2 = self.minv }
+        # if (v2 > self.maxv) { v2 = self.maxv }
+        # var x1 = ((v1 - self.minv) / self.range) * w
+        # var x2 = ((v2 - self.minv) / self.range) * w
+        # var y1 = Math.round(h*0.5)
+        # context.lineWidth = Math.round(h*0.4)
+        # context.beginPath()
+        # context.moveTo(x+x1, y + y1)
+        # context.lineTo(x+x2, y + y1)
+        # context.stroke()
+        # context.strokeStyle = "white"
+        # context.lineWidth = 3
+        # var x1 = ((self.avg - self.minv) / self.range) * w
+        # context.beginPath()
+        # context.moveTo(x+x1, y)
+        # context.lineTo(x+x1, y + h)
+        # context.stroke()
+
+        # context.save()
+        # var x1 = ((val - self.minv) / self.range) * w
+        # var y1 = Math.round(h*0.5)
+        # context.lineWidth = 1
+        # context.strokeStyle = self.pointer_color
+        # context.fillStyle = self.pointer_color
+        # context.beginPath()
+        # context.moveTo(x+x1, y+y1)
+        # context.lineTo(x+x1-y1, y+y1-y1*Math.sqrt(3))
+        # context.lineTo(x+x1+y1, y+y1-y1*Math.sqrt(3))
+        # context.lineTo(x+x1, y+y1)
+        # context.stroke()
+        # context.shadowOffsetX = 1
+        # context.shadowOffsetY = 2
+        # context.shadowBlur = 3
+        # context.shadowColor = "rgba(0, 0, 0, 0.9)"
+        # context.fill()
+        # context.restore()
+
+        # context.font = px + "px Courier New, monospace"
+        # context.strokeStyle = "white"
+        # context.fillStyle = "white"
+        # context.textAlign = "left"
+        # context.fillText(self.text1, x, y + Math.round(2.2*h))
+        # context.textAlign = "right"
+        # context.fillText(text2, x + w, y + Math.round(2.2*h))
+        # context.beginPath()
+        # context.restore()
 
 class Airspeed(NiceGauge):
     def __init__(self):
         super().__init__()
 
         bg_radius = self.width*0.5 * 0.95
-        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes("w-96").props("fit=scale-down")
         self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
         self.base.content = self.background
         print("ati init svg:", self.base.content)
@@ -174,7 +351,7 @@ class Airspeed(NiceGauge):
         ground_needle = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, arc_radius*0.2, ground_deg, "arrow", "orange", 5)
 
         speed_deg = asi_func(speed*speed_scale)
-        speed_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, arc_radius*0.05, speed_deg, "pointer", "white", 2)
+        speed_needle = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, speed_deg, "pointer", "white", 2)
 
         # assemble the components
         self.base.content = self.background
@@ -279,7 +456,7 @@ class Altitude(NiceGauge):
         alt_text = self.label(self.cx, self.cy, self.width*0.08, 90, "AGL (ft)", "white", px)
 
         alt_deg = alt_func(alt_ft)
-        alt_needle = self.needle(self.cx, self.cy, arc_radius-1*arc_width, arc_radius*0.05, alt_deg, "pointer", "white", 2)
+        alt_needle = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, alt_deg, "pointer", "white", 2)
 
         # assemble the components
         self.base.content = self.background
@@ -320,17 +497,17 @@ class Heading(NiceGauge):
 
         arc_radius = self.width*0.5 * 0.84
         arc_width = self.width * 0.04
-        wind_vane = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, -arc_radius*0.6, wind_deg + 180 - heading_deg, "arrow", "lightblue", 5)
+        wind_vane = self.needle(self.cx, self.cy, arc_radius-2*arc_width, -arc_radius*0.6, wind_deg + 180 - heading_deg, "arrow", "lightblue", 5)
         wind_text = self.label(self.cx+self.width*0.14, self.cy-self.width*0.06, 0, 0, "WND:%.0f" % (wind_kt*speed_scale), "lightblue", self.width*0.06)
 
-        course = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, -arc_radius*0.6, self.groundtrack_deg - heading_deg, "arrow", "orange", 5)
+        course = self.needle(self.cx, self.cy, arc_radius-2*arc_width, -arc_radius*0.6, self.groundtrack_deg - heading_deg, "arrow", "orange", 5)
         ground_text = self.label(self.cx-self.width*0.14, self.cy-self.width*0.06, 0, 0, "CRS", "orange", self.width*0.06)
 
         bug_deg = refs_node.getDouble("groundtrack_deg")
         bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius-arc_width, bug_deg - heading_deg)
 
         # // face plate
-        # context.drawImage(img_hdg3, x, y, width=size, height=size);
+        # context.drawImage(img_hdg3, x, y, width=size, height=size)
         faceplate = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/hdg3.png", 0, 0)
 
         self.base.content = self.background + rose + wind_vane + wind_text + course + ground_text + bug + faceplate
