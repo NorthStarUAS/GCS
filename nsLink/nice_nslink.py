@@ -15,7 +15,7 @@ from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
-from nice_gauge import Airspeed, Attitude, Altitude, Heading
+from nice_gauge import Airspeed, Attitude, Altitude, Heading, Power
 from nodes import ident_node, remote_link_node
 import requests
 from sim_link import sim_link
@@ -49,7 +49,7 @@ with ui.row(wrap=False).classes("w-full"):
     asi = Airspeed()
     ati = Attitude()
     alt = Altitude()
-    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    power = Power()
 
 with ui.row(wrap=False).classes("w-full"):
     ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
@@ -64,6 +64,7 @@ async def gauge_test():
     asi.update()
     ati.update()
     alt.update()
+    power.update()
     hdg.update()
 
 gauge_test()

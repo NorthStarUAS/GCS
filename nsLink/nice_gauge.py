@@ -32,20 +32,29 @@ class NiceGauge():
         # print("arc:", svg)
         return svg
 
+    def line(self, points, color, fill, stroke_width, fill_opacity):
+        p = points[0]
+        svg = '<path d="M %.0f %.0f' % (p[0], p[1])
+        for p in points[1:]:
+            svg += ' L %.0f %.0f' % (p[0], p[1])
+        svg += '"'
+        svg += ' stroke="%s"' % color
+        if len(fill):
+            svg += ' fill="%s"' % fill
+        svg += ' stroke-width="%.0f"' % stroke_width
+        if fill_opacity > 0.01 and fill_opacity < 0.99:
+            svg += ' fill-opacity="%0.1f"' % fill_opacity
+        svg += ' />'
+        # print("line:", svg)
+        return svg
+
     def tic(self, cx, cy, inner_radius, outer_radius, angle_deg, color, fill, stroke_width, fill_opacity):
         # print("cx:", cx, "angle_deg:", angle_deg)
         x1 = cx + cos(angle_deg*d2r)*inner_radius
         x2 = cx + cos(angle_deg*d2r)*outer_radius
         y1 = cy - sin(angle_deg*d2r)*inner_radius
         y2 = cy - sin(angle_deg*d2r)*outer_radius
-        svg = '<path d="M %.0f %.0f L %.0f %.0f" ' % (x1, y1, x2, y2)
-        svg += 'stroke="%s" ' % color
-        if len(fill):
-            svg += 'fill="%s" ' % fill
-        svg += 'stroke-width="%.0f" ' % stroke_width
-        svg += 'fill-opacity="%0.1f" ' % fill_opacity
-        svg += '/>'
-        # print("tic:", svg)
+        svg = self.line( [[x1, y1], [x2, y2]], color, fill, stroke_width, fill_opacity)
         return svg
 
     def label(self, cx, cy, radius, angle_deg, text, color, font_size):
@@ -155,23 +164,20 @@ class NiceBar(NiceGauge):
 
         svg = '<defs><filter id="f1"><feDropShadow dx="-4" dy="-4" stdDeviation="2" flood-opacity="1"/></filter></defs>'
 
-        # context.strokeStyle = "white"
-        # context.lineWidth = Math.round(h*0.4)
-        # context.beginPath()
-        # context.moveTo(x, y+Math.round(h*0.5))
-        # context.lineTo(x+w, y+Math.round(h*0.5))
-        # context.stroke()
-        # context.strokeStyle = "yellow"
-        # for ( var i = 0; i < self.yellows.length; i++ ) {
-        #     context.lineWidth = h
-        #     var x1 = ((self.yellows[i][0] - self.minv) / self.range) * w
-        #     var x2 = ((self.yellows[i][1] - self.minv) / self.range) * w
-        #     context.beginPath()
-        #     context.moveTo(x+x1, y + Math.round(h*0.5))
-        #     context.lineTo(x+x2, y + Math.round(h*0.5))
-        #     context.stroke()
-        # context.strokeStyle = "#0C0"
-        # context.lineWidth = h
+        # main bar
+        svg += self.line( [[x, y+h*0.5], [x+w, y+h*0.5]], "white", "", h*0.4, 1)
+
+        for yellow in self.yellows:
+            x1 = x + ((yellow[0] - self.minv) / self.range) * w
+            x2 = x + ((yellow[1] - self.minv) / self.range) * w
+            # print("minv:", self.minv, "range:", self.range, "w:", w, "x1:", x1, "x2:", x2)
+            svg += self.line( [[x1, y+h*0.5], [x2, y+h*0.5]], "yellow", "", h, 1)
+        for green in self.greens:
+            x1 = x + ((green[0] - self.minv) / self.range) * w
+            x2 = x + ((green[1] - self.minv) / self.range) * w
+            # print("minv:", self.minv, "range:", self.range, "w:", w, "x1:", x1, "x2:", x2)
+            svg += self.line( [[x1, y+h*0.5], [x2, y+h*0.5]], "green", "", h, 1)
+
         # for ( var i = 0; i < self.greens.length; i++ ) {
         #     var x1 = ((self.greens[i][0] - self.minv) / self.range) * w
         #     var x2 = ((self.greens[i][1] - self.minv) / self.range) * w
@@ -256,6 +262,41 @@ class NiceBar(NiceGauge):
         # context.beginPath()
         # context.restore()
 
+        return svg
+
+class Power(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        bg_radius = self.width*0.5 * 0.95
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.base.content = self.background
+
+        self.batt_bar = NiceBar("Battery", 0, 100, 10, [[0,10]], [[10,25]], [[25,100]])
+        self.cell_bar = NiceBar("Per Cell", 3.0, 4.2, 0.1, [[3.0,3.3]], [], [[3.5,4.2]])
+        self.vcc_bar = NiceBar("Avionics", 4.5, 5.5, 0.1, [[4.5,4.8], [5.2,5.5]], [], [[4.9,5.1]])
+        self.pwm_vcc_bar = NiceBar("PWM", 4.5, 6.0, 0.1, [[4.5,4.8], [5.8,6.0]], [], [[4.9,5.5]])
+        self.imu_temp_bar = NiceBar("IMU Temp", 0, 60, 10, [[50,60]], [], [[0,40]])
+
+        print("power init svg:", self.base.content)
+
+    def update(self):
+        pad = self.width * 0.025
+        ipad = pad * 6
+        r = self.width * 0.3
+        h = self.height * 0.04
+        vspace = self.height * 0.15
+        px = self.width * 0.06
+
+        y = 100
+        battery_percent = 85
+        val_text = "battery"
+        print("width:", self.width, "ipad:", ipad, "val:", self.width - 2*ipad)
+        svg = self.batt_bar.draw(ipad, y, self.width - 2*ipad, h, px, battery_percent, val_text)
+        print("bar:", svg)
+        self.base.content = self.background + svg
+
 class Airspeed(NiceGauge):
     def __init__(self):
         super().__init__()
@@ -325,13 +366,13 @@ class Airspeed(NiceGauge):
         label_radius = self.width*0.5 * 0.6
         for tic_kt in range(dtic, int(upper_kt+1), dtic):
             tic_deg = 90 - asi_func(tic_kt*speed_scale)
-            tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width, 0)
+            tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width, 1)
             tic_svg += self.label(self.cx, self.cy, label_radius, tic_deg, str(tic_kt), "white", px)
         if dstic > 0:
             inner_radius = arc_radius - arc_width
             for tic_kt in range(dstic, int(upper_kt+1), dstic):
                 tic_deg = 90 - asi_func(tic_kt*speed_scale)
-                tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width*0.8, 0)
+                tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width*0.8, 1)
 
         if specs_node.getString("vehicle_class") == "surface":
             speed = nav_node.getDouble("groundspeed_kt")
@@ -439,13 +480,13 @@ class Altitude(NiceGauge):
         label_radius = self.width*0.5 * 0.55
         for tic_ft in range(dtic, int(upper_ft+1), dtic):
             tic_deg = 90 - alt_func(tic_ft)
-            tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width, 0)
+            tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width, 1)
             tic_svg += self.label(self.cx, self.cy, label_radius, tic_deg, str(tic_ft), "white", px)
         if dstic > 0:
             inner_radius = arc_radius - arc_width
             for tic_kt in range(dstic, int(upper_ft+1), dstic):
                 tic_deg = 90 - alt_func(tic_kt)
-                tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width*0.8, 0)
+                tic_svg += self.tic(self.cx, self.cy, inner_radius, arc_radius, tic_deg, "white", "", tic_width*0.8, 1)
 
         bug_kt = refs_node.getDouble("altitude_agl_ft")
         bug_deg = alt_func(bug_kt)
