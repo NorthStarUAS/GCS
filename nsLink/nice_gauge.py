@@ -1,4 +1,4 @@
-from math import ceil, cos, sin
+from math import ceil, cos, sin, sqrt
 from nicegui import ui
 from scipy.interpolate import interp1d
 import time
@@ -15,6 +15,7 @@ class NiceGauge():
         self.cy = self.height / 2
         self.radius = self.width * 0.5
         self.bg_color = "#202020"
+        # self.bg_color = "#D0D0D0"
 
     def arc(self, cx, cy, radius, start_deg, end_deg, color, fill, stroke_width, fill_opacity):
         # print("cx:", cx, "start_deg:", start_deg, "end_deg:", end_deg)
@@ -33,8 +34,9 @@ class NiceGauge():
         return svg
 
     def line(self, points, color, fill, stroke_width, fill_opacity):
+        svg = ''
         p = points[0]
-        svg = '<path d="M %.0f %.0f' % (p[0], p[1])
+        svg += '<path d="M %.0f %.0f' % (p[0], p[1])
         for p in points[1:]:
             svg += ' L %.0f %.0f' % (p[0], p[1])
         svg += '"'
@@ -71,24 +73,32 @@ class NiceGauge():
         return svg
 
     def needle(self, cx, cy, pointer_radius, tail_radius, angle_deg, style, color, stroke_width):
-        svg = '<defs><filter id="f1"><feDropShadow dx="-4" dy="-4" stdDeviation="2" flood-opacity="1"/></filter></defs>'
+        svg = ''
         svg += '<g transform="rotate(%.1f %.0f %.0f)"> ' % (angle_deg, cx, cy)
         if style == "pointer":
             arrow_head = pointer_radius * 0.05
-            svg += '<path d="M %.0f %.0f L %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-tail_radius, cx-arrow_head, cy-tail_radius-1.5*arrow_head,
-                                                                                   cx, cy-pointer_radius, cx+arrow_head, cy-tail_radius-1.5*arrow_head)
+            svg += '<path d="M %.0f %.0f L %.0f %.0f L %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-tail_radius, cx-arrow_head, cy-tail_radius-1.5*arrow_head,
+                                                                                               cx, cy-pointer_radius, cx+arrow_head, cy-tail_radius-1.5*arrow_head,
+                                                                                               cx, cy-tail_radius)
             svg += 'fill="%s" ' % color
         elif style == "arrow":
             arrow_head = pointer_radius * 0.08
             svg += '<path d="M %.0f %.0f L %.0f %.0f M %.0f %.0f L %.0f %.0f L %.0f %.0f" ' % (cx, cy-tail_radius, cx, cy-pointer_radius,
-                                                                                            cx-arrow_head, cy-(pointer_radius-2*arrow_head),
-                                                                                            cx, cy-pointer_radius,
-                                                                                            cx+arrow_head, cy-(pointer_radius-2*arrow_head))
+                                                                                               cx-arrow_head, cy-(pointer_radius-2*arrow_head),
+                                                                                               cx, cy-pointer_radius,
+                                                                                               cx+arrow_head, cy-(pointer_radius-2*arrow_head))
             svg += 'fill-opacity="0" '
         svg += 'stroke="%s" ' % color
         svg += 'stroke-width="%.0f" ' % stroke_width
-        svg += 'filter="url(#f1)" '
         svg += ' /> </g>'
+        return svg
+
+    def add_shadow(self, inner_svg):
+        svg = '<defs><filter id="f1"><feDropShadow dx="4" dy="6" stdDeviation="3" flood-opacity="0.9"/></filter></defs>'
+        svg += '<g filter="url(#f1)">'
+        svg += inner_svg
+        svg += '</g>'
+        print("shadow:", svg)
         return svg
 
 class NiceBar(NiceGauge):
@@ -100,6 +110,7 @@ class NiceBar(NiceGauge):
         self.range = self.maxv - self.minv
         self.tics = tics
         self.reds = reds
+        self.draw_yellows = False
         self.yellows = yellows
         self.greens = greens
         self.avg = None
@@ -161,54 +172,32 @@ class NiceBar(NiceGauge):
             print("bar:", val)
         self.update_stats(val)
         self.set_pointer_color(val)
-
-        svg = '<defs><filter id="f1"><feDropShadow dx="-4" dy="-4" stdDeviation="2" flood-opacity="1"/></filter></defs>'
+        svg = ''
 
         # main bar
         svg += self.line( [[x, y+h*0.5], [x+w, y+h*0.5]], "white", "", h*0.4, 1)
 
-        for yellow in self.yellows:
-            x1 = x + ((yellow[0] - self.minv) / self.range) * w
-            x2 = x + ((yellow[1] - self.minv) / self.range) * w
-            # print("minv:", self.minv, "range:", self.range, "w:", w, "x1:", x1, "x2:", x2)
-            svg += self.line( [[x1, y+h*0.5], [x2, y+h*0.5]], "yellow", "", h, 1)
+        if self.draw_yellows:
+            for yellow in self.yellows:
+                x1 = ((yellow[0] - self.minv) / self.range) * w
+                x2 = ((yellow[1] - self.minv) / self.range) * w
+                # print("minv:", self.minv, "range:", self.range, "w:", w, "x1:", x1, "x2:", x2)
+                svg += self.line( [[x + x1, y+h*0.5], [x + x2, y+h*0.5]], "yellow", "", h, 1)
         for green in self.greens:
-            x1 = x + ((green[0] - self.minv) / self.range) * w
-            x2 = x + ((green[1] - self.minv) / self.range) * w
+            x1 = ((green[0] - self.minv) / self.range) * w
+            x2 = ((green[1] - self.minv) / self.range) * w
             # print("minv:", self.minv, "range:", self.range, "w:", w, "x1:", x1, "x2:", x2)
-            svg += self.line( [[x1, y+h*0.5], [x2, y+h*0.5]], "green", "", h, 1)
-
-        # for ( var i = 0; i < self.greens.length; i++ ) {
-        #     var x1 = ((self.greens[i][0] - self.minv) / self.range) * w
-        #     var x2 = ((self.greens[i][1] - self.minv) / self.range) * w
-        #     context.beginPath()
-        #     context.moveTo(x+x1, y + Math.round(h*0.5))
-        #     context.lineTo(x+x2, y + Math.round(h*0.5))
-        #     context.stroke()
-        # context.strokeStyle = "black"
-        # context.lineWidth = 1
-        # context.beginPath()
-        # for ( var xt = self.minv+self.tics; xt < self.maxv; xt += self.tics ) {
-        #     var x1 = ((xt - self.minv) / self.range) * w
-        #     context.moveTo(x+x1, y)
-        #     context.lineTo(x+x1, y + Math.round(h*0.8))
-        # context.stroke()
-        # context.strokeStyle = "#e03030"
-        # for ( var i = 0 i < self.reds.length; i++ ) {
-        #     context.lineWidth = Math.round(w*0.02)
-        #     var x1 = ((self.reds[i][0] - self.minv) / self.range) * w
-        #     var x2 = ((self.reds[i][1] - self.minv) / self.range) * w
-        #     if ( x1 > 1 && x1 < w-1 ) {
-        #                 context.beginPath()
-        #                 context.moveTo(x+x1, y)
-        #                 context.lineTo(x+x1, y + h)
-        #                 context.stroke()
-        #             }
-        #     if ( x2 > 1 && x2 < w-1 ) {
-        #                 context.beginPath()
-        #                 context.moveTo(x+x2, y)
-        #                 context.lineTo(x+x2, y + h)
-        #                 context.stroke()
+            svg += self.line( [[x + x1, y+h*0.5], [x + x2, y+h*0.5]], "green", "", h, 1)
+        for xt in range(self.minv+self.tics, self.maxv, self.tics):
+            x1 = ((xt - self.minv) / self.range) * w
+            svg += self.line( [[x + x1, y], [x + x1, y+h*0.8]], "black", "", 1, 1)
+        for red in self.reds:
+            x1 = ((red[0] - self.minv) / self.range) * w
+            x2 = ((red[1] - self.minv) / self.range) * w
+            if x1 > 1 and x1 < w-1:
+                svg += self.line( [[x + x1, y], [x + x1, y+h]], "red", "", w*0.02, 1)
+            if x2 > 1 and x2 < w-1:
+                svg += self.line( [[x + x2, y], [x + x2, y+h]], "red", "", w*0.02, 1)
         # context.strokeStyle = "cyan"
         # var std = Math.sqrt(self.std2)
         # var v1 = self.avg - std
@@ -234,8 +223,12 @@ class NiceBar(NiceGauge):
         # context.stroke()
 
         # context.save()
-        # var x1 = ((val - self.minv) / self.range) * w
-        # var y1 = Math.round(h*0.5)
+        x1 = ((val - self.minv) / self.range) * w
+        y1 = h*0.5
+        tmp = self.line([[x+x1, y+y1], [x+x1-y1, y+y1-y1*sqrt(3)], [x+x1+y1, y+y1-y1*sqrt(3)], [x+x1, y+y1]],
+                        self.pointer_color, self.pointer_color, 1, 1, shadow=True)
+        svg += self.add_shadow(tmp)
+
         # context.lineWidth = 1
         # context.strokeStyle = self.pointer_color
         # context.fillStyle = self.pointer_color
@@ -389,10 +382,13 @@ class Airspeed(NiceGauge):
         bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius, bug_deg)
 
         ground_deg = asi_func(ground_kt)
-        ground_needle = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, arc_radius*0.2, ground_deg, "arrow", "orange", 5)
+        svg = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, arc_radius*0.2, ground_deg, "arrow", "orange", 5)
+        ground_needle = self.add_shadow(svg)
 
+        speed = (sin(time.time()*0.2)+1)*80
         speed_deg = asi_func(speed*speed_scale)
-        speed_needle = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, speed_deg, "pointer", "white", 2)
+        svg = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, speed_deg, "pointer", "white", 2)
+        speed_needle = self.add_shadow(svg)
 
         # assemble the components
         self.base.content = self.background
@@ -497,7 +493,8 @@ class Altitude(NiceGauge):
         alt_text = self.label(self.cx, self.cy, self.width*0.08, 90, "AGL (ft)", "white", px)
 
         alt_deg = alt_func(alt_ft)
-        alt_needle = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, alt_deg, "pointer", "white", 2)
+        svg = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, alt_deg, "pointer", "white", 2)
+        alt_needle = self.add_shadow(svg)
 
         # assemble the components
         self.base.content = self.background
