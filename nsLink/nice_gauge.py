@@ -1,11 +1,11 @@
-from math import ceil, cos, sin, sqrt
+from math import ceil, cos, isnan, sin, sqrt
 from nicegui import ui
 from scipy.interpolate import interp1d
 import time
 
-from nstSimulator.utils.constants import d2r, kt2mps, m2ft, mps2kt
+from nstSimulator.utils.constants import d2r, kt2mps, m2ft, mps2kt, r2d
 
-from nodes import airdata_node, environment_node, imu_node, nav_node, power_node, refs_node, specs_node, tecs_config_node
+from nodes import airdata_node, environment_node, gps_node, imu_node, nav_node, power_node, refs_node, specs_node, tecs_config_node
 
 class NiceGauge():
     def __init__(self):
@@ -232,89 +232,10 @@ class NiceBar(NiceGauge):
                         self.pointer_color, self.pointer_color, 1, 1)
         svg += self.add_shadow(tmp)
 
-        svg += self.label(x, y+2.2*h, 0, 0, self.text1, "white", px, align="start")
-        svg += self.label(x+w, y+2.2*h, 0, 0, text2, "white", px, align="end")
-        # context.font = px + "px Courier New, monospace"
-        # context.strokeStyle = "white"
-        # context.fillStyle = "white"
-        # context.textAlign = "left"
-        # context.fillText(self.text1, x, y + Math.round(2.2*h))
-        # context.textAlign = "right"
-        # context.fillText(text2, x + w, y + Math.round(2.2*h))
-        # context.beginPath()
-        # context.restore()
+        svg += self.label(x, y+2*h, 0, 0, self.text1, "white", px, align="start")
+        svg += self.label(x+w, y+2*h, 0, 0, text2, "white", px, align="end")
 
         return svg
-
-class Power(NiceGauge):
-    def __init__(self):
-        super().__init__()
-
-        pad = self.width * 0.025
-        bg_radius = self.width * 0.15
-        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
-        self.background = self.rectangle(pad, pad, self.width-2*pad, self.height-2*pad, bg_radius, self.bg_color)
-        # self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
-        # // power label
-        y1 = self.width*0.12
-        px = self.width * 0.06
-        # context.font = px + "px Courier New, monospace";
-        # context.fillStyle = "white";
-        # context.textAlign = "center";
-        # context.fillText("POWER", cx, y + y1);
-        self.power_label = self.label(self.cx, y1, 0, 0, "POWER", "white", px, align="middle")
-
-        self.base.content = self.background + self.power_label
-
-        self.batt_bar = NiceBar("Battery", 0, 100, 10, [[0,10]], [[10,25]], [[25,100]])
-        self.cell_bar = NiceBar("Per Cell", 3.0, 4.2, 0.1, [[3.0,3.3]], [], [[3.5,4.2]])
-        self.vcc_bar = NiceBar("Avionics", 4.5, 5.5, 0.1, [[4.5,4.8], [5.2,5.5]], [], [[4.9,5.1]])
-        self.pwm_vcc_bar = NiceBar("PWM", 4.5, 6.0, 0.1, [[4.5,4.8], [5.8,6.0]], [], [[4.9,5.5]])
-        self.imu_temp_bar = NiceBar("IMU Temp", 0, 60, 10, [[50,60]], [], [[0,40]])
-
-        print("power init svg:", self.base.content)
-
-    def update(self):
-        pad = self.width * 0.025
-        ipad = pad * 6
-        r = self.width * 0.3
-        h = self.height * 0.04
-        vspace = self.height * 0.15
-        px = self.width * 0.05
-
-        mah = power_node.getDouble("total_mah")
-        battery_total = specs_node.getDouble("battery_mah")
-        remaining = battery_total - mah
-        # battery_percent = (remaining / battery_total) * 100
-        battery_percent = power_node.getDouble("battery_perc")*100
-        if battery_percent < 0: battery_percent = 0
-
-        y1 = self.height * 0.17
-        val_text = "%.0f%%" % battery_percent
-        # print("width:", self.width, "ipad:", ipad, "val:", self.width - 2*ipad)
-        svg = self.batt_bar.draw(ipad, y1, self.width - 2*ipad, h, px, battery_percent, val_text)
-
-        y1 += vspace
-        cell_volts = power_node.getDouble("cell_vcc")
-        val_text = "%.2fV" % cell_volts
-        svg += self.cell_bar.draw(ipad, y1, self.width - 2*ipad, h, px, cell_volts, val_text)
-
-        y1 += vspace
-        vcc = power_node.getDouble("avionics_vcc")
-        val_text = "%.2fV" % vcc
-        svg += self.vcc_bar.draw(ipad, y1, self.width - 2*ipad, h, px, vcc, val_text)
-
-        y1 += vspace
-        pwm_vcc = power_node.getDouble("pwm_vcc")
-        val_text = "%.2fV" % pwm_vcc
-        svg += self.pwm_vcc_bar.draw(ipad, y1, self.width - 2*ipad, h, px, pwm_vcc, val_text)
-
-        y1 += vspace
-        imu_temp = imu_node.getDouble("temp_C")
-        val_text = "%.0fC" % imu_temp
-        svg += self.imu_temp_bar.draw(ipad, y1, self.width - 2*ipad, h, px, imu_temp, val_text)
-
-        self.base.content = self.background + self.power_label + svg
 
 class Airspeed(NiceGauge):
     def __init__(self):
@@ -574,3 +495,152 @@ class Heading(NiceGauge):
         faceplate = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/hdg3.png", 0, 0)
 
         self.base.content = self.background + rose + wind_vane + wind_text + course + ground_text + bug + faceplate
+
+class Power(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        pad = self.width * 0.025
+        bg_radius = self.width * 0.15
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = self.rectangle(pad, pad, self.width-2*pad, self.height-2*pad, bg_radius, self.bg_color)
+        y1 = self.width*0.12
+        px = self.width * 0.06
+        self.power_label = self.label(self.cx, y1, 0, 0, "POWER", "white", px, align="middle")
+
+        self.base.content = self.background + self.power_label
+
+        self.batt_bar = NiceBar("Battery", 0, 100, 10, [[0,10]], [[10,25]], [[25,100]])
+        self.cell_bar = NiceBar("Per Cell", 3.0, 4.2, 0.1, [[3.0,3.3]], [], [[3.5,4.2]])
+        self.vcc_bar = NiceBar("Avionics", 4.5, 5.5, 0.1, [[4.5,4.8], [5.2,5.5]], [], [[4.9,5.1]])
+        self.pwm_vcc_bar = NiceBar("PWM", 4.5, 6.0, 0.1, [[4.5,4.8], [5.8,6.0]], [], [[4.9,5.5]])
+        self.imu_temp_bar = NiceBar("IMU Temp", 0, 60, 10, [[50,60]], [], [[0,40]])
+
+        print("power init svg:", self.base.content)
+
+    def update(self):
+        pad = self.width * 0.025
+        ipad = pad * 6
+        h = self.height * 0.04
+        vspace = self.height * 0.14
+        px = self.width * 0.047
+
+        battery_percent = power_node.getDouble("battery_perc")*100
+        if battery_percent < 0: battery_percent = 0
+
+        y1 = self.height * 0.17
+        val_text = "%.0f%%" % battery_percent
+        # print("width:", self.width, "ipad:", ipad, "val:", self.width - 2*ipad)
+        svg = self.batt_bar.draw(ipad, y1, self.width - 2*ipad, h, px, battery_percent, val_text)
+
+        y1 += vspace
+        cell_volts = power_node.getDouble("cell_vcc")
+        val_text = "%.2fV" % cell_volts
+        svg += self.cell_bar.draw(ipad, y1, self.width - 2*ipad, h, px, cell_volts, val_text)
+
+        y1 += vspace
+        vcc = power_node.getDouble("avionics_vcc")
+        val_text = "%.2fV" % vcc
+        svg += self.vcc_bar.draw(ipad, y1, self.width - 2*ipad, h, px, vcc, val_text)
+
+        y1 += vspace
+        pwm_vcc = power_node.getDouble("pwm_vcc")
+        val_text = "%.2fV" % pwm_vcc
+        svg += self.pwm_vcc_bar.draw(ipad, y1, self.width - 2*ipad, h, px, pwm_vcc, val_text)
+
+        y1 += vspace
+        imu_temp = imu_node.getDouble("temp_C")
+        val_text = "%.0fC" % imu_temp
+        svg += self.imu_temp_bar.draw(ipad, y1, self.width - 2*ipad, h, px, imu_temp, val_text)
+
+        self.base.content = self.background + self.power_label + svg
+
+class INS_GNSS(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        pad = self.width * 0.025
+        bg_radius = self.width * 0.15
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = self.rectangle(pad, pad, self.width-2*pad, self.height-2*pad, bg_radius, self.bg_color)
+        y1 = self.width*0.12
+        px = self.width * 0.06
+        self.power_label = self.label(self.cx, y1, 0, 0, "INS/GNSS", "white", px, align="middle")
+
+        self.base.content = self.background + self.power_label
+
+        self.sats_bar = NiceBar("GPS Sats", 0, 25, 5, [[0,5]], [], [[7,25]]);
+        self.hdop_bar = NiceBar("GPS hdop", 0, 10, 2, [[5,10]], [], [[0,3.5]]);
+        self.pos_bar = NiceBar("Pos Acc", 0, 10, 2, [[6,10]], [], [[0,4]]);
+        self.vel_bar = NiceBar("Vel Acc", 0, 1, 0.2, [[0.4,1]], [], [[0,0.2]]);
+        self.att_bar = NiceBar("Att Acc", 0, 2.5, 0.5, [[1,2.5]], [], [[0,0.5]]);
+        self.accel_bar = NiceBar("Accel Bias", 0, 2, 0.4, [[1,2]], [], [[0,0.5]]);
+        self.gyro_bar = NiceBar("Gyro Bias", 0, 2, 0.4, [[1,2]], [], [[0,0.5]]);
+
+    def update(self):
+        pad = self.width * 0.025
+        ipad = pad * 6
+        h = self.height * 0.035
+        vspace = self.height * 0.11
+        px = self.width * 0.043
+
+        y1 = self.height * 0.17
+
+        gps_sats = gps_node.getInt("num_sats")
+        val_text = str(gps_sats)
+        svg = self.sats_bar.draw(ipad, y1, self.width - 2*ipad, h, px, gps_sats, val_text)
+
+        y1 += vspace
+        gps_hdop = gps_node.getDouble("hdop")
+        val_text = "%.2f" % gps_hdop
+        svg += self.hdop_bar.draw(ipad, y1, self.width - 2*ipad, h, px, gps_hdop, val_text)
+
+        y1 += vspace
+        pp0 = nav_node.getDouble("Pp0")
+        pp1 = nav_node.getDouble("Pp1")
+        pp2 = nav_node.getDouble("Pp2")
+        pos_cov = sqrt(pp0*pp0 + pp1*pp1 + pp2*pp2)
+        if isnan(pos_cov): pos_cov = 0
+        val_text = "%.1f m" % pos_cov
+        svg += self.pos_bar.draw(ipad, y1, self.width - 2*ipad, h, px, pos_cov, val_text)
+
+        y1 += vspace
+        pv0 = nav_node.getDouble("Pv0")
+        pv1 = nav_node.getDouble("Pv1")
+        pv2 = nav_node.getDouble("Pv2")
+        vel_cov = sqrt(pv0*pv0 + pv1*pv1 + pv2*pv2)
+        if isnan(vel_cov): vel_cov = 0
+        val_text = "%.2f m/s" % vel_cov
+        svg += self.vel_bar.draw(ipad, y1, self.width - 2*ipad, h, px, vel_cov, val_text)
+
+        y1 += vspace
+        pa0 = nav_node.getDouble("Pa0")
+        pa1 = nav_node.getDouble("Pa1")
+        pa2 = nav_node.getDouble("Pa2")
+        att_cov = sqrt(pa0*pa0 + pa1*pa1 + pa2*pa2) * r2d
+        if isnan(att_cov): att_cov = 0
+        val_text = "%.2f deg" % att_cov
+        svg += self.att_bar.draw(ipad, y1, self.width - 2*ipad, h, px, att_cov, val_text)
+
+        y1 += vspace
+        ax_bias = abs(nav_node.getDouble("ax_bias"))
+        ay_bias = abs(nav_node.getDouble("ay_bias"))
+        az_bias = abs(nav_node.getDouble("az_bias"))
+        accel_bias = sqrt(ax_bias*ax_bias + ay_bias*ay_bias + az_bias*az_bias)
+        if nav_node.getInt("status") < 2:
+            accel_bias = 0.0
+        val_text = "%.2f mps2" % accel_bias
+        svg += self.accel_bar.draw(ipad, y1, self.width - 2*ipad, h, px, accel_bias, val_text)
+
+        y1 += vspace
+        p_bias = abs(nav_node.getDouble("p_bias"))
+        q_bias = abs(nav_node.getDouble("q_bias"))
+        r_bias = abs(nav_node.getDouble("r_bias"))
+        gyro_bias_deg = sqrt(p_bias*p_bias + q_bias*q_bias + r_bias*r_bias) * r2d
+        if nav_node.getInt("status") < 2:
+            gyro_bias_deg = 0
+        val_text = "%.2f dps" % gyro_bias_deg
+        svg += self.gyro_bar.draw(ipad, y1, self.width - 2*ipad, h, px, gyro_bias_deg, val_text)
+
+        self.base.content = self.background + self.power_label + svg
+
