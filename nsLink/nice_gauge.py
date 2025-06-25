@@ -5,7 +5,7 @@ import time
 
 from nstSimulator.utils.constants import d2r, kt2mps, m2ft, mps2kt, r2d
 
-from nodes import airdata_node, environment_node, gps_node, imu_node, nav_node, power_node, refs_node, specs_node, tecs_config_node
+from nodes import airdata_node, effectors_node, environment_node, gps_node, imu_node, nav_node, power_node, refs_node, specs_node, tecs_config_node
 
 class NiceGauge():
     def __init__(self):
@@ -644,3 +644,61 @@ class INS_GNSS(NiceGauge):
 
         self.base.content = self.background + self.power_label + svg
 
+class Controls(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        pad = self.width * 0.025
+        bg_radius = self.width * 0.15
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = self.rectangle(pad, pad, self.width-2*pad, self.height-2*pad, bg_radius, self.bg_color)
+        y1 = self.width*0.12
+        px = self.width * 0.06
+        self.controls_label = self.label(self.cx, y1, 0, 0, "FLIGHT CONTROLS", "white", px, align="middle")
+
+        self.base.content = self.background + self.controls_label
+
+        self.ail_bar = NiceBar("Aileron", -1, 1, 0.2, [], [], [[-0.5,0.5]])
+        self.ele_bar = NiceBar("Elevator", -1, 1, 0.2, [], [], [[-0.5,0.5]])
+        self.rud_bar = NiceBar("Rudder", -1, 1, 0.2, [], [], [[-0.5,0.5]])
+        self.thr_bar = NiceBar("Throttle", 0, 100, 10, [[90,100]], [], [[0,75]])
+        self.flaps_bar = NiceBar("Flaps", 0, 1, 0.1, [], [], [[0,0.5]])
+
+        print("controls init svg:", self.base.content)
+
+    def update(self):
+        pad = self.width * 0.025
+        ipad = pad * 6
+        h = self.height * 0.04
+        vspace = self.height * 0.14
+        px = self.width * 0.047
+
+        ail = effectors_node.getDouble("channel", 1)
+        ele = effectors_node.getDouble("channel", 2)
+        rud = effectors_node.getDouble("channel", 3)
+        thr = effectors_node.getDouble("channel", 0) * 100
+        flaps = effectors_node.getDouble("flaps")
+
+        y1 = self.width*0.17
+        svg = ''
+
+        val_text = "%.2f" % ail
+        svg += self.ail_bar.draw(ipad, y1, self.width - 2*ipad, h, px, ail, val_text)
+
+        y1 += vspace
+        val_text = "%.2f" % ele
+        svg += self.ele_bar.draw(ipad, y1, self.width - 2*ipad, h, px, ele, val_text)
+
+        y1 += vspace
+        val_text = "%.2f" % rud
+        svg += self.rud_bar.draw(ipad, y1, self.width - 2*ipad, h, px, rud, val_text)
+
+        y1 += vspace
+        val_text = "%.0f%%" % thr
+        svg += self.thr_bar.draw(ipad, y1, self.width - 2*ipad, h, px, thr, val_text)
+
+        y1 += vspace
+        val_text = "%.2f" % flaps
+        svg += self.flaps_bar.draw(ipad, y1, self.width - 2*ipad, h, px, flaps, val_text)
+
+        self.base.content = self.background + self.controls_label + svg
