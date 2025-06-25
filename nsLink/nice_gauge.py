@@ -5,7 +5,7 @@ import time
 
 from nstSimulator.utils.constants import d2r, kt2mps, m2ft, mps2kt
 
-from nodes import airdata_node, environment_node, imu_node, nav_node, refs_node, specs_node, tecs_config_node
+from nodes import airdata_node, environment_node, imu_node, nav_node, power_node, refs_node, specs_node, tecs_config_node
 
 class NiceGauge():
     def __init__(self):
@@ -16,6 +16,13 @@ class NiceGauge():
         self.radius = self.width * 0.5
         self.bg_color = "#202020"
         # self.bg_color = "#D0D0D0"
+
+    def circle(self):
+        pass
+
+    def rectangle(self, x, y, width, height, corner_radius, color):
+        return '<rect x="%.0f" y="%.0f" width="%.0f" height="%.0f" rx="%.0f" fill="%s" />' % (x, y, width, height, corner_radius, color)
+
 
     def arc(self, cx, cy, radius, start_deg, end_deg, color, fill, stroke_width, fill_opacity):
         # print("cx:", cx, "start_deg:", start_deg, "end_deg:", end_deg)
@@ -98,7 +105,6 @@ class NiceGauge():
         svg += '<g filter="url(#f1)">'
         svg += inner_svg
         svg += '</g>'
-        print("shadow:", svg)
         return svg
 
 class NiceBar(NiceGauge):
@@ -189,9 +195,12 @@ class NiceBar(NiceGauge):
             x2 = ((green[1] - self.minv) / self.range) * w
             # print("minv:", self.minv, "range:", self.range, "w:", w, "x1:", x1, "x2:", x2)
             svg += self.line( [[x + x1, y+h*0.5], [x + x2, y+h*0.5]], "green", "", h, 1)
-        for xt in range(self.minv+self.tics, self.maxv, self.tics):
+        # for xt in range(self.minv+self.tics, self.maxv, self.tics):
+        xt = self.minv + self.tics
+        while xt < self.maxv:
             x1 = ((xt - self.minv) / self.range) * w
             svg += self.line( [[x + x1, y], [x + x1, y+h*0.8]], "black", "", 1, 1)
+            xt += self.tics
         for red in self.reds:
             x1 = ((red[0] - self.minv) / self.range) * w
             x2 = ((red[1] - self.minv) / self.range) * w
@@ -241,10 +250,21 @@ class Power(NiceGauge):
     def __init__(self):
         super().__init__()
 
-        bg_radius = self.width*0.5 * 0.95
+        pad = self.width * 0.025
+        bg_radius = self.width * 0.15
         self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
-        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
-        self.base.content = self.background
+        self.background = self.rectangle(pad, pad, self.width-2*pad, self.height-2*pad, bg_radius, self.bg_color)
+        # self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        # // power label
+        y1 = self.width*0.12
+        px = self.width * 0.06
+        # context.font = px + "px Courier New, monospace";
+        # context.fillStyle = "white";
+        # context.textAlign = "center";
+        # context.fillText("POWER", cx, y + y1);
+        self.power_label = self.label(self.cx, y1, 0, 0, "POWER", "white", px, align="middle")
+
+        self.base.content = self.background + self.power_label
 
         self.batt_bar = NiceBar("Battery", 0, 100, 10, [[0,10]], [[10,25]], [[25,100]])
         self.cell_bar = NiceBar("Per Cell", 3.0, 4.2, 0.1, [[3.0,3.3]], [], [[3.5,4.2]])
@@ -260,15 +280,41 @@ class Power(NiceGauge):
         r = self.width * 0.3
         h = self.height * 0.04
         vspace = self.height * 0.15
-        px = self.width * 0.06
+        px = self.width * 0.05
 
-        y = 100
-        battery_percent = 85
+        mah = power_node.getDouble("total_mah")
+        battery_total = specs_node.getDouble("battery_mah")
+        remaining = battery_total - mah
+        # battery_percent = (remaining / battery_total) * 100
+        battery_percent = power_node.getDouble("battery_perc")*100
+        if battery_percent < 0: battery_percent = 0
+
+        y1 = self.height * 0.17
         val_text = "%.0f%%" % battery_percent
-        print("width:", self.width, "ipad:", ipad, "val:", self.width - 2*ipad)
-        svg = self.batt_bar.draw(ipad, y, self.width - 2*ipad, h, px, battery_percent, val_text)
-        print("bar:", svg)
-        self.base.content = self.background + svg
+        # print("width:", self.width, "ipad:", ipad, "val:", self.width - 2*ipad)
+        svg = self.batt_bar.draw(ipad, y1, self.width - 2*ipad, h, px, battery_percent, val_text)
+
+        y1 += vspace
+        cell_volts = power_node.getDouble("cell_vcc")
+        val_text = "%.2fV" % cell_volts
+        svg += self.cell_bar.draw(ipad, y1, self.width - 2*ipad, h, px, cell_volts, val_text)
+
+        y1 += vspace
+        vcc = power_node.getDouble("avionics_vcc")
+        val_text = "%.2fV" % vcc
+        svg += self.vcc_bar.draw(ipad, y1, self.width - 2*ipad, h, px, vcc, val_text)
+
+        y1 += vspace
+        pwm_vcc = power_node.getDouble("pwm_vcc")
+        val_text = "%.2fV" % pwm_vcc
+        svg += self.pwm_vcc_bar.draw(ipad, y1, self.width - 2*ipad, h, px, pwm_vcc, val_text)
+
+        y1 += vspace
+        imu_temp = imu_node.getDouble("temp_C")
+        val_text = "%.0fC" % imu_temp
+        svg += self.imu_temp_bar.draw(ipad, y1, self.width - 2*ipad, h, px, imu_temp, val_text)
+
+        self.base.content = self.background + self.power_label + svg
 
 class Airspeed(NiceGauge):
     def __init__(self):
@@ -365,7 +411,6 @@ class Airspeed(NiceGauge):
         svg = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, arc_radius*0.2, ground_deg, "arrow", "orange", 5)
         ground_needle = self.add_shadow(svg)
 
-        speed = (sin(time.time()*0.2)+1)*80
         speed_deg = asi_func(speed*speed_scale)
         svg = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, speed_deg, "pointer", "white", 2)
         speed_needle = self.add_shadow(svg)
