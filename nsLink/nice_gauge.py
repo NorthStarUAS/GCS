@@ -76,7 +76,7 @@ class NiceGauge():
 
     def image(self, cx, cy, w, h, path, radius, angle_deg):
         # svg = '<image href="%s" transform="translate(%.0f %.0f) rotate(%.1f, %.0f, %.0f)" />' % (path, cx, cy, angle_deg, cx, cy)
-        svg = '<image href="%s" transform="rotate(%.1f %.0f %.0f) translate(%.0f %.0f)" />' % (path, angle_deg, cx, cy, cx-w*0.5, cy-h*0.5-radius)
+        svg = '<image href="%s" transform="rotate(%.1f %.0f %.0f) translate(%.1f %.1f)" />' % (path, angle_deg, cx, cy, cx-w*0.5, cy-h*0.5-radius)
         return svg
 
     def needle(self, cx, cy, pointer_radius, tail_radius, angle_deg, style, color, stroke_width):
@@ -230,7 +230,8 @@ class NiceBar(NiceGauge):
         y1 = h*0.5
         tmp = self.line([[x+x1, y+y1], [x+x1-y1, y+y1-y1*sqrt(3)], [x+x1+y1, y+y1-y1*sqrt(3)], [x+x1, y+y1]],
                         self.pointer_color, self.pointer_color, 1, 1)
-        svg += self.add_shadow(tmp)
+        # svg += self.add_shadow(tmp)
+        svg += tmp
 
         svg += self.label(x, y+2*h, 0, 0, self.text1, "white", px, align="start")
         svg += self.label(x+w, y+2*h, 0, 0, text2, "white", px, align="end")
@@ -330,11 +331,13 @@ class Airspeed(NiceGauge):
 
         ground_deg = asi_func(ground_kt)
         svg = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, arc_radius*0.2, ground_deg, "arrow", "orange", 5)
-        ground_needle = self.add_shadow(svg)
+        ground_needle = svg
+        # ground_needle = self.add_shadow(svg)
 
         speed_deg = asi_func(speed*speed_scale)
         svg = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, speed_deg, "pointer", "white", 2)
-        speed_needle = self.add_shadow(svg)
+        speed_needle = svg
+        # speed_needle = self.add_shadow(svg)
 
         # assemble the components
         self.base.content = self.background
@@ -440,7 +443,8 @@ class Altitude(NiceGauge):
 
         alt_deg = alt_func(alt_ft)
         svg = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, alt_deg, "pointer", "white", 2)
-        alt_needle = self.add_shadow(svg)
+        alt_needle = svg
+        # alt_needle = self.add_shadow(svg)
 
         # assemble the components
         self.base.content = self.background
