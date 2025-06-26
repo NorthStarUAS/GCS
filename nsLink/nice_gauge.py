@@ -5,7 +5,7 @@ import time
 
 from nstSimulator.utils.constants import d2r, kt2mps, m2ft, mps2kt, r2d
 
-from nodes import airdata_node, effectors_node, environment_node, gps_node, imu_node, nav_node, power_node, refs_node, specs_node, tecs_config_node
+from nodes import airdata_node, effectors_node, environment_node, gps_node, imu_node, nav_node, power_node, refs_node, specs_node, status_node, tecs_config_node
 
 class NiceGauge():
     def __init__(self):
@@ -17,8 +17,8 @@ class NiceGauge():
         self.bg_color = "#202020"
         # self.bg_color = "#D0D0D0"
 
-    def circle(self):
-        pass
+    def circle(self, x, y, radius, color):
+        return '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (x, y, radius, color)
 
     def rectangle(self, x, y, width, height, corner_radius, color):
         return '<rect x="%.0f" y="%.0f" width="%.0f" height="%.0f" rx="%.0f" fill="%s" />' % (x, y, width, height, corner_radius, color)
@@ -244,7 +244,7 @@ class Airspeed(NiceGauge):
 
         bg_radius = self.width*0.5 * 0.95
         self.base = ui.interactive_image(size=(self.width,self.height)).classes("w-96").props("fit=scale-down")
-        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.background = self.circle(self.cx, self.cy, bg_radius, self.bg_color)
         self.base.content = self.background
         print("ati init svg:", self.base.content)
 
@@ -350,7 +350,7 @@ class Attitude(NiceGauge):
 
         bg_radius = self.width*0.5 * 0.95
         self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
-        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.background = self.circle(self.cx, self.cy, bg_radius, self.bg_color)
         self.base.content = self.background
         print("ati init svg:", self.base.content)
 
@@ -380,7 +380,7 @@ class Altitude(NiceGauge):
 
         bg_radius = self.width*0.5 * 0.95
         self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
-        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.background = self.circle(self.cx, self.cy, bg_radius, self.bg_color)
         self.base.content = self.background
         print("ati init svg:", self.base.content)
 
@@ -458,7 +458,7 @@ class Heading(NiceGauge):
         bg_radius = self.width*0.5 * 0.95
         self.groundtrack_deg = 0
         self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
-        self.background = '<circle cx="%.0f" cy="%.0f" r="%.0f" fill="%s" />' % (self.cx, self.cy, bg_radius, self.bg_color)
+        self.background = self.circle(self.cx, self.cy, bg_radius, self.bg_color)
         self.base.content = self.background
         print("ati init svg:", self.base.content)
 
@@ -706,3 +706,87 @@ class Controls(NiceGauge):
         svg += self.flaps_bar.draw(ipad, y1, self.width - 2*ipad, h, px, flaps, val_text)
 
         self.base.content = self.background + self.controls_label + svg
+
+class Status(NiceGauge):
+    def __init__(self):
+        super().__init__()
+
+        pad = self.width * 0.025
+        bg_radius = self.width * 0.15
+        self.base = ui.interactive_image(size=(self.width,self.height)).classes('w-96').props("fit=scale-down")
+        self.background = self.rectangle(pad, pad, self.width-2*pad, self.height-2*pad, bg_radius, self.bg_color)
+        y1 = self.width*0.12
+        px = self.width * 0.06
+        self.status_label = self.label(self.cx, y1, 0, 0, "STATUS", "white", px, align="middle")
+
+        self.base.content = self.background + self.status_label
+
+        self.batt_bar = NiceBar("Battery", 0, 100, 10, [[0,10]], [[10,25]], [[25,100]])
+        self.cell_bar = NiceBar("Per Cell", 3.0, 4.2, 0.1, [[3.0,3.3]], [], [[3.5,4.2]])
+        self.vcc_bar = NiceBar("Avionics", 4.5, 5.5, 0.1, [[4.5,4.8], [5.2,5.5]], [], [[4.9,5.1]])
+        self.pwm_vcc_bar = NiceBar("PWM", 4.5, 6.0, 0.1, [[4.5,4.8], [5.8,6.0]], [], [[4.9,5.5]])
+        self.imu_temp_bar = NiceBar("IMU Temp", 0, 60, 10, [[50,60]], [], [[0,40]])
+
+        print("power init svg:", self.base.content)
+
+    def update(self):
+        pad = self.width * 0.025
+        ipad = pad * 6
+        h = self.height * 0.07
+        vspace = self.height * 0.14
+        px = self.width * 0.05
+        pos = self.width * 0.25
+
+        alert_count = status_node.getLen("alerts")
+        warns_count = status_node.getLen("warns")
+        oks_count = status_node.getLen("oks")
+
+        svg = ''
+        if alert_count == 0 and warns_count == 0 and oks_count == 0:
+            svg += self.label(ipad, pos, 0, 0, "Status: OK", "green", px, align="start")
+            pos += h
+
+        for i in range(alert_count):
+            text = status_node.getString("alerts", i)
+            if len(text):
+                svg += self.label(ipad, pos, 0, 0, text, "red", px, align="start")
+                pos += h
+        for i in range(warns_count):
+            text = status_node.getString("warns", i)
+            if len(text):
+                svg += self.label(ipad, pos, 0, 0, text, "yellow", px, align="start")
+                pos += h
+        for i in range(oks_count):
+            text = status_node.getString("oks", i)
+            if len(text):
+                svg += self.label(ipad, pos, 0, 0, text, "green", px, align="start")
+                pos += h
+
+        self.base.content = self.background + self.status_label + svg
+
+        # // draw alerts
+        # context.fillStyle = "red";
+        # for ( var i = 0; i < alerts.length; i++ ) {
+        #     if ( alerts[i] != "" ) {
+        #         context.fillText(alerts[i], cx - size * 0.4, cy + size*pos);
+        #         pos += 0.07;
+        #     }
+        # }
+
+        # // draw warns
+        # context.fillStyle = "yellow";
+        # for ( var i = 0; i < warns.length; i++ ) {
+        #     if ( warns[i] != "" ) {
+        #         context.fillText(warns[i], cx - size * 0.4, cy + size*pos);
+        #         pos += 0.07;
+        #     }
+        # }
+
+        # // draw oks
+        # context.fillStyle = '#0C0';
+        # for ( var i = 0; i < oks.length; i++ ) {
+        #     if ( oks[i] != "" ) {
+        #         context.fillText(oks[i], cx - size * 0.4, cy + size*pos);
+        #         pos += 0.07;
+        #     }
+        # }

@@ -15,7 +15,7 @@ from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
-from nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls
+from nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls, Status
 from nodes import ident_node, remote_link_node
 import requests
 from sim_link import sim_link
@@ -52,7 +52,7 @@ with ui.row(wrap=False).classes("w-full"):
     power = Power()
 
 with ui.row(wrap=False).classes("w-full"):
-    ii = ui.interactive_image("resources/panel/textures/alt1.png").props("fit=scale-down")
+    status = Status()
     hdg = Heading()
     ins_gnss = INS_GNSS()
     controls = Controls()
@@ -68,6 +68,7 @@ async def gauge_test():
     hdg.update()
     ins_gnss.update()
     controls.update()
+    status.update()
 
 gauge_test()
 
@@ -117,7 +118,7 @@ with ui.tab_panels(tabs, value=panel).classes('w-full'):
 ui.timer(0.1, bus_data.refresh)
 ui.timer(0.1, gauge_test.refresh)
 
-ui.run(reload=False, native=False)
+ui.run(reload=False, native=True)
 
 # class MainApp(QWidget):
 #     def __init__(self):
