@@ -584,7 +584,7 @@ class INS_GNSS(NiceGauge):
     def update(self):
         pad = self.width * 0.025
         ipad = pad * 6
-        h = self.height * 0.035
+        h = self.height * 0.034
         vspace = self.height * 0.11
         px = self.width * 0.043
 
