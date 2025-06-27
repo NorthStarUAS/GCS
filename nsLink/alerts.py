@@ -240,14 +240,14 @@ class Alerts():
         ekf_level = max([self.pos_msg.level, self.vel_msg.level, self.att_msg.level, self.acc_bias_msg.level, self.gyro_bias_msg.level, self.imu_temp_msg.level])
         ann_node.setString("ekf", "%d;EKF" % ekf_level)
 
-        ann_node.setString("battery", "%d;Batt %.0f%% %.2fv" % (self.cell_vcc_msg.level, power_node.getDouble("battery_perc")*100, self.cell_vcc_msg.val))
+        ann_node.setString("battery", "%d;Battery %.0f%% %.2fV" % (self.cell_vcc_msg.level, power_node.getDouble("battery_perc")*100, self.cell_vcc_msg.val))
 
         secs = environment_node.getUInt("flight_timer_millis")/1000.0
         hours = floor(secs / 3600)
         rem = secs - (hours * 3600)
         mins = floor(rem / 60)
         rem = rem - (mins * 60)
-        msg = "Flt "
+        msg = "Flight "
         if secs < 3600:
             msg += "%d:%02d" % (mins, rem)
         else:
@@ -277,7 +277,7 @@ class Alerts():
             display_units = "ms"
         elif specs_node.getString("display_units") == "kts":
             speed_scale = 1.0
-            display_units = "kt"
+            display_units = "Kt"
         else:
             # default to mps if not specified
             speed_scale = kt2mps
