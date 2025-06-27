@@ -16,6 +16,7 @@ from fmu_link import fmu_link
 import httpserver
 import joystick
 from gui.annunciators import Annunciators
+from gui.events import Events
 from gui.nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls, Status
 from nodes import ident_node, remote_link_node
 import requests
@@ -74,9 +75,7 @@ async def gauge_test():
 gauge_test()
 
 ann = Annunciators()
-# with ui.header(elevated=True).classes('items-center justify-between').style("font-size: 150%"):
-#     ui_callsign = ui.label("Callsign: n/a")
-#     ui.button(on_click=lambda: right_drawer.toggle(), icon='menu').props('flat color=white')
+events = Events()
 
 def update():
     # callsign = ident_node.getString("call_sign")
@@ -92,6 +91,7 @@ def update():
     requests.gen_requests()
     commands.update()
     ann.update()
+    events.update()
     # Fixme: your mssion is to reproduce these two items in NiceGUI
     # telnet.update()
     # httpserver.update()
