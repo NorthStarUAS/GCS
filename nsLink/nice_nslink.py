@@ -113,6 +113,7 @@ with ui.tabs().classes("w-full") as tabs:
     panel = ui.tab("Panel", icon="speed")
     map = ui.tab("Map", icon="public")
     bus = ui.tab("Data Bus", icon="feed")
+tabs.set_visibility(False)
 
 with ui.tab_panels(tabs, value=panel).classes('w-full'):
     with ui.tab_panel(bus):

@@ -5,6 +5,7 @@ from PropertyTree import PropertyNode
 
 import nst_messages
 from alerts import alert_mgr
+from event_mgr import event_mgr
 from logger import Logger
 from nodes import airdata_node, circle_node, effectors_node, environment_node, home_node, imu_node, inceptors_node, outputs_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
@@ -133,6 +134,10 @@ def parse_msg(id, buf):
     elif id == nst_messages.event_v3_id:
         msg = nst_messages.event_v3(buf)
         alert_mgr.add_message(msg.message, 2, 10)
+        event_mgr.add_event(msg.message)
+        print("message:", msg.message)
+        import time
+        time.sleep(2)
     elif id == nst_messages.command_v1_id:
         msg = nst_messages.command_v1(buf)
         pos1 = msg.message.find(" ")
