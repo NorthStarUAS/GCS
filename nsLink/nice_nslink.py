@@ -15,7 +15,8 @@ from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
-from nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls, Status
+from gui.annunciators import Annunciators
+from gui.nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls, Status
 from nodes import ident_node, remote_link_node
 import requests
 from sim_link import sim_link
@@ -72,16 +73,17 @@ async def gauge_test():
 
 gauge_test()
 
-with ui.header(elevated=True).classes('items-center justify-between').style("font-size: 150%"):
-    ui_callsign = ui.markdown("Callsign: n/a")
-    ui.button(on_click=lambda: right_drawer.toggle(), icon='menu').props('flat color=white')
+ann = Annunciators()
+# with ui.header(elevated=True).classes('items-center justify-between').style("font-size: 150%"):
+#     ui_callsign = ui.label("Callsign: n/a")
+#     ui.button(on_click=lambda: right_drawer.toggle(), icon='menu').props('flat color=white')
 
 def update():
-    callsign = ident_node.getString("call_sign")
-    if len(callsign):
-        ui_callsign.content = "Callsign: " + callsign
-    else:
-        ui_callsign.content = "Callsign: " + "still waiting"
+    # callsign = ident_node.getString("call_sign")
+    # if len(callsign):
+    #     ui_callsign.set_text("Callsign: " + callsign)
+    # else:
+    #     ui_callsign.set_text("Callsign: " + "still waiting")
     sim_link.update()
     fmu_link.receive()
     derived_states.update()
@@ -89,6 +91,7 @@ def update():
     joystick.update()
     requests.gen_requests()
     commands.update()
+    ann.update()
     # Fixme: your mssion is to reproduce these two items in NiceGUI
     # telnet.update()
     # httpserver.update()
@@ -118,7 +121,7 @@ with ui.tab_panels(tabs, value=panel).classes('w-full'):
 ui.timer(0.1, bus_data.refresh)
 ui.timer(0.1, gauge_test.refresh)
 
-ui.run(reload=False, native=True)
+ui.run(reload=False, native=False)
 
 # class MainApp(QWidget):
 #     def __init__(self):
