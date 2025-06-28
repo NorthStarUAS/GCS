@@ -1,7 +1,7 @@
 from math import floor, pi, sqrt
 import time
 
-from nodes import airdata_node, ann_node, environment_node, gps_node, imu_node, inceptors_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
+from nodes import airdata_node, ann_node, environment_node, gps_node, imu_node, inceptors_node, mission_node, nav_node, power_node, remote_link_node, specs_node, status_node, refs_node
 
 r2d = 180 / pi
 kt2mps = 0.5144444444444444444
@@ -303,6 +303,9 @@ class Alerts():
             temp_level = 2
         else:
             temp_level = 1
-        ann_node.setString("temp", "%d;%dC" % (temp_level, temp))
+        ann_node.setString("temp", "%d;%.0fC" % (temp_level, temp))
+
+        task = mission_node.getString("task")
+        ann_node.setString("task", "1;Task: " + task)
 
 alert_mgr = Alerts()
