@@ -29,8 +29,14 @@ class Annunciators():
             with ui.button_group().props('rounded'):
                 self.ui_callsign = ui.button("Callsign: n/a").style("font-size: 100%").props('no-caps')
                 self.annunciator_list = [Annunciator("gps"), Annunciator("ekf"), Annunciator("battery"), Annunciator("timer"),
-                                        Annunciator("link"), Annunciator("auto"), Annunciator("wind"), Annunciator("temp")]
+                                        Annunciator("link"), Annunciator("auto"), Annunciator("wind"), Annunciator("temp"),
+                                        Annunciator("task")]
             ui.space()
+            with ui.dropdown_button("Panel", auto_close=True) as tab_menu:
+                ui.item("Panel", on_click=lambda: ui.notify('You clicked item 1'))
+                ui.item("Map", on_click=lambda: ui.notify('You clicked item 1'))
+                ui.item("Data Bus", on_click=lambda: ui.notify('You clicked item 1'))
+
             ui.button(on_click=lambda: self.right_drawer.toggle(), icon='menu').props('flat color=white')
 
         with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered') as self.right_drawer:
@@ -49,6 +55,6 @@ class Annunciators():
         result = event_mgr.get_next_event()
         if result is not None:
             msg = "[%.1f] %s" % (result[0]/1000, result[1])
-            ui.notify(msg, position="center", timeout=10.0)
+            ui.notify(msg, position="top")
             self.event_log.text += "\n" + msg
             print(event_mgr.pending_log)
