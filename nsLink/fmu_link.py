@@ -136,8 +136,6 @@ def parse_msg(id, buf):
         alert_mgr.add_message(msg.message, 2, 10)
         event_mgr.add_event(msg.message)
         print("message:", msg.message)
-        import time
-        time.sleep(2)
     elif id == nst_messages.command_v1_id:
         msg = nst_messages.command_v1(buf)
         pos1 = msg.message.find(" ")
