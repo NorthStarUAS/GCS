@@ -6,17 +6,49 @@ from event_mgr import event_mgr
 from nodes import ident_node
 
 from gui.annunciators import Annunciators
+from gui.nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls, Status
 
-@ui.refreshable
-async def bus_data():
-    json = PropertyNode("/").get_json_string()
-    # ui.run_javascript("var json = " + json)  # copy property tree to javascript session
+class Panel():
+    def __init__(self):
+        with ui.row(wrap=False).classes("w-full"):
+            self.asi = Airspeed()
+            self.ati = Attitude()
+            self.alt = Altitude()
+            self.power = Power()
 
-    # print("json:", json)
-    # ui.json_editor({"content": {"json": json}, "readOnly": True},
-    #                on_select=lambda e: ui.notify(f'Select: {e}'),
-    #                on_change=lambda e: ui.notify(f'Change: {e}'))
-    ui.label(json).classes("font-mono").style("white-space: pre-wrap")
+        with ui.row(wrap=False).classes("w-full"):
+            self.status = Status()
+            self.hdg = Heading()
+            self.ins_gnss = INS_GNSS()
+            self.controls = Controls()
+
+    @ui.refreshable
+    async def update(self):
+        self.asi.update()
+        self.ati.update()
+        self.alt.update()
+        self.power.update()
+        self.hdg.update()
+        self.ins_gnss.update()
+        self.controls.update()
+        self.status.update()
+
+class Map():
+    def __init__(self):
+        ui.label("I'm the map")
+
+    @ui.refreshable
+    async def update(self):
+        pass
+
+class DataBus():
+    def __init__(self):
+        self.data = ui.label("").classes("font-mono").style("white-space: pre-wrap")
+
+    @ui.refreshable
+    async def update(self):
+        json = PropertyNode("/").get_json_string()
+        self.data.text = json
 
 class MainDisplay():
     def __init__(self):
@@ -40,10 +72,19 @@ class MainDisplay():
         tabs.set_visibility(True)
 
         with ui.tab_panels(tabs, value=panel).classes('w-full'):
+            with ui.tab_panel(panel):
+                self.panel = Panel()
+                self.panel.update()
+            with ui.tab_panel(map):
+                self.map = Map()
+                self.map.update()
             with ui.tab_panel(bus):
-                bus_data()
+                self.bus = DataBus()
+                self.bus.update()
 
-        ui.timer(0.1, bus_data.refresh)
+        ui.timer(0.1, self.panel.update.refresh)
+        ui.timer(0.1, self.map.update.refresh)
+        ui.timer(0.1, self.bus.update.refresh)
 
     def update(self):
         self.annunciator_bar.update()
