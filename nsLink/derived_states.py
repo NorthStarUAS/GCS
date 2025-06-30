@@ -14,10 +14,10 @@ g = 9.81
 # 83% - 3.8
 # 27% - 3.65
 # 0%  - 3.5
-batv = [ 3.3, 3.50, 3.65, 3.80, 4.20 ]
-batp = [ 0.0, 0.05, 0.27, 0.83, 1.00 ]
+batv = [ 3.30, 3.50, 3.60, 3.75, 3.86, 4.12, 4.20 ]
+batp = [ 0.00, 0.05, 0.25, 0.50, 0.75, 1.00, 1.00 ]
 from scipy.interpolate import interp1d
-batf = interp1d(batv, batp)
+batf = interp1d(batv, batp, bounds_error=False, fill_value=(0, 1))
 filt_perc = 1.0
 
 class DerivedStates:
