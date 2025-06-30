@@ -15,8 +15,7 @@ import httpserver
 import joystick
 from gui.main import MainDisplay
 from gui.events import Events
-from gui.nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls, Status
-from nodes import ident_node, remote_link_node
+from nodes import remote_link_node
 import request_props
 from sim_link import sim_link
 import telnet
@@ -45,32 +44,20 @@ fmu_link.begin(args.serial, args.baud, timeout=dt)
 file_dir = pathlib.Path(__file__).parent.resolve()
 app.add_static_files("/resources", file_dir / "../html")
 
-with ui.row(wrap=False).classes("w-full"):
-    asi = Airspeed()
-    ati = Attitude()
-    alt = Altitude()
-    power = Power()
-
-with ui.row(wrap=False).classes("w-full"):
-    status = Status()
-    hdg = Heading()
-    ins_gnss = INS_GNSS()
-    controls = Controls()
-
 deg = 0.0
 
-@ui.refreshable
-async def gauge_test():
-    asi.update()
-    ati.update()
-    alt.update()
-    power.update()
-    hdg.update()
-    ins_gnss.update()
-    controls.update()
-    status.update()
+# @ui.refreshable
+# async def gauge_test():
+#     asi.update()
+#     ati.update()
+#     alt.update()
+#     power.update()
+#     hdg.update()
+#     ins_gnss.update()
+#     controls.update()
+#     status.update()
 
-gauge_test()
+# gauge_test()
 
 main_display = MainDisplay()
 events = Events()
@@ -96,9 +83,9 @@ def update():
 
 app.timer(0.01, update)
 
-ui.timer(0.1, gauge_test.refresh)
+# ui.timer(0.1, gauge_test.refresh)
 
-ui.run(reload=False, native=True)
+ui.run(reload=False, native=False)
 
 # class MainApp(QWidget):
 #     def __init__(self):
