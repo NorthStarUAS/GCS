@@ -1,6 +1,5 @@
 from nicegui import ui
 
-from event_mgr import event_mgr
 from nodes import ann_node, ident_node
 
 # for name space / ui reasons, the right_drawer event log is connected to the
@@ -24,23 +23,11 @@ class Annunciator():
 
 class Annunciators():
     def __init__(self):
-        # with ui.header(elevated=True).classes('items-center justify-between').style("font-size: 150%"):
-        with ui.header(elevated=True).classes('items-center').style("font-size: 150%"):
-            with ui.button_group().props('rounded'):
-                self.ui_callsign = ui.button("Callsign: n/a").style("font-size: 100%").props('no-caps')
-                self.annunciator_list = [Annunciator("gps"), Annunciator("ekf"), Annunciator("battery"), Annunciator("timer"),
-                                        Annunciator("link"), Annunciator("auto"), Annunciator("wind"), Annunciator("temp"),
-                                        Annunciator("task")]
-            ui.space()
-            with ui.dropdown_button("Panel", auto_close=True) as tab_menu:
-                ui.item("Panel", on_click=lambda: ui.notify('You clicked item 1'))
-                ui.item("Map", on_click=lambda: ui.notify('You clicked item 1'))
-                ui.item("Data Bus", on_click=lambda: ui.notify('You clicked item 1'))
-
-            ui.button(on_click=lambda: self.right_drawer.toggle(), icon='menu').props('flat color=white')
-
-        with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered') as self.right_drawer:
-            self.event_log = ui.label('Event Log').style('white-space: pre-wrap')
+        with ui.button_group().props('rounded'):
+            self.ui_callsign = ui.button("Callsign: n/a").style("font-size: 100%").props('no-caps')
+            self.annunciator_list = [Annunciator("gps"), Annunciator("ekf"), Annunciator("battery"), Annunciator("timer"),
+                                    Annunciator("link"), Annunciator("auto"), Annunciator("wind"), Annunciator("temp"),
+                                    Annunciator("task")]
 
     def update(self):
         callsign = ident_node.getString("call_sign")
@@ -51,10 +38,3 @@ class Annunciators():
 
         for ann in self.annunciator_list:
             ann.update()
-
-        result = event_mgr.get_next_event()
-        if result is not None:
-            msg = "[%.1f] %s" % (result[0]/1000, result[1])
-            ui.notify(msg, position="top")
-            self.event_log.text += "\n" + msg
-            print(event_mgr.pending_log)

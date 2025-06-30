@@ -217,7 +217,7 @@ else:
     d = datetime.datetime.utcfromtimestamp(gps_unix_sec)
     print(d.strftime("%Y-%m-%d-%H:%M:%S"))
 
-    url = "https://timemachine.pirateweather.net/forecast/" + apikey + "/%.8f,%.8f,%.d" % (gps_lat, gps_lon, gps_unix_sec)
+    url = "https://timemachine.pirateweather.net/forecast/" + apikey + "/%.8f,%.8f,%d" % (gps_lat, gps_lon, gps_unix_sec)
     print("url:", url)
     import urllib.request, json
     response = urllib.request.urlopen(url)

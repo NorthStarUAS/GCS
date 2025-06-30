@@ -7,19 +7,17 @@ import sys
 import asyncio
 from nicegui import app, ui
 
-from PropertyTree import PropertyNode
-
 from alerts import alert_mgr
 from commands import commands
 from derived_states import derived_states
 from fmu_link import fmu_link
 import httpserver
 import joystick
-from gui.annunciators import Annunciators
+from gui.main import MainDisplay
 from gui.events import Events
 from gui.nice_gauge import Airspeed, Attitude, Altitude, Heading, Power, INS_GNSS, Controls, Status
 from nodes import ident_node, remote_link_node
-import requests
+import request_props
 from sim_link import sim_link
 import telnet
 
@@ -74,7 +72,7 @@ async def gauge_test():
 
 gauge_test()
 
-ann = Annunciators()
+main_display = MainDisplay()
 events = Events()
 
 def update():
@@ -88,9 +86,9 @@ def update():
     derived_states.update()
     alert_mgr.update()
     joystick.update()
-    requests.gen_requests()
+    request_props.gen_requests()
     commands.update()
-    ann.update()
+    main_display.update()
     events.update()
     # Fixme: your mssion is to reproduce these two items in NiceGUI
     # telnet.update()
@@ -98,31 +96,9 @@ def update():
 
 app.timer(0.01, update)
 
-@ui.refreshable
-async def bus_data():
-    json = PropertyNode("/").get_json_string()
-    # ui.run_javascript("var json = " + json)  # copy property tree to javascript session
-
-    # print("json:", json)
-    # ui.json_editor({"content": {"json": json}, "readOnly": True},
-    #                on_select=lambda e: ui.notify(f'Select: {e}'),
-    #                on_change=lambda e: ui.notify(f'Change: {e}'))
-    ui.label(json).classes("font-mono").style("white-space: pre-wrap")
-
-with ui.tabs().classes("w-full") as tabs:
-    panel = ui.tab("Panel", icon="speed")
-    map = ui.tab("Map", icon="public")
-    bus = ui.tab("Data Bus", icon="feed")
-tabs.set_visibility(False)
-
-with ui.tab_panels(tabs, value=panel).classes('w-full'):
-    with ui.tab_panel(bus):
-        bus_data()
-
-ui.timer(0.1, bus_data.refresh)
 ui.timer(0.1, gauge_test.refresh)
 
-ui.run(reload=False, native=False)
+ui.run(reload=False, native=True)
 
 # class MainApp(QWidget):
 #     def __init__(self):

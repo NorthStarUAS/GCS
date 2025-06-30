@@ -15,7 +15,7 @@ from fmu_link import fmu_link
 import httpserver
 import joystick
 from nodes import ident_node, remote_link_node
-import requests
+import request_props
 from sim_link import sim_link
 import telnet
 
@@ -43,7 +43,7 @@ def main_loop():
     derived_states.update()
     alert_mgr.update()
     joystick.update()
-    requests.gen_requests()
+    request_props.gen_requests()
     commands.update()
     telnet.update()
     httpserver.update()
