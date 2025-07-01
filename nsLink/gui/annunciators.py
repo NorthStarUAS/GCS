@@ -14,9 +14,9 @@ class Annunciator():
     def update(self):
         level, msg = ann_node.getString(self.id).split(";")
         self.button.set_text(msg)
-        if level == 3:
+        if level == "3":
             self.button.props('color="red"')
-        elif level == 2:
+        elif level == "2":
             self.button.props('color="yellow"')
         else:
             self.button.props('color="green"')
