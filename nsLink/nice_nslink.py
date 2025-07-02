@@ -14,7 +14,6 @@ from fmu_link import fmu_link
 import httpserver
 import joystick
 from gui.main import MainDisplay
-from nodes import remote_link_node
 import request_props
 from sim_link import sim_link
 import telnet
@@ -45,27 +44,9 @@ app.add_static_files("/resources", file_dir / "../html")
 
 deg = 0.0
 
-# @ui.refreshable
-# async def gauge_test():
-#     asi.update()
-#     ati.update()
-#     alt.update()
-#     power.update()
-#     hdg.update()
-#     ins_gnss.update()
-#     controls.update()
-#     status.update()
-
-# gauge_test()
-
 main_display = MainDisplay()
 
 def update():
-    # callsign = ident_node.getString("call_sign")
-    # if len(callsign):
-    #     ui_callsign.set_text("Callsign: " + callsign)
-    # else:
-    #     ui_callsign.set_text("Callsign: " + "still waiting")
     sim_link.update()
     fmu_link.receive()
     derived_states.update()
@@ -74,13 +55,11 @@ def update():
     request_props.gen_requests()
     commands.update()
     main_display.update()
-    # Fixme: your mssion is to reproduce these two items in NiceGUI
+    # Fixme: your mission is to reproduce these two items in NiceGUI
     # telnet.update()
     # httpserver.update()
 
 app.timer(0.01, update)
-
-# ui.timer(0.1, gauge_test.refresh)
 
 ui.run(reload=False, native=False)
 
