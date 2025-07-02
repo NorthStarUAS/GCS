@@ -763,30 +763,3 @@ class Status(NiceGauge):
                 pos += h
 
         self.base.content = self.background + self.status_label + svg
-
-        # // draw alerts
-        # context.fillStyle = "red";
-        # for ( var i = 0; i < alerts.length; i++ ) {
-        #     if ( alerts[i] != "" ) {
-        #         context.fillText(alerts[i], cx - size * 0.4, cy + size*pos);
-        #         pos += 0.07;
-        #     }
-        # }
-
-        # // draw warns
-        # context.fillStyle = "yellow";
-        # for ( var i = 0; i < warns.length; i++ ) {
-        #     if ( warns[i] != "" ) {
-        #         context.fillText(warns[i], cx - size * 0.4, cy + size*pos);
-        #         pos += 0.07;
-        #     }
-        # }
-
-        # // draw oks
-        # context.fillStyle = '#0C0';
-        # for ( var i = 0; i < oks.length; i++ ) {
-        #     if ( oks[i] != "" ) {
-        #         context.fillText(oks[i], cx - size * 0.4, cy + size*pos);
-        #         pos += 0.07;
-        #     }
-        # }
