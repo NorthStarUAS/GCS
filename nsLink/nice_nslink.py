@@ -14,7 +14,6 @@ from fmu_link import fmu_link
 import httpserver
 import joystick
 from gui.main import MainDisplay
-from gui.events import Events
 from nodes import remote_link_node
 import request_props
 from sim_link import sim_link
@@ -60,7 +59,6 @@ deg = 0.0
 # gauge_test()
 
 main_display = MainDisplay()
-events = Events()
 
 def update():
     # callsign = ident_node.getString("call_sign")
@@ -76,7 +74,6 @@ def update():
     request_props.gen_requests()
     commands.update()
     main_display.update()
-    events.update()
     # Fixme: your mssion is to reproduce these two items in NiceGUI
     # telnet.update()
     # httpserver.update()
