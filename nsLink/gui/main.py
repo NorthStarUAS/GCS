@@ -52,12 +52,16 @@ class MainDisplay():
         ui.timer(0.1, self.map.update.refresh)
         ui.timer(0.1, self.bus.update.refresh)
         ui.timer(0.1, self.console.update.refresh)
+        ui.timer(0.1, self.update.refresh)
+
+        self.my_select_tab("Map")
 
     def my_select_tab(self, name):
         self.tabs.set_value(name)
         self.tab_menu.set_text(name)
         ui.notify("Selected: " + name)
 
+    @ui.refreshable
     def update(self):
         self.annunciator_bar.update()
         self.notes.update()

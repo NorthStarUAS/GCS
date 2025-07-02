@@ -20,6 +20,13 @@ class Map():
         # )
         # ui.context.client.content.classes("h-full")
 
+        self.ownship = self.map.marker(latlng=self.map.center)
+        self.icon = 'L.icon({iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png"})'
+
+        self.post_init_done = False
+
     @ui.refreshable
     async def update(self):
-        pass
+        if True or not self.post_init_done:
+            self.post_init_done = True
+            self.ownship.run_method(':setIcon', self.icon)
