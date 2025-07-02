@@ -22,4 +22,13 @@ class Events():
             result = None
         return result
 
+class Commands():
+    def __init__(self):
+        self.results = []
+
+    def add_event(self, event_message):
+        millis = imu_node.getUInt("millis")
+        self.results.append( [millis, event_message] )
+
 event_mgr = Events()
+command_mgr = Commands()
