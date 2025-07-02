@@ -119,7 +119,7 @@ class MainDisplay():
 
         with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered') as self.right_drawer:
             ui.label("Flight Notes").style("font-size: 140%")
-            self.add_note = ui.input(label='Add Note', placeholder='start typing').on('keydown.enter', self.append_note)
+            self.add_note = ui.input(label='Add Note', placeholder='start typing').on('keydown.enter', self.add_note)
             self.event_log = ui.markdown().style('white-space: pre-wrap')
 
         with ui.tabs().classes("w-full") as self.tabs:
@@ -154,12 +154,14 @@ class MainDisplay():
         self.tab_menu.set_text(name)
         ui.notify("Selected: " + name)
 
-    def append_note(self):
+    def add_note(self):
         secs = imu_node.getUInt("millis") / 1000
-        msg = "__[%.1f]__ %s" % (secs, self.add_note.value)
+        msg = "__[%.1f]__ %s" % (secs, "op: " + self.add_note.value)
         self.add_note.value = ""
+
+        msg = "[%.1f] %s" % (secs, "op: " + self.add_note.value)
         ui.notify(msg, position="top")
-        self.event_log.content += "\n" + msg
+        self.event_log.content = msg + "\n" + self.event_log.content
 
     def update(self):
         self.annunciator_bar.update()
@@ -167,7 +169,7 @@ class MainDisplay():
         result = event_mgr.get_next_event()
         if result is not None:
             msg = "__[%.1f]__  ```%s```" % (result[0]/1000, result[1])
-            self.event_log.content += "\n%s" % msg
+            self.event_log.content = msg + "\n" + self.event_log.content
 
             msg = "[%.1f] %s" % (result[0]/1000, result[1])
             ui.notify(msg, position="top")
