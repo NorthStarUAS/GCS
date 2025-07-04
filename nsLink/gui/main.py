@@ -15,6 +15,7 @@ class MainDisplay():
     def __init__(self):
         with ui.header(elevated=True).classes('items-center').style("font-size: 160%"):
             self.annunciator_bar = Annunciators()
+            self.annunciator_bar.update()
             ui.space()
             with ui.dropdown_button("Panel", auto_close=True) as self.tab_menu:
                 ui.item("Panel", on_click=lambda: self.my_select_tab("Panel"))
@@ -25,6 +26,8 @@ class MainDisplay():
 
         with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered') as self.right_drawer:
             self.notes = Notes()
+            self.notes.update()
+            pass
 
         with ui.tabs().classes("w-full") as self.tabs:
             panel = ui.tab("Panel", icon="speed")
@@ -38,7 +41,7 @@ class MainDisplay():
             with ui.tab_panel(panel):
                 self.panel = Panel()
                 self.panel.update()
-            with ui.tab_panel(map).classes("h-full"):
+            with ui.tab_panel(map):
                 self.map = Map()
                 self.map.update()
             with ui.tab_panel(bus):
@@ -47,23 +50,20 @@ class MainDisplay():
             with ui.tab_panel(console):
                 self.console = Console()
                 self.console.update()
+            pass
 
         ui.timer(0.1, self.panel.update.refresh)
         ui.timer(0.1, self.map.update.refresh)
         ui.timer(0.1, self.bus.update.refresh)
         ui.timer(0.1, self.console.update.refresh)
-        ui.timer(0.1, self.update.refresh)
+        ui.timer(0.1, self.annunciator_bar.update.refresh)
+        ui.timer(0.1, self.notes.update.refresh)
 
-        self.my_select_tab("Map")
+        # self.my_select_tab("Map")
 
     def my_select_tab(self, name):
         self.tabs.set_value(name)
         self.tab_menu.set_text(name)
         ui.notify("Selected: " + name)
-
-    @ui.refreshable
-    def update(self):
-        self.annunciator_bar.update()
-        self.notes.update()
 
 

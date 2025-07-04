@@ -12,14 +12,16 @@ class Annunciator():
         self.button = ui.button(id).style("font-size: 100%").props('no-caps')
 
     def update(self):
-        level, msg = ann_node.getString(self.id).split(";")
-        self.button.set_text(msg)
-        if level == "3":
-            self.button.props('color="red"')
-        elif level == "2":
-            self.button.props('color="yellow"')
-        else:
-            self.button.props('color="green"')
+        ann_string = ann_node.getString(self.id)
+        if ";" in ann_string:
+            level, msg = ann_string.split(";")
+            self.button.set_text(msg)
+            if level == "3":
+                self.button.props('color="red"')
+            elif level == "2":
+                self.button.props('color="yellow"')
+            else:
+                self.button.props('color="green"')
 
 class Annunciators():
     def __init__(self):
@@ -29,6 +31,7 @@ class Annunciators():
                                     Annunciator("link"), Annunciator("auto"), Annunciator("wind"), Annunciator("temp"),
                                     Annunciator("task")]
 
+    @ui.refreshable
     def update(self):
         callsign = ident_node.getString("call_sign")
         if len(callsign):

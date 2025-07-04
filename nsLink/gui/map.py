@@ -29,4 +29,4 @@ class Map():
     async def update(self):
         if True or not self.post_init_done:
             self.post_init_done = True
-            self.ownship.run_method(':setIcon', self.icon)
+            # self.ownship.run_method(':setIcon', self.icon)

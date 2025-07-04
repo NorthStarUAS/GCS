@@ -18,6 +18,7 @@ class Notes():
         ui.notify(msg, position="top")
         self.event_log.content = msg + "\n" + self.event_log.content
 
+    @ui.refreshable
     def update(self):
         result = event_mgr.get_next_event()
         if result is not None:
