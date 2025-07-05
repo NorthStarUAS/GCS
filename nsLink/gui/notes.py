@@ -6,17 +6,16 @@ from nodes import imu_node
 class Notes():
     def __init__(self):
         ui.label("Flight Notes").style("font-size: 140%")
-        self.add_note = ui.input(label='Add Note', placeholder='start typing').on('keydown.enter', self.add_note)
+        self.note = ui.input(label='Add Note', placeholder='start typing').on('keydown.enter', self.add_note)
         self.event_log = ui.markdown().style('white-space: pre-wrap')
 
     def add_note(self):
         secs = imu_node.getUInt("millis") / 1000
-        msg = "__[%.1f]__ %s" % (secs, "op: " + self.add_note.value)
-        self.add_note.value = ""
-
-        msg = "[%.1f] %s" % (secs, "op: " + self.add_note.value)
-        ui.notify(msg, position="top")
+        msg = "__[%.1f]__  ```%s```" % (secs, self.note.value)
         self.event_log.content = msg + "\n" + self.event_log.content
+        msg = "[%.1f] %s" % (secs, self.note.value)
+        ui.notify(msg, position="top")
+        self.note.value = ""
 
     @ui.refreshable
     def update(self):
