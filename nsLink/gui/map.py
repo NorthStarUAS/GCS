@@ -32,6 +32,8 @@ class Map():
         self.setup_finished = False
         self.centering_timer = 0
 
+        self.track = self.map.generic_layer(name="polyline", args=[ [[45.51, -122.68],[37.77, -122.43],[34.04, -118.2]], {'color': 'red'}])
+
     @ui.refreshable
     async def update(self):
         if not self.setup_finished:
@@ -39,6 +41,9 @@ class Map():
             print("map initialized")
             self.ownship.run_method(':setIcon', self.icon)
             self.setup_finished = True
+            # self.map.client.run_javascript("console.log(window);")
+            # self.map.client.run_javascript("Object.getOwnPropertyNames(window).forEach(function(currentValue){console.log(currentValue)});")
+            # self.map.client.run_javascript('alert("map inited")')
         self.ownship.move(nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))
         self.ownship.run_method('setRotationAngle', nav_node.getDouble("yaw_deg"))
 
@@ -46,5 +51,16 @@ class Map():
         if current_time - self.centering_timer >= 10:
             self.map.set_center((nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
             self.centering_timer = current_time
-        # result = self.map.run_map_method('getBounds')
+
+            import random
+            self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg") + random.random(), nav_node.getDouble("longitude_deg")+random.random()))
+        # result = await self.map.run_map_method('getBounds')
         # print("bounds:", result)
+
+        # autopan experiment (send javascript code to run client-side because
+        # there is potential for multiple clients with different bounds)
+        # js = "var newLatLng = new L.LatLng(%.8f,%.8f); " % (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))
+        # var visible = mymap.getBounds().contains(ownship.getLatLng());
+        # js += "var visible = this.map.getBounds().contains(newLatLng); "
+        # js += "console.log(this); "
+        # self.map.client.run_javascript(js)
