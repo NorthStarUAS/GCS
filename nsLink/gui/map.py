@@ -30,9 +30,10 @@ class Map():
         # self.icon = 'L.icon({iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png"})'
         self.icon = 'L.icon({iconUrl: "/icons/fg_generic_craft.png", iconSize: [40, 40], iconAnchor: [20, 20]})'
         self.setup_finished = False
-        self.centering_timer = 0
+        self.track_timer = 0
+        self.pan_timer = 0
 
-        self.track = self.map.generic_layer(name="polyline", args=[ [[45.51, -122.68],[37.77, -122.43],[34.04, -118.2]], {'color': 'red'}])
+        self.track = None
 
     @ui.refreshable
     async def update(self):
@@ -48,19 +49,15 @@ class Map():
         self.ownship.run_method('setRotationAngle', nav_node.getDouble("yaw_deg"))
 
         current_time = time.time()
-        if current_time - self.centering_timer >= 10:
-            self.map.set_center((nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
-            self.centering_timer = current_time
+        if current_time - self.pan_timer >= 1:
+            self.map.run_map_method("panInside", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
+            # self.map.set_center((nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
+            self.pan_timer = current_time
 
-            import random
-            self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg") + random.random(), nav_node.getDouble("longitude_deg")+random.random()))
-        # result = await self.map.run_map_method('getBounds')
-        # print("bounds:", result)
+        if current_time - self.track_timer >= 0.5:
+            self.track_timer = current_time
+            if self.track is None:
+                self.track = self.map.generic_layer(name="polyline", args=[ [[nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")]], {'color': 'red', 'opacity': 0.5}])
+            else:
+                self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
 
-        # autopan experiment (send javascript code to run client-side because
-        # there is potential for multiple clients with different bounds)
-        # js = "var newLatLng = new L.LatLng(%.8f,%.8f); " % (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))
-        # var visible = mymap.getBounds().contains(ownship.getLatLng());
-        # js += "var visible = this.map.getBounds().contains(newLatLng); "
-        # js += "console.log(this); "
-        # self.map.client.run_javascript(js)
