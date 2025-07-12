@@ -441,6 +441,9 @@ class Altitude(NiceGauge):
         # display_ft = round(alt_ft/10)*10
         alt_text = self.label(self.cx, self.cy, self.width*0.08, 90, "AGL (ft)", "white", px)
 
+        gps_ft = int(round(gps_node.getDouble("altitude_m") * m2ft / 10)) * 10
+        gps_text = self.label(self.cx, self.cy, self.width*0.12, -90, "GPS: %.0f" % gps_ft, "orange", round(self.width*0.06))
+
         alt_deg = alt_func(alt_ft)
         svg = self.needle(self.cx, self.cy, arc_radius-0.5*arc_width, arc_radius*0.05, alt_deg, "pointer", "white", 2)
         alt_needle = svg
@@ -449,7 +452,7 @@ class Altitude(NiceGauge):
         # assemble the components
         self.base.content = self.background
         self.base.content += self.green_arc + self.yellow_arc + tic_svg
-        self.base.content += bug + alt_text + alt_needle
+        self.base.content += bug + alt_text + gps_text + alt_needle
 
 class Heading(NiceGauge):
     def __init__(self):
@@ -573,8 +576,8 @@ class INS_GNSS(NiceGauge):
 
         self.base.content = self.background + self.power_label
 
-        self.sats_bar = NiceBar("GPS Sats", 0, 25, 5, [[0,5]], [], [[7,25]]);
-        self.hdop_bar = NiceBar("GPS hdop", 0, 10, 2, [[5,10]], [], [[0,3.5]]);
+        self.gps_sats_bar = NiceBar("GPS Sats", 0, 25, 5, [[0,5]], [], [[7,25]]);
+        self.gps_acc_bar = NiceBar("GPS Acc", 0, 10, 2, [[6,10]], [], [[0,4]]);
         self.pos_bar = NiceBar("Pos Acc", 0, 10, 2, [[6,10]], [], [[0,4]]);
         self.vel_bar = NiceBar("Vel Acc", 0, 1, 0.2, [[0.4,1]], [], [[0,0.2]]);
         self.att_bar = NiceBar("Att Acc", 0, 2.5, 0.5, [[1,2.5]], [], [[0,0.5]]);
@@ -592,12 +595,17 @@ class INS_GNSS(NiceGauge):
 
         gps_sats = gps_node.getInt("num_sats")
         val_text = str(gps_sats)
-        svg = self.sats_bar.draw(ipad, y1, self.width - 2*ipad, h, px, gps_sats, val_text)
+        svg = self.gps_sats_bar.draw(ipad, y1, self.width - 2*ipad, h, px, gps_sats, val_text)
 
         y1 += vspace
-        gps_hdop = gps_node.getDouble("hdop")
-        val_text = "%.2f" % gps_hdop
-        svg += self.hdop_bar.draw(ipad, y1, self.width - 2*ipad, h, px, gps_hdop, val_text)
+        gps_hacc = gps_node.getDouble("hAcc_m")
+        gps_vacc = gps_node.getDouble("vAcc_m")
+        if gps_hacc > 0 or gps_vacc > 0:
+            gps_acc = sqrt(gps_hacc**2 + gps_vacc**2) # assumes hAcc already include x & y accuracy
+        else:
+            gps_acc = 0
+        val_text = "%.2f" % gps_acc
+        svg += self.gps_acc_bar.draw(ipad, y1, self.width - 2*ipad, h, px, gps_acc, val_text)
 
         y1 += vspace
         pp0 = nav_node.getDouble("Pp0")
