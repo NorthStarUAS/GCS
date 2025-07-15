@@ -106,7 +106,7 @@ class Map():
                 self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))),
 
         if mission_node.getString("task") == "circle":
-            print("circle marker:", circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg"))
+            # print("circle marker:", circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg"))
             self.circle_center.run_method("setLatLng", (circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg")))
             self.circle_perimeter.run_method("setLatLng", (circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg")))
             self.circle_perimeter.run_method("setRadius", circle_node.getDouble("radius_m"))
