@@ -11,12 +11,15 @@ class DataBus():
         user = str(uuid4())
         avatar = f'https://robohash.org/{user}?bgset=bg2'
         with ui.row().classes('w-full items-center'):
-            with ui.avatar():
-                ui.image(avatar)
+            # with ui.avatar():
+            #     ui.image(avatar)
             self.input = ui.input(label="Send command", placeholder='start typing') \
                 .props('rounded outlined').classes('flex-grow') \
                 .on('keydown.enter', self.send)
-        self.last_result = ui.markdown().style('w-full white-space: pre-wrap')
+        with ui.row().classes('w-full items-center'):
+            with ui.avatar():
+                ui.image(avatar)
+            self.last_result = ui.markdown("") # .style('w-full white-space: pre-wrap')
         self.data = ui.label("").classes("w-full font-mono").style("white-space: pre-wrap")
 
     def send(self):
