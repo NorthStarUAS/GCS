@@ -16,11 +16,12 @@ class DataBus():
             self.input = ui.input(label="Send command", placeholder='start typing') \
                 .props('rounded outlined').classes('flex-grow') \
                 .on('keydown.enter', self.send)
-        with ui.row().classes('w-full items-center'):
+        with ui.row(wrap=False).classes('w-full items-center'):
             with ui.avatar():
                 ui.image(avatar)
-            self.last_result = ui.markdown("") # .style('w-full white-space: pre-wrap')
+            self.last_result = ui.markdown("") # .style('white-space: pre-wrap')
         self.data = ui.label("").classes("w-full font-mono").style("white-space: pre-wrap")
+        self.last_command = 0
 
     def send(self):
         commands.add(self.input.value)
@@ -28,10 +29,11 @@ class DataBus():
 
     @ui.refreshable
     async def update(self):
-        if len(command_mgr.results):
+        if self.last_command < len(command_mgr.results):
             result = command_mgr.results[-1]
             msg = "__[%.1f]__\n" % (result[0]/1000)
             msg += "```%s```\n" % result[1]
             self.last_result.content = msg
+            self.last_command = len(command_mgr.results)
         json = PropertyNode("/").get_json_string()
         self.data.text = json

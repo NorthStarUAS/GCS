@@ -8,14 +8,14 @@ class Notes():
     def __init__(self):
         ui.label("Flight Notes").style("font-size: 140%")
         self.note = ui.input(label='Add Note', placeholder='start typing').on('keydown.enter', self.user_note)
-        self.event_log = ui.markdown().style('white-space: pre-wrap')
+        self.event_log = ui.markdown() # .style('white-space: pre-wrap')
         self.last_command = 0
 
     def add_note(self, secs, color, message, notify):
         msg = '<font color="%s">__[%.1f]__  ```%s```' % (color, secs, message)
-        self.event_log.content = msg + "\n" + self.event_log.content
+        self.event_log.content = msg + "\n\n" + self.event_log.content
         if notify:
-            msg = '<font color="%s">[%.1f] %s</font>' % (color, secs, message)
+            msg = '[%.1f] %s' % (secs, message)
             ui.notify(msg, position="top")
 
     def user_note(self):
