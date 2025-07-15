@@ -82,7 +82,7 @@ class Alerts():
         # GPS
         self.last_gps_status = -1
         self.gps_sats_msg = Entry(msg="GPS sats: %d", ok=10, warn=7, alert=5, inverse=True)
-        self.gps_acc_msg = Entry(msg="GPS Accuracy: %.2f", ok=2.0, warn=4.0, alert=6.0)
+        self.gps_acc_msg = Entry(msg="GPS Accuracy: %.2f m", ok=2.0, warn=4.0, alert=6.0)
         self.msg_list += [self.gps_sats_msg, self.gps_acc_msg]
 
         # Power
