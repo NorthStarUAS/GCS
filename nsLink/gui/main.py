@@ -25,7 +25,7 @@ class MainDisplay():
                 # ui.item("Console", on_click=lambda: self.my_select_tab("Console"))
             with ui.dropdown_button("Tasks", auto_close=True) as self.action_menu:
                 ui.item("Preflight Calibration", on_click=self.dialogs.do_preflight_calib)
-                ui.item("Launch", on_click=lambda: commands.add("task launch"))
+                ui.item("Launch", on_click=self.dialogs.do_launch)
                 ui.item("Land", on_click=lambda: commands.add("task land"))
                 ui.separator()
                 ui.item("Set Airspeed")
