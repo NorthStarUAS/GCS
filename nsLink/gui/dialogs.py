@@ -14,7 +14,7 @@ class Dialogs():
                 ui.button('Cancel', on_click=lambda: self.preflight_dialog.submit('Cancel'))
 
         with ui.dialog() as self.airspeed_dialog, ui.card():
-            ui.label("Zero Airspeed:")
+            ui.label("Calibrate Airspeed:")
             ui.markdown("*The differential pressure sensor bias can change as it warms up.  Make sure the plane is perpendicular to the wind and shield the pitot tube.*")
             ui.label("Are you sure?  Never do this in flight!")
             with ui.row():
@@ -22,7 +22,7 @@ class Dialogs():
                 ui.button('Cancel', on_click=lambda: self.airspeed_dialog.submit('Cancel'))
 
         with ui.dialog() as self.gyros_dialog, ui.card():
-            ui.label("Zero Gyros:")
+            ui.label("Calibrate Gyros:")
             ui.markdown("*The gyro bias can change as the IMU warms up.  The EKF can compensate for gyro bias, but too much can make EKF convergence slower.*")
             ui.label("Are you sure?  Never do this in flight!")
             with ui.row():
@@ -37,7 +37,7 @@ class Dialogs():
                 ui.button('Submit', on_click=lambda: self.ekf_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.ekf_dialog.submit('Cancel'))
 
-    async def do_preflight_calibration(self):
+    async def do_preflight_calib(self):
         result = await self.preflight_dialog
         if result == "Submit":
             if environment_node.getBool("is_airborne"):
@@ -45,7 +45,7 @@ class Dialogs():
             else:
                 commands.add("task calib_home")
 
-    async def do_zero_airspeed(self):
+    async def do_calib_airspeed(self):
         result = await self.airspeed_dialog
         if result == "Submit":
             if environment_node.getBool("is_airborne"):
@@ -53,7 +53,7 @@ class Dialogs():
             else:
                 commands.add("set /sensors/airdata/zero 1")
 
-    async def do_zero_gyros(self):
+    async def do_calib_gyros(self):
         result = await self.gyros_dialog
         if result == "Submit":
             if environment_node.getBool("is_airborne"):
