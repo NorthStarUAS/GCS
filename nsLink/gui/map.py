@@ -85,6 +85,7 @@ class Map():
             await self.map.initialized()
             print("map initialized")
             self.ownship.run_method(':setIcon', self.icon)
+            self.map.run_map_method("panTo", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
             self.setup_finished = True
             # self.map.client.run_javascript("console.log(window);")
             # self.map.client.run_javascript("Object.getOwnPropertyNames(window).forEach(function(currentValue){console.log(currentValue)});")
