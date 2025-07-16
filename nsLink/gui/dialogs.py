@@ -1,7 +1,7 @@
 from nicegui import ui
 
 from commands import commands
-from nodes import environment_node
+from nodes import environment_node, refs_node, tecs_config_node
 
 class Dialogs():
     def __init__(self):
@@ -11,12 +11,9 @@ class Dialogs():
 
 *Place the airplane at the desired landing point.  This will survey a home position and altitude.  Wait for the task to return to idle.*
 
-Are you sure?  Always do this before your first launch!
+Always do this before your first launch!
 """
             ui.markdown(msg)
-            # ui.label("Preflight Calibration:")
-            # ui.markdown("*Place the airplane at the desired landing point.  This will survey a home position and altitude.  Wait for the task to return to idle.*")
-            # ui.label("Are you sure?  Always do this before your first launch!")
             with ui.row():
                 ui.button('Submit', on_click=lambda: self.preflight_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.preflight_dialog.submit('Cancel'))
@@ -39,38 +36,67 @@ Are you sure?  Always do this before your first launch!
 * Ensure launch area clear
 * Point aircraft into the prevailing wind
 * Activate A/P switch
-* As power comes up release / throw aircraft firmly in a wings level and slightly nose up attitude
+* As power comes up release / throw aircraft firmly with wings level and at a slightly nose up attitude
 
 #### Be smart with a live aircraft!
 
 When you are ready, click Submit.
 """
             ui.markdown(msg)
-            # ui.label("Be smart with a live aircraft!  When you are ready, click Submit.")
             with ui.row():
                 ui.button('Submit', on_click=lambda: self.launch_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.launch_dialog.submit('Cancel'))
 
-        with ui.dialog() as self.airspeed_dialog, ui.card():
-            ui.label("Calibrate Airspeed:")
-            ui.markdown("*The differential pressure sensor bias can change as it warms up.  Make sure the plane is perpendicular to the wind and shield the pitot tube.*")
-            ui.label("Are you sure?  Never do this in flight!")
+        with ui.dialog() as self.set_airspeed_dialog, ui.card():
+            ui.markdown("### Set Airspeed")
+            print(tecs_config_node.getDouble("min_kt"), tecs_config_node.getDouble("max_kt"), refs_node.getDouble("airspeed_kt"))
+            self.airspeed_slider = ui.slider(min=tecs_config_node.getDouble("min_kt"), max=tecs_config_node.getDouble("max_kt"),
+                                             value=refs_node.getDouble("airspeed_kt"), step=1)
             with ui.row():
-                ui.button('Submit', on_click=lambda: self.airspeed_dialog.submit('Submit'))
-                ui.button('Cancel', on_click=lambda: self.airspeed_dialog.submit('Cancel'))
+                ui.button('Submit', on_click=lambda: self.set_airspeed_dialog.submit('Submit'))
+                ui.button('Cancel', on_click=lambda: self.set_airspeed_dialog.submit('Cancel'))
+
+        with ui.dialog() as self.calib_airspeed_dialog, ui.card():
+            msg = \
+"""
+### Calibrate Zero Airspeed
+
+*The differential pressure sensor bias can change as it warms up.  Make sure the plane is perpendicular to the wind and shield the pitot tube.*
+
+Never do this in flight!
+"""
+            ui.markdown(msg)
+            with ui.row():
+                ui.button('Submit', on_click=lambda: self.calib_airspeed_dialog.submit('Submit'))
+                ui.button('Cancel', on_click=lambda: self.calib_airspeed_dialog.submit('Cancel'))
 
         with ui.dialog() as self.gyros_dialog, ui.card():
-            ui.label("Calibrate Gyros:")
-            ui.markdown("*The gyro bias can change as the IMU (flight controller board) warms up.  The EKF can compensate for gyro bias, but too much can make EKF convergence slower.*")
-            ui.label("Are you sure?  Never do this in flight!")
+            msg = \
+"""
+### Calibrate Zero Gyros
+
+*The gyro bias can change as the IMU (flight controller board) warms up.  The EKF can compensate for gyro bias, but too much bias can make EKF
+convergence slower.*
+
+Never do this in flight!
+"""
+            ui.markdown(msg)
             with ui.row():
                 ui.button('Submit', on_click=lambda: self.gyros_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.gyros_dialog.submit('Cancel'))
 
         with ui.dialog() as self.ekf_dialog, ui.card():
-            ui.label("Reset EKF:")
-            ui.markdown("*Normally you can walk or jog around with the aircraft and help the EKF converge (change of direction aka acceleration helps), but if somehow the solution is really bad, you can reset the EKF and try again.  If your heading is rotating rapidly, or stuck 180 degrees off, consider this option.*")
-            ui.label("Are you sure?  Never do this in flight!")
+            msg = \
+"""
+### Reset EKF
+
+*Normally you can walk or jog around with the aircraft and help the EKF converge (change of direction aka acceleration helps),
+but if somehow the solution is really bad, you can reset the EKF and try again.  If your heading is rotating rapidly, or stuck
+180 degrees off, consider this option.*
+
+Never do this in flight!
+"""
+            ui.markdown(msg)
             with ui.row():
                 ui.button('Submit', on_click=lambda: self.ekf_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.ekf_dialog.submit('Cancel'))
@@ -88,8 +114,15 @@ When you are ready, click Submit.
         if result == "Submit":
             commands.add("task launch")
 
+    async def do_set_airspeed(self):
+        self.airspeed_slider = ui.slider(min=tecs_config_node.getDouble("min_kt"), max=tecs_config_node.getDouble("max_kt"),
+                                          value=refs_node.getDouble("airspeed_kt"), step=1)
+        result = await self.set_airspeed_dialog
+        if result == "Submit":
+            commands.add("set /fcs/refs/airspeed_kt %.1f", self.airspeed_slider.value)
+
     async def do_calib_airspeed(self):
-        result = await self.airspeed_dialog
+        result = await self.calib_airspeed_dialog
         if result == "Submit":
             if environment_node.getBool("is_airborne"):
                 ui.notification("I cannot let you zero the airspeed while airborne, Dave!")

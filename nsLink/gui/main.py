@@ -28,7 +28,7 @@ class MainDisplay():
                 ui.item("Launch", on_click=self.dialogs.do_launch)
                 ui.item("Land", on_click=lambda: commands.add("task land"))
                 ui.separator()
-                ui.item("Set Airspeed")
+                ui.item("Set Airspeed", on_click=self.dialogs.do_set_airspeed)
                 ui.item("Set Altitude")
                 ui.separator()
                 ui.item("Calibrate Airspeed", on_click=self.dialogs.do_calib_airspeed)
