@@ -47,14 +47,21 @@ When you are ready, click Submit.
                 ui.button('Submit', on_click=lambda: self.launch_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.launch_dialog.submit('Cancel'))
 
-        with ui.dialog() as self.set_airspeed_dialog, ui.card():
+        with ui.dialog() as self.set_airspeed_dialog, ui.card().classes("w-96"):
             ui.markdown("### Set Airspeed")
-            print(tecs_config_node.getDouble("min_kt"), tecs_config_node.getDouble("max_kt"), refs_node.getDouble("airspeed_kt"))
-            self.airspeed_slider = ui.slider(min=tecs_config_node.getDouble("min_kt"), max=tecs_config_node.getDouble("max_kt"),
-                                             value=refs_node.getDouble("airspeed_kt"), step=1)
+            with ui.row().classes("w-full") as self.airspeed_row:
+                self.airspeed_slider = ui.slider(min=0, max=1)
             with ui.row():
                 ui.button('Submit', on_click=lambda: self.set_airspeed_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.set_airspeed_dialog.submit('Cancel'))
+
+        with ui.dialog() as self.set_altitude_dialog, ui.card().classes("w-96"):
+            ui.markdown("### Set Altitude")
+            with ui.row().classes("w-full") as self.altitude_row:
+                self.altitude_slider = ui.slider(min=0, max=1)
+            with ui.row():
+                ui.button('Submit', on_click=lambda: self.set_altitude_dialog.submit('Submit'))
+                ui.button('Cancel', on_click=lambda: self.set_altitude_dialog.submit('Cancel'))
 
         with ui.dialog() as self.calib_airspeed_dialog, ui.card():
             msg = \
@@ -115,11 +122,23 @@ Never do this in flight!
             commands.add("task launch")
 
     async def do_set_airspeed(self):
-        self.airspeed_slider = ui.slider(min=tecs_config_node.getDouble("min_kt"), max=tecs_config_node.getDouble("max_kt"),
-                                          value=refs_node.getDouble("airspeed_kt"), step=1)
+        self.airspeed_row.clear()
+        with self.airspeed_row:
+            # print(tecs_config_node.getDouble("min_kt"), tecs_config_node.getDouble("max_kt"), refs_node.getDouble("airspeed_kt"))
+            self.airspeed_slider = ui.slider(min=tecs_config_node.getDouble("min_kt"), max=tecs_config_node.getDouble("max_kt"),
+                                             value=refs_node.getDouble("airspeed_kt"), step=1).props('label-always').style("font-size: 160%")
         result = await self.set_airspeed_dialog
         if result == "Submit":
-            commands.add("set /fcs/refs/airspeed_kt %.1f", self.airspeed_slider.value)
+            commands.add("set /fcs/refs/airspeed_kt %.1f" % self.airspeed_slider.value)
+
+    async def do_set_altitude(self):
+        self.altitude_row.clear()
+        with self.altitude_row:
+            self.altitude_slider = ui.slider(min=25, max=400,
+                                             value=refs_node.getDouble("altitude_agl_ft"), step=25).props('label-always')
+        result = await self.set_altitude_dialog
+        if result == "Submit":
+            commands.add("set /fcs/refs/altitude_agl_ft %.0f" % self.altitude_slider.value)
 
     async def do_calib_airspeed(self):
         result = await self.calib_airspeed_dialog
