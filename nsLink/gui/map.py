@@ -95,7 +95,7 @@ class Map():
 
         current_time = time.time()
         if current_time - self.pan_timer >= 1:
-            self.map.run_map_method("panInside", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
+            self.map.run_map_method("panInside", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")), {"padding": [20,20]})
             # self.map.set_center((nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
             self.pan_timer = current_time
 
