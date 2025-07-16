@@ -6,9 +6,17 @@ from nodes import environment_node
 class Dialogs():
     def __init__(self):
         with ui.dialog() as self.preflight_dialog, ui.card():
-            ui.label("Preflight Calibration:")
-            ui.markdown("*Place the airplane at the desired landing point.  This will survey a home position and altitude.  Wait for the task to return to idle.*")
-            ui.label("Are you sure?  Always do this before your first launch!")
+            msg = \
+"""### Preflight Calibration
+
+*Place the airplane at the desired landing point.  This will survey a home position and altitude.  Wait for the task to return to idle.*
+
+Are you sure?  Always do this before your first launch!
+"""
+            ui.markdown(msg)
+            # ui.label("Preflight Calibration:")
+            # ui.markdown("*Place the airplane at the desired landing point.  This will survey a home position and altitude.  Wait for the task to return to idle.*")
+            # ui.label("Are you sure?  Always do this before your first launch!")
             with ui.row():
                 ui.button('Submit', on_click=lambda: self.preflight_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.preflight_dialog.submit('Cancel'))
