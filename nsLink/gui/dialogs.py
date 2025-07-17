@@ -1,7 +1,9 @@
 from nicegui import ui
 
+from PropertyTree import PropertyNode
+
 from commands import commands
-from nodes import environment_node, refs_node, tecs_config_node
+from nodes import environment_node, home_node, launch_node, land_node, refs_node, tecs_config_node
 
 class Dialogs():
     def __init__(self):
@@ -46,6 +48,14 @@ When you are ready, click Submit.
             with ui.row():
                 ui.button('Submit', on_click=lambda: self.launch_dialog.submit('Submit'))
                 ui.button('Cancel', on_click=lambda: self.launch_dialog.submit('Cancel'))
+
+        with ui.dialog() as self.land_dialog, ui.card():
+            self.land_config = ui.column()
+            with ui.row():
+                ui.button('Submit', on_click=lambda: self.land_dialog.submit('Submit'))
+                ui.button('Arm', on_click=lambda: self.land_dialog.submit('Arm'))
+                ui.button('Cancel', on_click=lambda: self.land_dialog.submit('Cancel'))
+
 
         with ui.dialog() as self.set_airspeed_dialog, ui.card().classes("w-96"):
             ui.markdown("### Set Airspeed")
@@ -120,6 +130,51 @@ Never do this in flight!
         result = await self.launch_dialog
         if result == "Submit":
             commands.add("task launch")
+
+    async def do_land(self):
+        self.land_config.clear()
+        with self.land_config:
+            ui.markdown("### Approach and Land")
+            if land_node.getString("direction") == "left":
+                dir = 1
+            else:
+                dir = 2
+            with ui.row().classes('items-center'):
+                ui.label("Direction:")
+                self.land_dir = ui.radio({1: "Left", 2: "Right"}, value=dir).props("inline")
+            self.land_radius = ui.input(label="Circle Radius (m)", value=land_node.getDouble("circle_radius_m"))
+            self.land_heading = ui.input(label="Runway Heading (deg)", value=home_node.getDouble("azimuth_deg"))
+            self.land_glideslope = ui.input(label="Glide Slope (deg)", value=land_node.getDouble("glideslope_deg"))
+            self.land_speed = ui.input(label="Approach Speed (kt)", value=land_node.getDouble("approach_speed_kt"))
+            self.land_final_leg = ui.input(label="Final Leg (m)", value=land_node.getDouble("final_leg_m"))
+            self.land_flare_pitch = ui.input(label="Flare Pitch (deg)", value=land_node.getDouble("flare_pitch_deg"))
+            self.land_flare_sec = ui.input(label="Flare Seconds", value=land_node.getDouble("flare_seconds"))
+            self.land_lat_offset = ui.input(label="Lateral Offset (m)", value=land_node.getDouble("lateral_offset_m"))
+            self.land_vert_offset = ui.input(label="Vertical Offset (ft)", value=land_node.getDouble("alt_base_agl_ft"))
+
+            # with ui.row().classes('items-center'):
+            #     ui.label("Circle Radius:")
+            #     self.land_radisu= ui.radio({1: "Left", 2: "Right"}, value=dir).props("inline")
+
+            # self.enter_radius = ui.input(label='Circle Radius (m) (%d-%d)' % (self.radius_min, self.radius_max), value=self.circle_radius_m)
+        result = await self.land_dialog
+        if result == "Submit" or result == "Arm":
+            if self.land_dir.value == 1:
+                dir = "left"
+            else:
+                dir = "right"
+            commands.add("set /config/mission/land/direction " + dir)
+            commands.add("set /mission/home/azimuth_deg %.1f" % float(self.land_heading.value))
+            commands.add("set /config/mission/land/glideslope_deg %.1f" % float(self.land_glideslope.value))
+            commands.add("set /config/mission/land/approach_speed_kt %.0f" % float(self.land_speed.value))
+            commands.add("set /config/mission/land/final_leg_m %.0f" %  float(self.land_final_leg.value))
+            commands.add("set /config/mission/land/flare_pitch_deg %.1f" % float(self.land_flare_pitch.value))
+            commands.add("set /config/mission/land/flare_seconds %.1f" % float(self.land_flare_sec.value))
+            commands.add("set /config/mission/land/lateral_offset_m %.1f" % float(self.land_lat_offset.value))
+            commands.add("set /config/mission/land/alt_base_agl_ft %.0f" % float(self.land_vert_offset.value))
+            commands.add("get /config/mission/land")
+        if result == "Submit":
+            commands.add("task land")
 
     async def do_set_airspeed(self):
         self.airspeed_row.clear()

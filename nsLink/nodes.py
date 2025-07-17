@@ -1,8 +1,10 @@
 from PropertyTree import PropertyNode
 
 # Configuration
-ident_node = PropertyNode('/config/identity')
-specs_node = PropertyNode('/config/specs')
+ident_node = PropertyNode("/config/identity")
+specs_node = PropertyNode("/config/specs")
+launch_node = PropertyNode("/config/mission/launch")
+land_node = PropertyNode("/config/mission/land")
 
 # Sensors
 airdata_node = PropertyNode("/sensors/airdata")

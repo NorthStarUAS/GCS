@@ -3,7 +3,7 @@
 from PropertyTree import PropertyNode
 
 from commands import commands
-from nodes import ident_node, specs_node, tecs_config_node
+from nodes import ident_node, launch_node, land_node, specs_node, tecs_config_node
 
 requests_pending = True
 def gen_requests():
@@ -22,3 +22,9 @@ def gen_requests():
         if tecs_config_node.getString("max_kt") == "":
             requests_pending = True
             commands.add("get /config/fcs/TECS")
+        if launch_node.getString("launch_mode") == "":
+            requests_pending = True
+            commands.add("get /config/mission/launch")
+        if land_node.getString("direction") == "":
+            requests_pending = True
+            commands.add("get /config/mission/land")
