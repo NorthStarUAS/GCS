@@ -1,7 +1,5 @@
 from nicegui import ui
 
-from PropertyTree import PropertyNode
-
 from commands import commands
 from nodes import environment_node, home_node, launch_node, land_node, refs_node, tecs_config_node
 
@@ -135,35 +133,27 @@ Never do this in flight!
         self.land_config.clear()
         with self.land_config:
             ui.markdown("### Approach and Land")
-            if land_node.getString("direction") == "left":
-                dir = 1
-            else:
-                dir = 2
-            with ui.row().classes('items-center'):
-                ui.label("Direction:")
-                self.land_dir = ui.radio({1: "Left", 2: "Right"}, value=dir).props("inline")
-            self.land_radius = ui.input(label="Circle Radius (m)", value=land_node.getDouble("circle_radius_m"))
-            self.land_heading = ui.input(label="Runway Heading (deg)", value=home_node.getDouble("azimuth_deg"))
-            self.land_glideslope = ui.input(label="Glide Slope (deg)", value=land_node.getDouble("glideslope_deg"))
-            self.land_speed = ui.input(label="Approach Speed (kt)", value=land_node.getDouble("approach_speed_kt"))
-            self.land_final_leg = ui.input(label="Final Leg (m)", value=land_node.getDouble("final_leg_m"))
-            self.land_flare_pitch = ui.input(label="Flare Pitch (deg)", value=land_node.getDouble("flare_pitch_deg"))
-            self.land_flare_sec = ui.input(label="Flare Seconds", value=land_node.getDouble("flare_seconds"))
-            self.land_lat_offset = ui.input(label="Lateral Offset (m)", value=land_node.getDouble("lateral_offset_m"))
-            self.land_vert_offset = ui.input(label="Vertical Offset (ft)", value=land_node.getDouble("alt_base_agl_ft"))
-
-            # with ui.row().classes('items-center'):
-            #     ui.label("Circle Radius:")
-            #     self.land_radisu= ui.radio({1: "Left", 2: "Right"}, value=dir).props("inline")
-
-            # self.enter_radius = ui.input(label='Circle Radius (m) (%d-%d)' % (self.radius_min, self.radius_max), value=self.circle_radius_m)
+            with ui.grid(columns=2):
+                self.land_radius = ui.input(label="Circle Radius (m)", value=land_node.getDouble("circle_radius_m"))
+                self.land_dir = ui.toggle(["left", "right"], value=land_node.getString("direction"))
+                # if land_node.getString("direction") == "left":
+                #     dir = 1
+                # else:
+                #     dir = 2
+                # with ui.row().classes('items-center'):
+                #     ui.label("Direction:")
+                #     self.land_dir = ui.radio({1: "Left", 2: "Right"}, value=dir).props("inline")
+                self.land_heading = ui.input(label="Runway Heading (deg)", value=home_node.getDouble("azimuth_deg"))
+                self.land_glideslope = ui.input(label="Glide Slope (deg)", value=land_node.getDouble("glideslope_deg"))
+                self.land_speed = ui.input(label="Approach Speed (kt)", value=land_node.getDouble("approach_speed_kt"))
+                self.land_final_leg = ui.input(label="Final Leg (m)", value=land_node.getDouble("final_leg_m"))
+                self.land_flare_pitch = ui.input(label="Flare Pitch (deg)", value=land_node.getDouble("flare_pitch_deg"))
+                self.land_flare_sec = ui.input(label="Flare Seconds", value=land_node.getDouble("flare_seconds"))
+                self.land_lat_offset = ui.input(label="Lateral Offset (m)", value=land_node.getDouble("lateral_offset_m"))
+                self.land_vert_offset = ui.input(label="Vertical Offset (ft)", value=land_node.getDouble("alt_base_agl_ft"))
         result = await self.land_dialog
         if result == "Submit" or result == "Arm":
-            if self.land_dir.value == 1:
-                dir = "left"
-            else:
-                dir = "right"
-            commands.add("set /config/mission/land/direction " + dir)
+            commands.add("set /config/mission/land/direction " + self.land_dir.value)
             commands.add("set /mission/home/azimuth_deg %.1f" % float(self.land_heading.value))
             commands.add("set /config/mission/land/glideslope_deg %.1f" % float(self.land_glideslope.value))
             commands.add("set /config/mission/land/approach_speed_kt %.0f" % float(self.land_speed.value))
