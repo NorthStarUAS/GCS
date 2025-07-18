@@ -23,6 +23,7 @@ class MainDisplay():
             with ui.button("Tasks") as self.action_menu:
                 with ui.menu():
                     # ui.item("Preflight Calibration", on_click=self.dialogs.do_preflight_calib)
+                    ui.button("Preflight Calibration", icon="img:/icons/home.png", on_click=self.dialogs.do_preflight_calib).props("outline no-caps").classes("shadow-lg")
                     with ui.menu_item(on_click=self.dialogs.do_preflight_calib):
                         with ui.item_section():
                             ui.icon("img:/icons/home.png", size="1.5rem")
