@@ -18,9 +18,8 @@ class MainDisplay():
             self.annunciator_bar = Annunciators()
             self.annunciator_bar.update()
             ui.space()
-            with ui.button("Pages"):
-                with ui.menu(): # .props("auto-close"):
-                    self.page_toggle = ui.toggle(["Panel", "Map", "Data Bus"], value="Panel", on_change=self.my_select_tab)
+            with ui.dropdown_button("Pages"):
+                self.page_toggle = ui.toggle(["Panel", "Map", "Data Bus"], value="Panel", on_change=self.my_select_tab)
             with ui.button("Tasks") as self.action_menu:
                 with ui.menu():
                     # ui.item("Preflight Calibration", on_click=self.dialogs.do_preflight_calib)
@@ -38,7 +37,7 @@ class MainDisplay():
                         with ui.item_section():
                             ui.icon("img:/icons/land.png", size="1.5rem")
                         ui.item_section("Approach and Land")
-                    ui.separator()
+                    # ui.separator()
                     # ui.item("Set Airspeed", on_click=self.dialogs.do_set_airspeed)
                     with ui.menu_item(on_click=self.dialogs.do_set_airspeed):
                         with ui.item_section():
