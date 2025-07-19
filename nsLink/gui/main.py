@@ -20,15 +20,55 @@ class MainDisplay():
             ui.space()
             with ui.dropdown_button("Pages"):
                 self.page_toggle = ui.toggle(["Panel", "Map", "Data Bus"], value="Panel", on_change=self.my_select_tab)
-            with ui.button("Tasks") as self.action_menu:
+            with ui.dropdown_button("Tasks") as self.task_menu:
+                with ui.grid(columns=2):
+                    ui.button("Preflight Calibration", icon="img:/icons/home.png", on_click=self.dialogs.do_preflight_calib).props("outline no-caps").classes("shadow-lg")
+                    ui.button("Launch", icon="img:/icons/launch.png", on_click=self.dialogs.do_launch).props("outline no-caps")# .classes("shadow-lg")
+                    ui.button("Approach and Land", icon="img:/icons/land.png", on_click=self.dialogs.do_land).props("outline no-caps").classes("shadow-lg")
                 with ui.menu():
                     # ui.item("Preflight Calibration", on_click=self.dialogs.do_preflight_calib)
                     ui.button("Preflight Calibration", icon="img:/icons/home.png", on_click=self.dialogs.do_preflight_calib).props("outline no-caps").classes("shadow-lg")
-                    with ui.menu_item(on_click=self.dialogs.do_preflight_calib):
-                        with ui.item_section():
-                            ui.icon("img:/icons/home.png", size="1.5rem")
-                        ui.item_section("Preflight Setup Home")
+                    # with ui.menu_item(on_click=self.dialogs.do_preflight_calib):
+                    #     with ui.item_section():
+                    #         ui.icon("img:/icons/home.png", size="1.5rem")
+                    #     ui.item_section("Preflight Setup Home")
                     # with ui.item(on_click=self.dialogs.do_launch):
+                    ui.button("Launch", icon="img:/icons/launch.png", on_click=self.dialogs.do_launch).props("outline no-caps").classes("shadow-lg")
+                    with ui.menu_item(on_click=self.dialogs.do_launch):
+                        with ui.item_section():
+                            ui.icon("img:/icons/launch.png", size="1.5rem")
+                        ui.item_section("Launch")
+                    # ui.item("Land", on_click=self.dialogs.do_land)
+                    with ui.menu_item(on_click=self.dialogs.do_land):
+                        with ui.item_section():
+                            ui.icon("img:/icons/land.png", size="1.5rem")
+                        ui.item_section("Approach and Land")
+                    # ui.separator()
+                    # ui.item("Set Airspeed", on_click=self.dialogs.do_set_airspeed)
+                    with ui.menu_item(on_click=self.dialogs.do_set_airspeed):
+                        with ui.item_section():
+                            ui.icon("img:/icons/speed.png", size="1.5rem")
+                        ui.item_section("Set Airspeed")
+                    # ui.item("Set Altitude", on_click=self.dialogs.do_set_altitude)
+                    with ui.menu_item(on_click=self.dialogs.do_set_altitude):
+                        with ui.item_section():
+                            ui.icon("img:/icons/altitude.png", size="1.5rem")
+                        ui.item_section("Set Altitude")
+                    ui.separator()
+                    ui.menu_item("Calibrate Airspeed", on_click=self.dialogs.do_calib_airspeed).props("side")
+                    ui.menu_item("Calibrate Gyros", on_click=self.dialogs.do_calib_gyros)
+                    ui.menu_item("Force Reset EKF", on_click=self.dialogs.do_reset_ekf)
+                    ui.switch("Auto-pan Map", value=True)
+            with ui.button("Tasks") as self.task_menu:
+                with ui.menu():
+                    # ui.item("Preflight Calibration", on_click=self.dialogs.do_preflight_calib)
+                    ui.button("Preflight Calibration", icon="img:/icons/home.png", on_click=self.dialogs.do_preflight_calib).props("outline no-caps").classes("shadow-lg")
+                    # with ui.menu_item(on_click=self.dialogs.do_preflight_calib):
+                    #     with ui.item_section():
+                    #         ui.icon("img:/icons/home.png", size="1.5rem")
+                    #     ui.item_section("Preflight Setup Home")
+                    # with ui.item(on_click=self.dialogs.do_launch):
+                    ui.button("Launch", icon="img:/icons/launch.png", on_click=self.dialogs.do_launch).props("outline no-caps").classes("shadow-lg")
                     with ui.menu_item(on_click=self.dialogs.do_launch):
                         with ui.item_section():
                             ui.icon("img:/icons/launch.png", size="1.5rem")
