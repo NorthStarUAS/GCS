@@ -104,7 +104,7 @@ class Map():
     async def handle_draw(self, e: events.GenericEventArguments):
         with ui.dialog() as route_dialog:
             with ui.card():
-                ui.markdown("Send this new route to the aicraft:")
+                ui.markdown("Send this new route to the aicraft (%d waypoints):" % len(e.args['layer']['_latlngs']))
                 with ui.row():
                     ui.button('Submit', on_click=lambda: route_dialog.submit('Submit'))
                     ui.button('Cancel', on_click=lambda: route_dialog.submit('Cancel'))
@@ -131,6 +131,7 @@ class Map():
             await self.map.initialized()
             print("map initialized")
             self.ownship.run_method(':setIcon', self.icon)
+            self.ownship.run_method("bindTooltip", "This is a test")
             self.map.run_map_method("panTo", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
             self.setup_finished = True
             # self.map.client.run_javascript("console.log(window);")
@@ -173,23 +174,3 @@ class Map():
             print("new_route:", new_route)
             self.active_route = new_route
             self.route.run_method("setLatLngs", self.active_route)
-
-        # var route_size = json.mission.route.route_size;
-        # if ( route_size > 0 ) {
-        #     var wpts = [];
-        #     var array_size = route_size;
-        #     if ( json.mission.route.active.wpt.length < array_size ) {
-        #         array_size = json.mission.route.active.wpt.length;
-        #     }
-        #     for ( var i = 0; i < array_size; i++ ) {
-        #         var lat = json.mission.route.active.wpt[i].latitude_deg;
-        #         var lon = json.mission.route.active.wpt[i].longitude_deg;
-        #         if ( Math.abs(lat) > 0.001 && Math.abs(lon) > 0.001 ) {
-        #             wpts.push( [lat, lon] );
-        #         }
-        #     }
-        #     // wpts.push( [json.mission.route.active.wpt[0].latitude_deg,
-        #     //             json.mission.route.active.wpt[0].longitude_deg] );
-        #     active_route.setLatLngs(wpts);
-        #     active_route.setStyle( { color: 'blue', opacity: 0.5 } );
-        # }
