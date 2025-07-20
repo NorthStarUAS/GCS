@@ -54,9 +54,6 @@ def update():
     joystick.update()
     request_props.gen_requests()
     commands.update()
-    # Fixme: your mission is to reproduce these two items in NiceGUI
-    # telnet.update()
-    # httpserver.update()
 
 app.timer(0.01, update)
 
