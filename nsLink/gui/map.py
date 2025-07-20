@@ -54,9 +54,12 @@ class Map():
         self.icon = 'L.icon({iconUrl: "/icons/fg_generic_craft.png", iconSize: [40, 40], iconAnchor: [20, 20]})'
         self.setup_finished = False
         self.track_timer = 0
+        self.track_trim_timer = 0
         self.pan_timer = 0
 
         self.track = None
+        self.track_history = []
+        self.track_save_min = 10
 
         # Circle dialog box defaults (fixme: poll uas and then use /config/mission/* values here)
         self.circle_radius_m = 125
@@ -69,6 +72,36 @@ class Map():
         self.active_waypoint = self.map.generic_layer(name="circleMarker", args=[self.map.center, {"color": "blue", "opacity": 0.5}])
         self.circle_perimeter = self.map.generic_layer(name="circle", args=[self.map.center, {"color": "blue", "opacity": 0.5, "fill": False}])
         self.route = self.map.generic_layer(name="polyline", args=[ [[nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")]], {'color': 'blue', 'opacity': 0.5}])
+
+    def update_track_history(self):
+        min_delta = 0.2  # 5 hz
+        nav_time_sec = nav_node.getUInt("millis") / 1000.0
+        if nav_time_sec > 0 and nav_time_sec >= self.track_timer + min_delta:
+            if self.track_timer == 0.0:
+                self.track_timer = nav_time_sec  # init: jump to current time
+            self.track_timer += min_delta
+            self.track_history.append([nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"), nav_time_sec])
+
+            if self.track is None:
+                self.track = self.map.generic_layer(name="polyline", args=[ [[nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")]], {'color': 'red', 'opacity': 0.5}])
+            else:
+                self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))),
+
+        # trim history every trim_delta seconds
+        trim_delta = 10
+        if nav_time_sec > self.track_trim_timer + trim_delta:
+            if self.track_trim_timer == 0.0:
+                self.track_trim_timer = nav_time_sec
+            self.track_trim_timer += trim_delta
+            do_trim = -1
+            cutoff_sec = nav_time_sec - self.track_save_min*60
+            for i in range(len(self.track_history)):
+                if self.track_history[i][2] >= cutoff_sec:
+                    do_trim = i
+                    break
+            if do_trim >= 0:
+                self.track_history = self.track_history[do_trim:]
+                self.track.run_method("setLatLngs", self.track_history),
 
     async def handle_click(self, e: events.GenericEventArguments):
         lat = e.args['latlng']['lat']
@@ -146,12 +179,14 @@ class Map():
             # self.map.set_center((nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
             self.pan_timer = current_time
 
-        if current_time - self.track_timer >= 0.5:
-            self.track_timer = current_time
-            if self.track is None:
-                self.track = self.map.generic_layer(name="polyline", args=[ [[nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")]], {'color': 'red', 'opacity': 0.5}])
-            else:
-                self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))),
+        self.update_track_history()
+        # if current_time - self.track_timer >= 0.2:
+        #     self.track_timer = current_time
+        #     if self.track is None:
+        #         # self.track = self.map.generic_layer(name="polyline", args=[ [[nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")]], {'color': 'red', 'opacity': 0.5}])
+        #         self.track = self.map.generic_layer(name="polyline", args=[ self.track_history, {'color': 'red', 'opacity': 0.5}])
+        #     else:
+        #         self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))),
 
         if mission_node.getString("task") == "circle" or mission_node.getString("task") == "land":
             # print("circle marker:", circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg"))
