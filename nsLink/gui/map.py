@@ -1,8 +1,14 @@
+import geopy.distance
 from nicegui import events, ui
 import time
 
+from nstSimulator.utils.constants import m2ft, mps2kt
+
 from commands import commands
-from nodes import mission_node, nav_node, circle_node, route_node, active_node
+from nodes import active_node, airdata_node, circle_node, environment_node, ident_node, mission_node, nav_node, route_node
+
+# var marker = new L.marker([39.5, -77.3], { opacity: 0.01 }); //opacity may be set to zero
+# marker.bindTooltip("My Label", {permanent: true, className: "my-label", offset: [0, 0] });
 
 class Map():
     def __init__(self):
@@ -162,14 +168,17 @@ class Map():
     async def update(self):
         if not self.setup_finished:
             await self.map.initialized()
+            # we can stack up a bunch of "await map initialized()"" here, so if
+            # we get to this point and the map has already been initialized,
+            # let's just return and let future calls do updates
+            if self.setup_finished:
+                return
             print("map initialized")
             self.ownship.run_method(':setIcon', self.icon)
-            self.ownship.run_method("bindTooltip", "This is a test")
+            self.ownship.run_method("bindTooltip", "<div>callsign</div>", {"permanent": True, "direction": "bottom", "offset": (0, 30)})
             self.map.run_map_method("panTo", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
+            self.active_waypoint.run_method("bindTooltip", "<div>waypoint</div>", {"permanent": True, "direction": "bottom", "offset": (0, 20)})
             self.setup_finished = True
-            # self.map.client.run_javascript("console.log(window);")
-            # self.map.client.run_javascript("Object.getOwnPropertyNames(window).forEach(function(currentValue){console.log(currentValue)});")
-            # self.map.client.run_javascript('alert("map inited")')
         self.ownship.move(nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))
         self.ownship.run_method('setRotationAngle', nav_node.getDouble("yaw_deg"))
 
@@ -178,6 +187,8 @@ class Map():
             self.map.run_map_method("panInside", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")), {"padding": [20,20]})
             # self.map.set_center((nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
             self.pan_timer = current_time
+
+        self.ownship.run_method("setTooltipContent", '<font color="red"<div>%s</div><div>%.0f (kts)</div><div>%.0f (ft agl)</div></font>' % (ident_node.getString("call_sign"), airdata_node.getDouble("airspeed_filt_mps")*mps2kt, environment_node.getDouble("altitude_agl_m")*m2ft))
 
         self.update_track_history()
         # if current_time - self.track_timer >= 0.2:
@@ -188,14 +199,24 @@ class Map():
         #     else:
         #         self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))),
 
+
         if mission_node.getString("task") == "circle" or mission_node.getString("task") == "land":
             # print("circle marker:", circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg"))
             self.active_waypoint.run_method("setLatLng", (circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg")))
+            self.active_waypoint.run_method("setTooltipContent", '<font color="blue"<div>Radius: %.0f m</div></font>' % (circle_node.getDouble("radius_m")))
         elif mission_node.getString("task") == "route":
             i = route_node.getInt("target_wpt_idx")
             if i < active_node.getLen("wpt"):
                 node = active_node.getChild("wpt/%d" % i)
                 self.active_waypoint.run_method("setLatLng", (node.getDouble("latitude_deg"), node.getDouble("longitude_deg")))
+                waypoint_pos = (node.getDouble("latitude_deg"), node.getDouble("longitude_deg"))
+                ownship_pos = (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))
+                dist = geopy.distance.distance(ownship_pos, waypoint_pos).m
+                rate = nav_node.getDouble("groundspeed_mps")
+                if rate > 0.1:
+                    secs = dist / rate
+                    self.active_waypoint.run_method("setTooltipContent", '<font color="blue"<div>ETA: %.0f sec</div></font>' % (secs))
+
 
         self.circle_perimeter.run_method("setLatLng", (circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg")))
         self.circle_perimeter.run_method("setRadius", circle_node.getDouble("radius_m"))
