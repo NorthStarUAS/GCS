@@ -34,7 +34,7 @@ class FMULink:
                 # print("received:", pkt_id)
                 parse_msg(pkt_id, self.parser.payload)
                 remote_link_node.setDouble("last_received_sec", time.time())
-                self.log.log_msg(pkt_id, self.parser.pkt_len, self.parser.payload, self.parser.cksum_lo, self.parser.cksum_hi)
+                self.log.log_msg(pkt_id, self.parser.payload)
             else:
                 new_data = False
         remote_link_node.setInt("good_packet_count", self.parser.good_count)
