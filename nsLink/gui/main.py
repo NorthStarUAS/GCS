@@ -7,7 +7,7 @@ from gui.annunciators import Annunciators
 from gui.data_bus import DataBus
 from gui.dialogs import Dialogs
 from gui.map import Map
-from gui.notes import Notes
+from gui.notes import uiNotes
 from gui.panel import Panel
 
 class MainDisplay():
@@ -42,7 +42,7 @@ class MainDisplay():
             ui.button(on_click=lambda: self.right_drawer.toggle(), icon='menu').props('flat color=white')
 
         with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered') as self.right_drawer:
-            self.notes = Notes()
+            self.notes = uiNotes()
             self.notes.update()
             pass
 

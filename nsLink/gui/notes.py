@@ -2,20 +2,24 @@ from nicegui import ui
 
 from event_mgr import command_mgr
 from event_mgr import event_mgr
+from logger import Notes
 from nodes import imu_node
 
-class Notes():
+class uiNotes():
     def __init__(self):
         ui.label("Flight Notes").style("font-size: 140%")
         self.note = ui.input(label='Add Note', placeholder='start typing').on('keydown.enter', self.user_note)
         self.event_log = ui.markdown() # .style('white-space: pre-wrap')
         self.last_command = 0
+        self.notes_logger = Notes()
 
     def add_note(self, secs, color, message, notify):
         msg = '<font color="%s">__[%.1f]__  ```%s```' % (color, secs, message)
         self.event_log.content = msg + "\n\n" + self.event_log.content
+
+        msg = '[%.1f] %s' % (secs, message)
+        self.notes_logger.add_note(msg)
         if notify:
-            msg = '[%.1f] %s' % (secs, message)
             ui.notify(msg, position="top")
 
     def user_note(self):
