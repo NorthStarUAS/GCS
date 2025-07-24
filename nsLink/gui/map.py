@@ -188,7 +188,8 @@ class Map():
             # self.map.set_center((nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg")))
             self.pan_timer = current_time
 
-        self.ownship.run_method("setTooltipContent", '<font color="red"<div>%s</div><div>%.0f (kts)</div><div>%.0f (ft agl)</div></font>' % (ident_node.getString("call_sign"), airdata_node.getDouble("airspeed_filt_mps")*mps2kt, environment_node.getDouble("altitude_agl_m")*m2ft))
+        display_alt = round(environment_node.getDouble("altitude_agl_m")*m2ft/5)*5
+        self.ownship.run_method("setTooltipContent", '<font color="red"<div>%s</div><div>%.0f (kts)</div><div>%.0f (ft agl)</div></font>' % (ident_node.getString("call_sign"), airdata_node.getDouble("airspeed_filt_mps")*mps2kt, display_alt))
 
         self.update_track_history()
         # if current_time - self.track_timer >= 0.2:
