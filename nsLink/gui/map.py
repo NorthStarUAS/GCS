@@ -65,7 +65,7 @@ class Map():
 
         self.track = None
         self.track_history = []
-        self.track_save_min = 10
+        self.track_save_min = 15
 
         # Circle dialog box defaults (fixme: poll uas and then use /config/mission/* values here)
         self.circle_radius_m = 125
