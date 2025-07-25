@@ -17,8 +17,8 @@ from comms import aura_messages
 from comms.packer import packer
 
 import commands
-import current
-import auraparser
+import nsLink.derived_states as derived_states
+import nsLink.fmu_link as fmu_link
 
 m2nm   = 0.0005399568034557235 # meters to nautical miles
 
@@ -108,7 +108,7 @@ if args.flight:
     if filename.endswith('.gz'):
         # remove temporary file name
         os.remove(filetmp)
-        
+
     divs = 500
     size = len(full)
     chunk_size = size / divs
@@ -120,7 +120,7 @@ if args.flight:
     last_counter = 0
     while True:
         try:
-            (id, index, counter) = auraparser.file_read(full) 
+            (id, index, counter) = fmu_link.file_read(full)
             t.update(counter-last_counter)
             last_counter = counter
             if not located:
@@ -129,7 +129,7 @@ if args.flight:
                     lon = gps_node.getDouble('longitude_deg')
                     sec = gps_node.getDouble('unix_time_sec')
                     located = True
-            current.compute_derived_data()
+            derived_states.compute_derived_data()
             category = logical_category(id)
             record, headers = generate_record(category, index)
             key = '%s-%d' % (category, index)
@@ -170,7 +170,7 @@ for key in sorted(data):
         writer.writeheader()
         for row in data[key]:
             writer.writerow(row)
-        
+
 print()
 print("Total log time: %.1f min" % (total_time / 60.0))
 print("Flight timer: %.1f min" % (status_node.getDouble('flight_timer') / 60.0))
