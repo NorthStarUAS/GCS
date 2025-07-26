@@ -600,9 +600,11 @@ if "power" in data:
 
     plt.figure()
     plt.title("Battery")
-    plt.plot(df0_power["cell_vcc"], label="Main battery (per cell) V")
+    plt.xlabel("Time (sec)")
+    plt.ylabel("Voltage (V)")
+    plt.plot(df0_power["cell_vcc"], label="per Cell Volts (V)")
     # plt.plot(df0_power["battery_perc"], label="Battery %")
-    plt.plot(df0_eff["throttle"], label="throttle")
+    plt.plot(df0_eff["throttle"], label="Power (0-1)")
     plt.legend()
     plt.grid()
 
