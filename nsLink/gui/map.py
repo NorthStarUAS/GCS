@@ -5,7 +5,7 @@ import time
 from nstSimulator.utils.constants import m2ft, mps2kt
 
 from commands import commands
-from nodes import active_node, airdata_node, circle_node, environment_node, ident_node, mission_node, nav_node, route_node
+from nodes import active_node, airdata_node, circle_node, environment_node, home_node, ident_node, mission_node, nav_node, route_node
 
 # var marker = new L.marker([39.5, -77.3], { opacity: 0.01 }); //opacity may be set to zero
 # marker.bindTooltip("My Label", {permanent: true, className: "my-label", offset: [0, 0] });
@@ -66,6 +66,8 @@ class Map():
         self.track = None
         self.track_history = []
         self.track_save_min = 15
+
+        self.home_waypoint = self.map.generic_layer(name="circleMarker", args=[self.map.center, {"color": "black", "opacity": 0.5}])
 
         # Circle dialog box defaults (fixme: poll uas and then use /config/mission/* values here)
         self.circle_radius_m = 125
@@ -200,6 +202,7 @@ class Map():
         #     else:
         #         self.track.run_method("addLatLng", (nav_node.getDouble("latitude_deg"), nav_node.getDouble("longitude_deg"))),
 
+        self.home_waypoint.run_method("setLatLng", (home_node.getDouble("latitude_deg"), home_node.getDouble("longitude_deg")))
 
         if mission_node.getString("task") == "circle" or mission_node.getString("task") == "land":
             # print("circle marker:", circle_node.getDouble("latitude_deg"), circle_node.getDouble("longitude_deg"))
