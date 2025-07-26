@@ -40,11 +40,13 @@ fmu_link.begin(args.serial, args.baud, timeout=dt)
 
 # maps a resource url to physical path for the nicegui app
 file_dir = pathlib.Path(__file__).parent.resolve()
-app.add_static_files("/resources", file_dir / "../html")
+app.add_static_files("/textures", file_dir / "gui/textures")
 app.add_static_files("/icons", file_dir / "gui/icons")
 deg = 0.0
 
-main_display = MainDisplay()
+@ui.page("/")
+async def main_page():
+    main_display = MainDisplay()
 
 def update():
     sim_link.update()
