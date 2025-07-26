@@ -327,7 +327,7 @@ class Airspeed(NiceGauge):
 
         bug_kt = refs_node.getDouble("airspeed_kt")
         bug_deg = asi_func(bug_kt*speed_scale)
-        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius, bug_deg)
+        bug = self.image(self.cx, self.cy, 48, 48, "textures/hdg2.png", arc_radius, bug_deg)
 
         ground_deg = asi_func(ground_kt)
         svg = self.needle(self.cx, self.cy, arc_radius-1.2*arc_width, arc_radius*0.2, ground_deg, "arrow", "orange", 5)
@@ -358,19 +358,19 @@ class Attitude(NiceGauge):
         roll_deg = nav_node.getDouble("roll_deg")
         pitch_deg = nav_node.getDouble("pitch_deg")
 
-        backplate = self.image(self.cx, self.cy, 384, 384, "resources/panel/textures/ati1.png", 0, -roll_deg)
+        backplate = self.image(self.cx, self.cy, 384, 384, "textures/ati1.png", 0, -roll_deg)
 
         p = pitch_deg
         if p < -20: p = -20
         if p > 20: p = 20
         y_offset = p * 4.5
-        pitch = self.image(self.cx, self.cy+y_offset, 392, 256, "resources/panel/textures/ati2.png", 0, -roll_deg)
+        pitch = self.image(self.cx, self.cy+y_offset, 392, 256, "textures/ati2.png", 0, -roll_deg)
 
-        roll = self.image(self.cx, self.cy, 464, 464, "resources/panel/textures/ati3.png", 0, -roll_deg)
+        roll = self.image(self.cx, self.cy, 464, 464, "textures/ati3.png", 0, -roll_deg)
 
-        bird = self.image(self.cx, self.cy+77, 264, 174, "resources/panel/textures/ati4.png", 0, 0)
+        bird = self.image(self.cx, self.cy+77, 264, 174, "textures/ati4.png", 0, 0)
 
-        bezel = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/ati5.png", 0, 0)
+        bezel = self.image(self.cx, self.cy, 512, 512, "textures/ati5.png", 0, 0)
 
         self.base.content = self.background + backplate + pitch + roll + bird + bezel
 
@@ -435,7 +435,7 @@ class Altitude(NiceGauge):
 
         bug_kt = refs_node.getDouble("altitude_agl_ft")
         bug_deg = alt_func(bug_kt)
-        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius, bug_deg)
+        bug = self.image(self.cx, self.cy, 48, 48, "textures/hdg2.png", arc_radius, bug_deg)
 
         alt_ft = environment_node.getDouble("altitude_agl_m") * m2ft
         # display_ft = round(alt_ft/10)*10
@@ -473,7 +473,7 @@ class Heading(NiceGauge):
         wind_deg = environment_node.getDouble("wind_deg")
         wind_kt = environment_node.getDouble("wind_mps")*mps2kt
 
-        rose = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/hdg1.png", 0, -heading_deg)
+        rose = self.image(self.cx, self.cy, 512, 512, "textures/hdg1.png", 0, -heading_deg)
 
         display_units = specs_node.getString("display_units")
         speed_scale = 1.0
@@ -495,11 +495,11 @@ class Heading(NiceGauge):
         ground_text = self.label(self.cx-self.width*0.14, self.cy-self.width*0.06, 0, 0, "CRS", "orange", self.width*0.06)
 
         bug_deg = refs_node.getDouble("groundtrack_deg")
-        bug = self.image(self.cx, self.cy, 48, 48, "resources/panel/textures/hdg2.png", arc_radius-arc_width, bug_deg - heading_deg)
+        bug = self.image(self.cx, self.cy, 48, 48, "textures/hdg2.png", arc_radius-arc_width, bug_deg - heading_deg)
 
         # // face plate
         # context.drawImage(img_hdg3, x, y, width=size, height=size)
-        faceplate = self.image(self.cx, self.cy, 512, 512, "resources/panel/textures/hdg3.png", 0, 0)
+        faceplate = self.image(self.cx, self.cy, 512, 512, "textures/hdg3.png", 0, 0)
 
         self.base.content = self.background + rose + wind_vane + wind_text + course + ground_text + bug + faceplate
 
