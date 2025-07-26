@@ -8,16 +8,14 @@ import h5py
 import numpy as np
 import os
 import pandas as pd
-import sys
 import tempfile
 from tqdm import tqdm
 
 from nodes import environment_node, gps_node, imu_node, status_node
 
-sys.path.append("../../src")
 import nst_messages
 
-import commands
+# import commands
 from derived_states import derived_states
 import fmu_link
 
@@ -108,6 +106,8 @@ if args.flight:
     while True:
         try:
             (id, msg, counter) = fmu_link.file_read(full)
+            if id < 0:
+                continue
             # print(id, msg.__dict__)
             t.update(counter-last_counter)
             last_counter = counter
