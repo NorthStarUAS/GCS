@@ -58,11 +58,11 @@ class FMULink:
 
 fmu_link = FMULink()
 
-millis = 0
+# millis = 0
 
 # working on eliminating "packer" and replacing it with auto-generated message code.
 def parse_msg(id, buf):
-    global millis
+    # global millis
     msg = None
     if id == nst_messages.gps_v5_id:
         msg = nst_messages.gps_v5(buf)
@@ -70,11 +70,11 @@ def parse_msg(id, buf):
     elif id == nst_messages.imu_v6_id:
         msg = nst_messages.imu_v6(buf)
         msg.msg2props(imu_node)
-        millis = msg.millis
+        # millis = msg.millis
     elif id == nst_messages.airdata_v9_id:
         msg = nst_messages.airdata_v9(buf)
         msg.msg2props(airdata_node)
-        msg.millis = millis
+        # msg.millis = millis
     elif id == nst_messages.environment_v1_id:
         msg = nst_messages.environment_v1(buf)
         msg.msg2props(environment_node)
@@ -98,7 +98,7 @@ def parse_msg(id, buf):
     elif id == nst_messages.fcs_outputs_v1_id:
         msg = nst_messages.fcs_outputs_v1(buf)
         msg.msg2props(outputs_node)
-        msg.millis = millis
+        # msg.millis = millis
     elif id == nst_messages.power_v2_id:
         msg = nst_messages.power_v2(buf)
         msg.msg2props(power_node)
@@ -157,11 +157,12 @@ def parse_msg(id, buf):
     return msg
 
 counter = 0
+last_millis = None
 def file_read(buf):
     global counter
+    global last_millis
 
     savebuf = ''
-    myeof = False
 
     # scan for sync characters
     sync0 = buf[counter]; counter += 1
@@ -194,6 +195,21 @@ def file_read(buf):
     if cksum0 == c0 and cksum1 == c1:
         # print "check sum passed"
         msg = parse_msg(id, savebuf)
+        if "millis" in msg.__dict__:
+            # print("parse millis:", msg.__dict__["millis"], last_millis)
+            if last_millis is None:
+                last_millis = msg.__dict__["millis"]
+            if abs(msg.__dict__["millis"] - last_millis) > 1000*100:
+                # more than 100 second gap in data ... what up?  Seems like
+                # unplugging power to the teensy on the marmot board can leave
+                # it logging data for another few 0.2-0.3 seconds with a bunk
+                # mills()?
+                print("DISCONTINUITY IN MILLIS() CALLING IT THE END OF FILE!!!!")
+                import time
+                time.sleep(5)
+                raise IndexError
+            last_millis = msg.__dict__["millis"]
+
         return (id, msg, counter)
 
     print("Check sum failure!")
