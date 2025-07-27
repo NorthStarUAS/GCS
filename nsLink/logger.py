@@ -7,7 +7,7 @@ from serial_link import wrap_packet
 
 class PacketLogger:
     def __init__(self):
-        self.last_imu_time = imu_node.getUInt("millis")
+        self.last_millis = 0
         log_dir = Path(__file__).resolve().parent / "logs"
         print("log_dir:", log_dir)
         if not log_dir.exists():
@@ -23,11 +23,11 @@ class PacketLogger:
 
     def log_msg(self, pkt_id, payload):
         imu_time = imu_node.getUInt("millis")
-        if imu_time < self.last_imu_time:
-            # time went backwards (remote flight computer rebooted? new flight?)
-            # so start a new log file.
+        if imu_time < self.last_millis - 1000*10:
+            # time went backwards more than 10 seconds (remote flight computer
+            # rebooted? new flight?) so start a new log file.
             self.__init__()
-        self.last_imu_time = imu_node.getUInt("millis")
+        self.last_millis = imu_node.getUInt("millis")
 
         buf = wrap_packet(pkt_id, payload)
         self.f.write(buf)
@@ -61,4 +61,5 @@ class EventLogger:
         f.write(line)
         f.close()
 
+packet_logger = PacketLogger()
 event_logger = EventLogger()

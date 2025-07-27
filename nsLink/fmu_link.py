@@ -5,14 +5,13 @@ from PropertyTree import PropertyNode
 
 import nst_messages
 from alerts import alert_mgr
-from logger import PacketLogger, event_logger
+from logger import packet_logger, event_logger
 from nodes import airdata_node, circle_node, effectors_node, environment_node, home_node, imu_node, inceptors_node, outputs_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
 from serial_link import serial_link, checksum, wrap_packet, START_OF_MSG0, START_OF_MSG1
 
 class FMULink:
     def __init__(self):
         self.parser = serial_link()
-        self.log = PacketLogger()
 
     def begin(self, device, baud, timeout):
         try:
@@ -33,7 +32,7 @@ class FMULink:
                 # print("received:", pkt_id)
                 parse_msg(pkt_id, self.parser.payload)
                 remote_link_node.setDouble("last_received_sec", time.time())
-                self.log.log_msg(pkt_id, self.parser.payload)
+                packet_logger.log_msg(pkt_id, self.parser.payload)
             else:
                 new_data = False
         remote_link_node.setInt("good_packet_count", self.parser.good_count)
