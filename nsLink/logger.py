@@ -5,7 +5,7 @@ from nstSimulator.sim.lib.props import imu_node
 
 from serial_link import wrap_packet
 
-class Logger:
+class PacketLogger:
     def __init__(self):
         self.last_imu_time = imu_node.getUInt("millis")
         log_dir = Path(__file__).resolve().parent / "logs"
@@ -32,9 +32,9 @@ class Logger:
         buf = wrap_packet(pkt_id, payload)
         self.f.write(buf)
 
-class Notes:
+class EventLogger:
     def __init__(self):
-        self.last_imu_time = imu_node.getUInt("millis")
+        self.last_millis = 0
         log_dir = Path(__file__).resolve().parent / "logs"
         print("log_dir:", log_dir)
         if not log_dir.exists():
@@ -42,19 +42,23 @@ class Notes:
             log_dir.mkdir(parents=True, exist_ok=True)
         d = datetime.datetime.now(datetime.timezone.utc)
         self.notefile = log_dir / Path('notes-' + d.strftime("%Y%m%d-%H%M%S") + '.txt')
+        self.event_list = []
 
-    def add_note(self, message):
-        imu_time = imu_node.getUInt("millis")
-        if imu_time < self.last_imu_time:
-            # time went backwards (remote flight computer rebooted? new flight?)
-            # so start a new log file.
+    def add_event(self, millis, message):
+        if millis < self.last_millis - 1000*10:
+            # time went backwards more than 10 seconds (remote flight computer
+            # rebooted? new flight?) so start a new log file.
             self.__init__()
-        self.last_imu_time = imu_node.getUInt("millis")
+        self.last_millis = millis
+
+        self.event_list.append( [millis, message] )
 
         try:
             f = open(self.notefile, 'a')
         except:
             print("Cannot open:", self.notefile)
-
-        f.write(message + "\n")
+        line = "[%.1f] %s\n" % (millis/1000, message)
+        f.write(line)
         f.close()
+
+event_logger = EventLogger()

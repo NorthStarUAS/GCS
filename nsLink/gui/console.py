@@ -2,7 +2,7 @@ from nicegui import ui
 from uuid import uuid4
 
 from commands import commands
-from event_mgr import command_mgr
+from event_mgr import event_mgr
 
 class Console():
     def __init__(self):
@@ -23,10 +23,10 @@ class Console():
 
     @ui.refreshable
     async def update(self):
-        if len(command_mgr.results) > self.last_length:
-            self.last_length = len(command_mgr.results)
+        if len(event_mgr.results) > self.last_length:
+            self.last_length = len(event_mgr.results)
             self.data.content = ""
-            for result in reversed(command_mgr.results):
+            for result in reversed(event_mgr.results):
                 msg = "__[%.1f]__\n" % (result[0]/1000)
                 msg += "```%s```\n" % result[1]
                 self.data.content += msg

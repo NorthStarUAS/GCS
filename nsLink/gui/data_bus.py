@@ -4,7 +4,8 @@ from uuid import uuid4
 from PropertyTree import PropertyNode
 
 from commands import commands
-from event_mgr import command_mgr
+# from event_mgr import event_mgr
+from logger import event_logger
 
 class DataBus():
     def __init__(self):
@@ -29,11 +30,11 @@ class DataBus():
 
     @ui.refreshable
     async def update(self):
-        if self.last_command < len(command_mgr.results):
-            result = command_mgr.results[-1]
+        if self.last_command < len(event_logger.event_list):
+            result = event_logger.event_list[-1]
             msg = "__[%.1f]__\n" % (result[0]/1000)
             msg += "```%s```\n" % result[1]
             self.last_result.content = msg
-            self.last_command = len(command_mgr.results)
+            self.last_command = len(event_logger.event_list)
         json = PropertyNode("/").get_json_string()
         self.data.text = json
