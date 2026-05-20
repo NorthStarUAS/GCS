@@ -60,4 +60,5 @@ def update():
 app.timer(0.01, update)
 
 if __name__ == '__main__':
-    ui.run(reload=False, native=True)
+    # ui.run(reload=False, native=True)
+    ui.run(reload=False, native=False)
