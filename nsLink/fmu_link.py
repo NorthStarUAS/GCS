@@ -1,9 +1,11 @@
+import json
 import serial, serial.tools.list_ports
 import time
 
 from PropertyTree import PropertyNode
 
 import nst_messages
+from nstSimulator.sim.lib.props import dict2props
 from alerts import alert_mgr
 from logger import packet_logger, event_logger
 from nodes import airdata_node, circle_node, effectors_node, environment_node, home_node, imu_node, inceptors_node, outputs_node, gps_node, mission_node, nav_node, power_node, refs_node, remote_link_node, route_node, active_node, status_node
@@ -142,11 +144,10 @@ def parse_msg(id, buf):
         pos1 = msg.message.find(" ")
         pos2 = msg.message.find(" ", pos1+1)
         path = msg.message[pos1+1:pos2]
-        json = msg.message[pos2+1:len(msg.message)]
-        print(path, " = ", json)
-        node = PropertyNode(path)
-        if not node.set_json_string(json):
-            print("json string parsing/setting failed")
+        json_string = msg.message[pos2+1:len(msg.message)]
+        print(path, " = ", json_string)
+        python_dict = json.loads(json_string)
+        dict2props(path, python_dict)
 
     elif id == nst_messages.ack_v1_id:
         msg = nst_messages.ack_v1(buf)
