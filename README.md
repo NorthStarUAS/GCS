@@ -1,5 +1,7 @@
 # NorthStarUAS Ground Station Interface
 
+NOTICE: This project has moved to Codeberg.org <https://codeberg.org/NorthStarUAS>
+
 Provides a web based operator interface to the RC UAS autopilot
 system.  The front end web pages work in conjunction with a backend
 rc-link python server (usually running on the same laptop) which
